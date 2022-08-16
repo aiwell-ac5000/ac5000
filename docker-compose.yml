@@ -1,0 +1,39 @@
+
+version: "3.8"
+
+services:
+  fw:
+    image: roarge/fw-ac5000:latest
+    restart: unless-stopped
+    user: root
+    privileged: true
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "5683:5683/udp"
+      - "502:502"
+  node-red:
+    image: roarge/node-red-ac5000:latest
+    restart: unless-stopped
+    user: root
+    privileged: true
+    environment:
+      - TZ=Europe/Amsterdam
+    ports:
+      - "1880:1880"
+    volumes:
+      - node-red-data:/data
+      #- type: bind
+      #  source: /root/logg
+      #  target: /logg
+      #- type: bind
+      #  source: /bin
+      #  target: /root/bin
+      - type: bind
+        source: /dev
+        target: /dev
+      - type: bind
+        source: /sys/bus/i2c/devices/0-006c/iio:device0
+        target: /ai
+volumes:
+  node-red-data:
