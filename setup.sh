@@ -1,1 +1,1 @@
-echo Bob
+echo "Ny installasjon av AC5000"
