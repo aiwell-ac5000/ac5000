@@ -1,5 +1,5 @@
 #!/bin/bash
-apt update -y
+apt-get update -y
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
