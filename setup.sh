@@ -12,6 +12,19 @@ apt-get install -y python3 python3-pip
 pip3 install docker-compose
 apt install dnsmasq -y
 
+user=user
+upwd=AiwellAC5000
+chpasswd <<EOF
+$user:$upwd
+EOF
+
+
+user=root
+upwd=Prod2001
+chpasswd <<EOF
+$user:$upwd
+EOF
+
 echo "interface=eth1" >> /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
 echo "domain-needed" >> /etc/dnsmasq.conf
@@ -96,18 +109,5 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
 
 reboot
