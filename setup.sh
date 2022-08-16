@@ -49,8 +49,7 @@ echo "sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type
 echo "sleep 7" >> /etc/xdg/openbox/autostart
 echo "chromium-browser --disable-infobars --kiosk 'http://127.0.0.1:1880/user'" >> /etc/xdg/openbox/autostart
 
-#echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
-echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > .bash_profile
+echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
 #sette hostname
 A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
