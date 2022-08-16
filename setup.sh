@@ -101,7 +101,7 @@ echo "" >> /etc/systemd/system/do_boot_behaviour.service
 echo "[Service]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "Type=oneshot" >> /etc/systemd/system/do_boot_behaviour.service
 echo "User=user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "ExecStart=/bin/raspi-config nonint do_boot_behaviour B2" >> /etc/systemd/system/do_boot_behaviour.service
+echo "ExecStart=/home/user/boot.sh" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.service
 echo "" >> /etc/systemd/system/do_boot_behaviour.service
 echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
