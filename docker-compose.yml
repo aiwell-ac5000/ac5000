@@ -47,7 +47,7 @@ networks:
   vlan:
     driver: macvlan
     driver_opts:
-      parent: eth0
+      parent: eth1
     ipam:
       driver: default
       config:
