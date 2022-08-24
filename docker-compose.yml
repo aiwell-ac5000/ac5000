@@ -7,9 +7,8 @@ services:
     restart: unless-stopped
     user: root
     privileged: true
-    networks:
-      aiim:
-        ipv4_address: 192.168.0.11
+    depends_on:
+      - "node-red"
     environment:
       - TZ=Europe/Amsterdam
     ports:
@@ -40,12 +39,4 @@ services:
         target: /ai
 volumes:
   node-red-data:
-networks:
-  aiim:
-    driver: host
-    ipam:
-      driver: default
-      config:
-        - subnet: 192.168.0.0/24
-        - gateway: 192.168.0.10
 
