@@ -11,13 +11,7 @@ services:
       - "node-red"
     environment:
       - TZ=Europe/Amsterdam
-    ports:
-      - "5683:5683/udp"
-      - "502:502"
-    mac_address: 02:42:c0:a8:84:23
-    networks: 
-      vlan:
-        ipv4_address: 192.168.0.45
+    network_mode: host
   node-red:
     image: roarge/node-red-ac5000:latest
     restart: unless-stopped
@@ -43,13 +37,3 @@ services:
         target: /ai
 volumes:
   node-red-data:
-networks:
-  vlan:
-    driver: macvlan
-    driver_opts:
-      parent: eth1
-    ipam:
-      driver: default
-      config:
-        - subnet: 192.168.0.0/24
-          gateway: 192.168.0.10
