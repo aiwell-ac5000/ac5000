@@ -111,6 +111,6 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
-rustup self uninstall-y
+rustup self uninstall -y
 
 #reboot
