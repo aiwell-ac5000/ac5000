@@ -62,6 +62,7 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000_$A$B$C$D$E$F
 echo $host
 
+docker-compose down
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 docker-compose -f docker-compose.yml up -d
 
@@ -110,4 +111,4 @@ echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.servi
 
 systemctl start do_boot_behaviour.service
 
-reboot
+#reboot
