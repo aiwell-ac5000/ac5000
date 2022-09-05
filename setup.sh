@@ -6,8 +6,10 @@ softmgr update all
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
+apt autoremove -y
 apt install build-essential -y
 curl https://sh.rustup.rs -sSf | sh -s -- -y
+source "$HOME/.cargo/env"
 curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
@@ -113,5 +115,6 @@ echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.servi
 
 systemctl start do_boot_behaviour.service
 rustup self uninstall -y
+apt autoremove -y
 
 reboot
