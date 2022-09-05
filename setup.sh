@@ -9,7 +9,7 @@ apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 apt install build-essential -y
 curl https://sh.rustup.rs -sSf | sh -s -- -y
-source "$HOME/.cargo/env"
+source $HOME/.cargo/env
 curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
