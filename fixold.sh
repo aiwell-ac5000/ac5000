@@ -2,6 +2,8 @@
 softmgr update all
 restore_settings -r
 #reboot
+service_port_ctrl off
+comctrl 1 RS-485 2 RS-485
 
 user=user
 upwd=AiwellAC5000
@@ -58,6 +60,10 @@ echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/d
 echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+service dhcpcd restart
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 docker-compose -f docker-compose.yml up -d
