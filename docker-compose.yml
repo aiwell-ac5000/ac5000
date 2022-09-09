@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     user: root
     privileged: true
-    depends_on:
-      - "node-red"
+    #depends_on:
+    #  - "node-red"
     environment:
       - TZ=Europe/Amsterdam
     network_mode: host
