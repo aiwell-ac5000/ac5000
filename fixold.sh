@@ -28,7 +28,7 @@ rm AC5000rs485cmd
 rm test_modbus
 rm docker-compose.yml
 
-#rm AC5000
+rm AC5000
 #rm AC5000rs485cmd
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
 apt-get install --no-install-recommends chromium-browser -y

@@ -64,6 +64,7 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000_$A$B$C$D$E$F
 echo $host
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 docker-compose down
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 docker-compose -f docker-compose.yml up -d

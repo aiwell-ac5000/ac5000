@@ -21,17 +21,17 @@ def main(argv):
         try:
                 opts, args = getopt.getopt(argv,"h:d:c:v:")
         except getopt.GetoptError:
-                print 'test.py -d <device_reg> -c <channel> -v <value>'
-                print 'device_reg can be 0x60, 0x61, 0x62, 0x63, 0x64, 0x65 or 0x66'
-                print 'channel can be 1,2,3,4'
-                print 'value can be 0-4095'
+                print('test.py -d <device_reg> -c <channel> -v <value>')
+                print('device_reg can be 0x60, 0x61, 0x62, 0x63, 0x64, 0x65 or 0x66')
+                print('channel can be 1,2,3,4')
+                print('value can be 0-4095')
                 sys.exit(2)
         for opt, arg in opts:
                 if opt == '-h':
-                        print 'test.py -d <device_reg> -c <channel> -v <value>'
-                        print 'device_reg can be 0x60, 0x61, 0x62, 0x63, 0x64, 0x65 or 0x66'
-                        print 'channel can be 1,2,3,4'
-                        print 'value can be 0-4095'
+                        print('test.py -d <device_reg> -c <channel> -v <value>')
+                        print('device_reg can be 0x60, 0x61, 0x62, 0x63, 0x64, 0x65 or 0x66')
+                        print('channel can be 1,2,3,4')
+                        print('value can be 0-4095')
                         sys.exit()
                 elif opt in ("-d"):
                         DAC_Address = int(arg[2:],16)
@@ -50,7 +50,7 @@ def main(argv):
                                 DAC_VREF = int(arg[2:],16)
                         else:
                                 DAC_VREF = arg
-                        print DAC_VREF
+                        print(DAC_VREF)
         set_value(DAC_Address,DAC_Chan,DAC_VREF)
  
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
 apt-get install -y python3 python3-pip
+pip3 install smbus
 pip3 install docker-compose
 apt install dnsmasq -y
 
@@ -67,6 +68,7 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000_$A$B$C$D$E$F
 echo $host
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 docker-compose -f docker-compose.yml up -d
 
