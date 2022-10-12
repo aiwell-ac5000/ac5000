@@ -76,6 +76,17 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 docker-compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
+
+mv rsyslog /etc/logrotate.d/rsyslog
+mv mosquitto /etc/logrotate.d/mosquitto
+mv nodered /etc/logrotate.d/nodered
+
+rm /var/log/*.gz
+rm /var/log/*.[1-9]
+
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
 
