@@ -1,17 +1,24 @@
 #!/bin/bash
 apt-get update --allow-releaseinfo-change -y
+softmgr update all
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
 apt-get install --no-install-recommends chromium-browser -y
+apt-get purge docker docker-engine docker.io containerd runc -y
+apt autoremove -y
 apt install build-essential -y
 curl https://sh.rustup.rs -sSf | sh -s -- -y
-source "$HOME/.cargo/env"
-#curl -sSL https://get.docker.com | sh
+
+curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
 apt-get install -y python3 python3-pip
+pip3 install smbus
+
+source "$HOME/.cargo/env"
 pip3 install docker-compose
+
 apt install dnsmasq -y
 
 user=user
@@ -61,16 +68,28 @@ D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
 E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
 F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 
-host=ac5000_$A$B$C$D$E$F
+host=ac5000$A$B$C$D$E$F
 echo $host
 
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
-docker-compose down
+#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 docker-compose -f docker-compose.yml up -d
+mv daemon.json /etc/docker/daemon.json
 
-echo "interface eth1" >> /etc/dhcpcd.conf
-echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
+
+mv rsyslog /etc/logrotate.d/rsyslog
+mv mosquitto /etc/logrotate.d/mosquitto
+mv nodered /etc/logrotate.d/nodered
+
+rm /var/log/*.gz
+rm /var/log/*.[1-9]
+
+#echo "interface eth1" >> /etc/dhcpcd.conf
+#echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
@@ -114,5 +133,6 @@ echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.servi
 
 systemctl start do_boot_behaviour.service
 rustup self uninstall -y
+apt autoremove -y
 
-#reboot
+reboot
