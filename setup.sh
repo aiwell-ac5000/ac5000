@@ -67,12 +67,14 @@ D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
 E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
 F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 
-host=ac5000_$A$B$C$D$E$F
+host=ac5000$A$B$C$D$E$F
 echo $host
 
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
+#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 docker-compose -f docker-compose.yml up -d
+mv daemon.json /etc/docker/daemon.json
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
