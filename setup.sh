@@ -101,6 +101,7 @@ echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.ex
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 
+systemctl daemon-reload
 service dhcpcd restart
 
 cd /etc

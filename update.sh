@@ -1,7 +1,24 @@
 #!/bin/bash
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
+
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
 apt-get install --no-install-recommends chromium-browser -y
+apt-get purge docker docker-engine docker.io containerd runc -y
+apt autoremove -y
+apt install build-essential -y
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+curl -sSL https://get.docker.com | sh
+apt-get install libffi-dev libssl-dev -y
+apt install python3-dev -y
+apt-get install -y python3 python3-pip
+pip3 install smbus
+
+source "$HOME/.cargo/env"
+pip3 install docker-compose
+
+apt install dnsmasq -y
 
 user=user
 upwd=AiwellAC5000
@@ -15,19 +32,19 @@ chpasswd <<EOF
 $user:$upwd
 EOF
 
-echo "1 rt2" >>  /etc/iproute2/rt_tables
-echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
-echo "ip route flush table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route flush cache" >> /etc/dhcpcd.exit-hook
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
+mv daemon.json /etc/docker/daemon.json
 
-echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
 
-service dhcpcd restart
+mv rsyslog /etc/logrotate.d/rsyslog
+mv mosquitto /etc/logrotate.d/mosquitto
+mv nodered /etc/logrotate.d/nodered
+
+rm /var/log/*.gz
+rm /var/log/*.[1-9]
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 docker-compose down --volumes
