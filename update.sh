@@ -31,6 +31,9 @@ pip3 install docker-compose
 
 apt install dnsmasq -y
 
+rustup self uninstall -y
+apt autoremove -y
+
 user=user
 upwd=AiwellAC5000
 chpasswd <<EOF
