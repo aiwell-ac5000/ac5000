@@ -1,6 +1,8 @@
 #!/bin/bash
+resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
+restore_settings -r
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
@@ -17,6 +19,7 @@ apt-get install -y python3 python3-pip
 pip3 install smbus
 
 source "$HOME/.cargo/env"
+export PATH="$HOME/.cargo/bin:$PATH"
 pip3 install docker-compose
 
 apt install dnsmasq -y
@@ -26,7 +29,6 @@ upwd=AiwellAC5000
 chpasswd <<EOF
 $user:$upwd
 EOF
-
 
 user=root
 upwd=Prod2001
