@@ -5,7 +5,7 @@ softmgr update all
 restore_settings -r
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -35,6 +35,9 @@ upwd=Prod2001
 chpasswd <<EOF
 $user:$upwd
 EOF
+
+echo "allowed_users=console" > /etc/X11/Xwrapper.config
+echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
 echo "interface=eth1" >> /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
