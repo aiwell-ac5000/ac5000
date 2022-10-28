@@ -17,6 +17,7 @@ $user:$upwd
 EOF
 
 apt-get update --allow-releaseinfo-change -y
+node-red-stop
 npm -g remove node-red
 npm -g remove node-red-admin
 rm -R ~/.node-red
