@@ -1,21 +1,4 @@
 #!/bin/bash
-#reboot
-service_port_ctrl off
-comctrl 1 RS-485 2 RS-485
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
-
 apt-get update --allow-releaseinfo-change -y
 node-red-stop
 npm -g remove node-red
