@@ -92,7 +92,7 @@ mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
 
 rm /var/log/*.gz
-rm /var/log/*.[1-9]
+rm /var/log/*.[1-9]ls
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
@@ -106,6 +106,8 @@ echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/d
 echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add to  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 systemctl daemon-reload
 service dhcpcd restart
