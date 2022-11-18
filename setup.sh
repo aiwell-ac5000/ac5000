@@ -106,8 +106,19 @@ echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/d
 echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+#api.met.no
 echo "ip rule add to  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+#docker hub
+echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add to 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 systemctl daemon-reload
 service dhcpcd restart
