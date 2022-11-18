@@ -1,4 +1,6 @@
 #!/bin/bash
+rm /var/log/*.gz
+rm /var/log/*.[1-9]
 apt-get update --allow-releaseinfo-change -y
 node-red-stop
 npm -g remove node-red
@@ -6,6 +8,9 @@ npm -g remove node-red-admin
 rm -R ~/.node-red
 apt-get remove nodejs -y
 rm AC5000
+
+softmgr update all
+apt-get update --allow-releaseinfo-change -y
 
 #Oppsett GUI
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox xserver-xorg-legacy -y
@@ -77,9 +82,6 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
 mv rsyslog /etc/logrotate.d/rsyslog
 mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
-
-rm /var/log/*.gz
-rm /var/log/*.[1-9]
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
