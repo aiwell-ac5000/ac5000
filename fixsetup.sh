@@ -156,4 +156,4 @@ rustup self uninstall -y
 apt purge build-essential -y
 apt autoremove -y
 
-reboot
+#reboot
