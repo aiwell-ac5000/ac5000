@@ -1,15 +1,17 @@
 #!/bin/bash
+resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
 restore_settings -r
+bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 apt install build-essential -y
-curl https://sh.rustup.rs -sSf | sh -s -- -y
+curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 
 curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
@@ -29,12 +31,14 @@ chpasswd <<EOF
 $user:$upwd
 EOF
 
-
 user=root
 upwd=Prod2001
 chpasswd <<EOF
 $user:$upwd
 EOF
+
+echo "allowed_users=console" > /etc/X11/Xwrapper.config
+echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
 echo "interface=eth1" >> /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
@@ -88,7 +92,7 @@ mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
 
 rm /var/log/*.gz
-rm /var/log/*.[1-9]
+rm /var/log/*.[1-9]ls
 
 #echo "interface eth1" >> /etc/dhcpcd.conf
 #echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
@@ -103,6 +107,20 @@ echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.ex
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 
+#api.met.no
+echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+#docker hub
+echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add to 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
+
+systemctl daemon-reload
 service dhcpcd restart
 
 cd /etc
@@ -135,6 +153,7 @@ echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.servi
 
 systemctl start do_boot_behaviour.service
 rustup self uninstall -y
+apt purge build-essential -y
 apt autoremove -y
 
 reboot
