@@ -108,8 +108,8 @@ echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 #api.met.no
-echo "ip rule add to  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from  157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
+echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 #docker hub
 echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
