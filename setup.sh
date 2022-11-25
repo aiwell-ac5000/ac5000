@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# curl -sSL ac5000setup.aiwell.no | sh
+
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
