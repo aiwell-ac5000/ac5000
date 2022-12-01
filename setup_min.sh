@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# curl -sSL ac5000setup.aiwell.no | sh
+# curl -sSL ac5000min.aiwell.no | sh
 
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
