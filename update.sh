@@ -1,7 +1,10 @@
 #!/bin/bash
+
+# curl -sSL ac5000update.aiwell.no | sh
+
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
-softmgr update all
+#softmgr update all
 
 docker-compose down --volumes
 #docker image rm roarge/fw-ac5000 -f
@@ -39,18 +42,6 @@ apt autoremove -y
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 mv daemon.json /etc/docker/daemon.json
