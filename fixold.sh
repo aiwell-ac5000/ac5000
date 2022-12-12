@@ -20,7 +20,7 @@ apt autoremove -y
 apt install build-essential -y
 curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-curl -sSL https://get.docker.com | sh
+curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
 apt-get install -y python3 python3-pip
