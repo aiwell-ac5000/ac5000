@@ -1,3 +1,5 @@
-TargetName,ParentName,TeamId
-Kvalitetsarbeid,,de113641-fbef-466b-ba0e-db3c716fcec7
-Utvikling,Kvalitetsarbeid,9ab31299-75fb-4d7b-902c-cb00ae4f6310
+TargetName,ParentName,TeamId,#Feil, #Ønsket funksjon,#Oppdatering, #Bistand
+Kvalitetsarbeid,,de113641-fbef-466b-ba0e-db3c716fcec7,,,,
+Produkter,,fbf31c63-923d-4fd5-abfa-6fa046de0b57,,,,
+Leveranser,,f0c46a4f-c279-459d-ae01-fa1e32d2ccc2,,,,
+Utvikling,Kvalitetsarbeid;Produkter;Leveranser,9ab31299-75fb-4d7b-902c-cb00ae4f6310,,,,

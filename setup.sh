@@ -95,7 +95,7 @@ mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
 
 rm /var/log/*.gz
-rm /var/log/*.[1-9]ls
+rm /var/log/*.[1-9]
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
