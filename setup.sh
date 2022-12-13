@@ -124,7 +124,7 @@ echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 systemctl daemon-reload
-docker-
+service dhcpcd restart
 
 cd /etc
 touch udev/rules.d/99-eth-mac.rules
