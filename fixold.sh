@@ -18,9 +18,10 @@ apt-get install --no-install-recommends chromium-browser fbi -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 apt install build-essential -y
-curl https://sh.rustup.rs -sSf | sh -s -- -y
+#curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
 apt-get install -y python3 python3-pip
