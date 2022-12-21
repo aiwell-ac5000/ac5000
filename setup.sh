@@ -136,6 +136,7 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
 touch /etc/systemd/system/splashscreen.service
 
 echo "[Unit]" > /etc/systemd/system/splashscreen.service
