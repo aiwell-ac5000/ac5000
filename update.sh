@@ -16,10 +16,6 @@ yes | docker system prune
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
-#!/bin/bash
-
-# curl -sSL ac5000setup.aiwell.no | sh
-
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
 
