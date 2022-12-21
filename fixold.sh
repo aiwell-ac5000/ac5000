@@ -14,7 +14,7 @@ apt-get update --allow-releaseinfo-change -y
 
 #Oppsett GUI
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox xserver-xorg-legacy -y
-apt-get install --no-install-recommends chromium-browser -y
+apt-get install --no-install-recommends chromium-browser fbi -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 apt install build-essential -y
@@ -82,6 +82,22 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
 mv rsyslog /etc/logrotate.d/rsyslog
 mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
+
+sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
+touch /etc/systemd/system/splashscreen.service
+
+echo "[Unit]" > /etc/systemd/system/splashscreen.service
+echo "Description=Splash screen" >> /etc/systemd/system/splashscreen.service
+echo "DefaultDependencies=no" >> /etc/systemd/system/splashscreen.service
+echo "After=local-fs.target" >> /etc/systemd/system/splashscreen.service
+echo "[Service]" >> /etc/systemd/system/splashscreen.service
+echo "ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose -a /root/logo.png" >> /etc/systemd/system/splashscreen.service
+echo "StandardInput=tty" >> /etc/systemd/system/splashscreen.service
+echo "StandardOutput=tty" >> /etc/systemd/system/splashscreen.service
+echo "[Install]" >> /etc/systemd/system/splashscreen.service
+echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
+systemctl enable splashscreen
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
