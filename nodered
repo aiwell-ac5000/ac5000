@@ -1,7 +1,7 @@
 /var/log/nodered-install.log
 {
 	rotate 0
-	weekly
+	hourly
 	missingok
 	notifempty
 	compress

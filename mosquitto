@@ -1,6 +1,6 @@
 /var/log/mosquitto/mosquitto.log {
 	rotate 0
-	daily
+	hourly
 	compress
 	size 100k
 	nocreate

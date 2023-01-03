@@ -41,7 +41,7 @@
 {
 	rotate 0
 	maxsize 20M
-	weekly
+	hourly
 	missingok
 	notifempty
 	compress
