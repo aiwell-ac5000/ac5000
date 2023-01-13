@@ -102,6 +102,8 @@ systemctl enable splashscreen
 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
+echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
+echo "static domain_name_servers=8.8.8.8" >> /etc/dhcpcd.conf
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
