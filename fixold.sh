@@ -1,4 +1,6 @@
 #!/bin/bash
+# curl -sSL ac5000old.aiwell.no | sh
+
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 apt-get update --allow-releaseinfo-change -y
