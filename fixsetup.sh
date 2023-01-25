@@ -43,12 +43,6 @@ EOF
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
-echo "interface=eth1" >> /etc/dnsmasq.conf
-echo "bind-dynamic" >> /etc/dnsmasq.conf
-echo "domain-needed" >> /etc/dnsmasq.conf
-echo "bogus-priv" >> /etc/dnsmasq.conf
-echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-
 systemctl enable docker
 
 #Sette oppstarts-skript
