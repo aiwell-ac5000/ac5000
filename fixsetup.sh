@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# curl -sSL ac5000setup.aiwell.no | sh
+
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
@@ -6,7 +9,7 @@ restore_settings -r
 bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit openbox xserver-xorg-legacy -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -59,10 +62,12 @@ echo "xset s noblank" >> /etc/xdg/openbox/autostart
 
 echo "setxkbmap -option terminate:ctrl_alt_bksp" >> /etc/xdg/openbox/autostart
 
+sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
+
 echo "sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/'Local State'" >> /etc/xdg/openbox/autostart
 echo "sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type\":\"[^\"]\+\"/\"exit_type\":\"Normal\"/' ~/.config/chromium/Default/Preferences" >> /etc/xdg/openbox/autostart
 echo "sleep 7" >> /etc/xdg/openbox/autostart
-echo "chromium-browser --disable-infobars --kiosk 'http://127.0.0.1:1880/user'" >> /etc/xdg/openbox/autostart
+echo "chromium-browser --disable-infobars --kiosk 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
@@ -92,10 +97,7 @@ mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
 
 rm /var/log/*.gz
-rm /var/log/*.[1-9]ls
-
-#echo "interface eth1" >> /etc/dhcpcd.conf
-#echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
+rm /var/log/*.[1-9]
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
@@ -131,29 +133,23 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
+touch /etc/systemd/system/splashscreen.service
 
-echo "#!/bin/bash" > /home/user/boot.sh
-echo "echo AiwellAC5000 | sudo -S raspi-config nonint do_boot_behaviour B2" >> /home/user/boot.sh
-chmod 777 /home/user/boot.sh
-usermod -aG sudo user
+echo "[Unit]" > /etc/systemd/system/splashscreen.service
+echo "Description=Splash screen" >> /etc/systemd/system/splashscreen.service
+echo "DefaultDependencies=no" >> /etc/systemd/system/splashscreen.service
+echo "After=local-fs.target" >> /etc/systemd/system/splashscreen.service
+echo "[Service]" >> /etc/systemd/system/splashscreen.service
+echo "ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose -a /root/logo.png" >> /etc/systemd/system/splashscreen.service
+echo "StandardInput=tty" >> /etc/systemd/system/splashscreen.service
+echo "StandardOutput=tty" >> /etc/systemd/system/splashscreen.service
+echo "[Install]" >> /etc/systemd/system/splashscreen.service
+echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
+systemctl enable splashscreen
 
-touch /etc/systemd/system/do_boot_behaviour.service
-echo "[Unit]" > /etc/systemd/system/do_boot_behaviour.service
-echo "Description=Set boot behaviour" >> /etc/systemd/system/do_boot_behaviour.service
-echo "After=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Service]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "Type=oneshot" >> /etc/systemd/system/do_boot_behaviour.service
-echo "User=user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "ExecStart=/home/user/boot.sh" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-
-systemctl start do_boot_behaviour.service
 rustup self uninstall -y
 apt purge build-essential -y
 apt autoremove -y
 
-#reboot
+reboot
