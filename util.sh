@@ -1,45 +1,4 @@
 #!/bin/bash
-
-# curl -sSL ac5000setup.aiwell.no | sh
-
-resize2fs /dev/mmcblk0p3
-apt-get update --allow-releaseinfo-change -y
-softmgr update all
-restore_settings -r
-bash ex_card_configure.sh
-
-#Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy -y
-apt-get install --no-install-recommends chromium-browser -y
-apt-get purge docker docker-engine docker.io containerd runc -y
-apt autoremove -y
-apt install build-essential -y
-curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-
-curl -sSL https://get.docker.com | sh
-apt-get install libffi-dev libssl-dev -y
-apt install python3-dev -y
-apt-get install -y python3 python3-pip
-pip3 install smbus
-
-source "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
-pip3 install docker-compose
-
-apt install dnsmasq -y
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
-
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
@@ -63,27 +22,12 @@ echo "chromium-browser --disable-infobars --kiosk 'http://user:AiwellAC5000@127.
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
-#sette hostname
-A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
-B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
-
-host=ac5000$A$B$C$D$E$F
-echo $host
-
-rm docker-compose.yml
-rm daemon.json
+#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 docker-compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
-rm rsyslog
-rm mosquitto
-rm nodered
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
@@ -92,38 +36,9 @@ mv rsyslog /etc/logrotate.d/rsyslog
 mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
 
-rm /var/log/*.gz
-rm /var/log/*.[1-9]
-
-echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
-echo "ip route flush table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route flush cache" >> /etc/dhcpcd.exit-hook
-
-echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-#api.met.no
-echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-#docker hub
-echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add to 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-systemctl daemon-reload
-service dhcpcd restart
-
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
-rm logo.png
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
 touch /etc/systemd/system/splashscreen.service
 
@@ -162,5 +77,3 @@ systemctl start do_boot_behaviour.service
 rustup self uninstall -y
 apt purge build-essential -y
 apt autoremove -y
-
-reboot
