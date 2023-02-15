@@ -10,7 +10,8 @@ services:
     #depends_on:
     #  - "node-red"
     environment:
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Oslo
+      - PORT=80
     network_mode: host
   node-red:
     image: roarge/node-red-ac5000:latest
