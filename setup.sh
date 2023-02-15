@@ -9,18 +9,19 @@ restore_settings -r
 bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy -y
-apt-get install --no-install-recommends chromium-browser -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy chromium-browser -y
+#apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
-apt install build-essential -y
-curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+#apt install build-essential -y
+#curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
-apt install python3-dev -y
+#apt install python3-dev -y
 apt-get install -y python3 python3-pip
-pip3 install smbus
+#pip3 install smbus
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -173,8 +174,8 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
-rustup self uninstall -y
-apt purge build-essential -y
+#rustup self uninstall -y
+#apt purge build-essential -y
 apt autoremove -y
 
 reboot

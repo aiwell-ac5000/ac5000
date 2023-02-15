@@ -26,6 +26,7 @@ curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
 curl -sSL https://get.docker.com | sh
 apt-get install libffi-dev libssl-dev -y
 apt install python3-dev -y
+pip install pip --upgrade
 apt-get install -y python3 python3-pip
 pip3 install smbus
 
