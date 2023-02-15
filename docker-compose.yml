@@ -11,7 +11,6 @@ services:
     #  - "node-red"
     environment:
       - TZ=Europe/Oslo
-      - PORT=80
     network_mode: host
   node-red:
     image: roarge/node-red-ac5000:latest
@@ -19,7 +18,8 @@ services:
     user: root
     privileged: true
     environment:
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Oslo
+      - PORT=80
     network_mode: host
     volumes:
       - node-red-data:/data
