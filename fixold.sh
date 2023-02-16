@@ -19,16 +19,19 @@ apt-get update --allow-releaseinfo-change -y
 apt-get install --no-install-recommends chromium-browser fbi -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
-apt install build-essential -y
+#apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+#curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 curl -sSL https://get.docker.com | sh
-apt-get install libffi-dev libssl-dev -y
-apt install python3-dev -y
+
+export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
+#apt-get install libffi-dev libssl-dev -y
+#apt install python3-dev -y
 pip install pip --upgrade
 apt-get install -y python3 python3-pip
-pip3 install smbus
+#pip3 install smbus
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -121,7 +124,7 @@ echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 systemctl daemon-reload
 service dhcpcd restart
 
-rustup self uninstall -y
+#rustup self uninstall -y
 apt autoremove -y
 
 #reboot
