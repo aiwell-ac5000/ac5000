@@ -15,6 +15,9 @@ apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+export DEBIAN_FRONTEND=noninteractive
+apt install -yq macchanger
+
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 curl -sSL https://get.docker.com | sh
@@ -83,9 +86,18 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000$A$B$C$D$E$F
 echo $host
 
+#touch /etc/network/if-up.d/macchange
+#echo "#!/bin/sh" > /etc/network/if-up.d/macchange
+#echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
+#echo 'exit 0' >> /etc/network/if-up.d/macchange
+#echo 'fi' >> /etc/network/if-up.d/macchange
+#echo '/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0' >> /etc/network/if-up.d/macchange
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
+#docker load < fw.tar
+#docker load < node.tar.gz
 docker-compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
