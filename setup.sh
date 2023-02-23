@@ -5,7 +5,7 @@
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
-restore_settings -r
+#restore_settings -r
 bash ex_card_configure.sh
 
 #Oppsett GUI
@@ -86,12 +86,13 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000$A$B$C$D$E$F
 echo $host
 
-#touch /etc/network/if-up.d/macchange
-#echo "#!/bin/sh" > /etc/network/if-up.d/macchange
-#echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
-#echo 'exit 0' >> /etc/network/if-up.d/macchange
-#echo 'fi' >> /etc/network/if-up.d/macchange
-#echo '/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0' >> /etc/network/if-up.d/macchange
+touch /etc/network/if-up.d/macchange
+echo "#!/bin/sh" > /etc/network/if-up.d/macchange
+echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
+echo 'exit 0' >> /etc/network/if-up.d/macchange
+echo 'fi' >> /etc/network/if-up.d/macchange
+echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
+chmod 755 /etc/network/if-up.d/macchange
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
