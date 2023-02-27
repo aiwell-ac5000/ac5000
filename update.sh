@@ -9,7 +9,7 @@ cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 docker-compose down --volumes
 #docker image rm roarge/fw-ac5000 -f
 #docker image rm roarge/node-red-ac5000 -f
-docker-compose pull
+
 
 yes | docker system prune
 
@@ -24,18 +24,20 @@ apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
-apt install build-essential -y
-curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+#apt install build-essential -y
+#curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 
 curl -sSL https://get.docker.com | sh
-apt-get install libffi-dev libssl-dev -y
-apt install python3-dev -y
+#apt-get install libffi-dev libssl-dev -y
+#apt install python3-dev -y
 apt-get install -y python3 python3-pip
-pip3 install smbus
+#pip3 install smbus
 
+export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 pip3 install docker-compose
+docker-compose pull
 
 apt install dnsmasq -y
 
@@ -162,6 +164,6 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
-rustup self uninstall -y
-apt purge build-essential -y
+#rustup self uninstall -y
+#apt purge build-essential -y
 apt autoremove -y
