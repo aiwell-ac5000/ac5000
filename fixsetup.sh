@@ -1,31 +1,34 @@
 #!/bin/bash
 
-# curl -sSL ac5000fix.aiwell.no | sh
+# curl -sSL ac5000setup.aiwell.no | sh
 
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
-restore_settings -r
+#restore_settings -r
 bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy -y
-apt-get install --no-install-recommends chromium-browser -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy chromium-browser -y
+#apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
+export DEBIAN_FRONTEND=noninteractive
+apt install -yq macchanger
+
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 curl -sSL https://get.docker.com | sh
-#apt-get install libffi-dev libssl-dev -y
+apt-get install libffi-dev libssl-dev -y
 #apt install python3-dev -y
 apt-get install -y python3 python3-pip
 #pip3 install smbus
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
-pip3 install docker-compose
+#pip3 install docker-compose
 
 apt install dnsmasq -y
 
@@ -43,6 +46,12 @@ EOF
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
+
+echo "interface=eth1" >> /etc/dnsmasq.conf
+echo "bind-dynamic" >> /etc/dnsmasq.conf
+echo "domain-needed" >> /etc/dnsmasq.conf
+echo "bogus-priv" >> /etc/dnsmasq.conf
+echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
 
 systemctl enable docker
 
@@ -75,20 +84,22 @@ F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 host=ac5000$A$B$C$D$E$F
 echo $host
 
-rm docker-compose.yml
-rm daemon.json
+touch /etc/network/if-up.d/macchange
+echo "#!/bin/sh" > /etc/network/if-up.d/macchange
+echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
+echo 'exit 0' >> /etc/network/if-up.d/macchange
+echo 'fi' >> /etc/network/if-up.d/macchange
+echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
+chmod 755 /etc/network/if-up.d/macchange
+
+#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
-docker-compose down --volumes
-docker-compose pull
-yes | docker system prune
-
-docker-compose -f docker-compose.yml up -d
+#docker load < fw.tar
+#docker load < node.tar.gz
+docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
-rm rsyslog
-rm mosquitto
-rm nodered
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
@@ -125,10 +136,14 @@ echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 systemctl daemon-reload
 service dhcpcd restart
 
+cd /etc
+touch udev/rules.d/99-eth-mac.rules
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.1", KERNEL=="eth*", NAME="eth0"' > udev/rules.d/99-eth-mac.rules
+echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.2", KERNEL=="eth*", NAME="eth1" RUN+="/sbin/ip link set dev eth1 address AC:50:00:AC:50:00"' >> udev/rules.d/99-eth-mac.rules
+
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
-rm logo.png
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
 touch /etc/systemd/system/splashscreen.service
 

@@ -28,7 +28,7 @@ apt-get install -y python3 python3-pip
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
-pip3 install docker-compose
+#pip3 install docker-compose
 
 apt install dnsmasq -y
 
@@ -99,7 +99,7 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 #docker load < fw.tar
 #docker load < node.tar.gz
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog

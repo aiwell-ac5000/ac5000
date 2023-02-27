@@ -6,7 +6,7 @@ cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
 #softmgr update all
 
-docker-compose down --volumes
+docker compose down --volumes
 rm docker-compose.yml
 #docker image rm roarge/fw-ac5000 -f
 #docker image rm roarge/node-red-ac5000 -f
@@ -39,8 +39,8 @@ apt-get install -y python3 python3-pip
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
-pip3 install docker-compose
-docker-compose pull
+#pip3 install docker-compose
+docker compose pull
 
 apt install dnsmasq -y
 
@@ -109,7 +109,7 @@ chmod 755 /etc/network/if-up.d/macchange
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
