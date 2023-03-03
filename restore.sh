@@ -15,12 +15,17 @@ echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/restore
 echo 'exit 0' >> /etc/network/if-up.d/restore
 echo 'fi' >> /etc/network/if-up.d/restore
 
-
 echo 'if [ -f "$flag" ]; then' >> /etc/network/if-up.d/restore
+echo 'while ! ping -c 1 -n -w 1 aiwell.no &> /dev/null' >> /etc/network/if-up.d/restore
+echo 'do' >> /etc/network/if-up.d/restore
+echo 'sleep 1' >> /etc/network/if-up.d/restore
+echo 'done' >> /etc/network/if-up.d/restore
+
 echo 'rm "$flag"' >> /etc/network/if-up.d/restore
 echo 'touch /root/restored' >> /etc/network/if-up.d/restore
 echo 'curl -sSL ac5000setup.aiwell.no | sh' >> /etc/network/if-up.d/restore
 echo 'fi' >> /etc/network/if-up.d/restore
+
 chmod 755 /etc/network/if-up.d/restore
 
 #restore_settings -r
