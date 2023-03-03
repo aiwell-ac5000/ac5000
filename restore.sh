@@ -23,7 +23,7 @@ echo 'done' >> /etc/network/if-up.d/restore
 
 echo 'rm "$flag"' >> /etc/network/if-up.d/restore
 echo 'touch /root/restored' >> /etc/network/if-up.d/restore
-echo 'curl -sSL ac5000setup.aiwell.no | sh' >> /etc/network/if-up.d/restore
+echo '/usr/bin/curl -sSL ac5000setup.aiwell.no | sh' >> /etc/network/if-up.d/restore
 echo 'fi' >> /etc/network/if-up.d/restore
 
 chmod 755 /etc/network/if-up.d/restore
