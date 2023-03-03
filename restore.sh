@@ -10,6 +10,7 @@ touch /root/restore
 touch /etc/network/if-up.d/restore
 echo "#!/bin/sh" > /etc/network/if-up.d/restore
 echo 'flag="/root/restore"' >> /etc/network/if-up.d/restore
+echo 'touch running' >> /etc/network/if-up.d/restore
 echo 'if [ -f "$flag" ]; then' >> /etc/network/if-up.d/restore
 echo '  rm "$flag"' >> /etc/network/if-up.d/restore
 echo '  touch restored"' >> /etc/network/if-up.d/restore
