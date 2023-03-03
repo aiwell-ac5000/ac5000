@@ -1,0 +1,162 @@
+#!/bin/bash
+PDIR="/home/core/library/"
+LOCATION_LOGFILE="/home/core/restore_settings/restore_settings.log"
+STATE_DEBUG="NO"
+STATE="LOAD_PLUGIN"
+source $PDIR/logger.sh
+source $PDIR/platform_plugin/main.sh
+source $PDIR/system_plugin/main.sh
+
+restore_mac()
+{
+    STATE="READ_MAC"
+    if ! read_board_mac;then
+        STATE="READ_BOARD_ID"
+        if read_board_id;then
+            STATE="READ_BASIC_DATA_FROM_API"
+            if get_basic_data_from_production_portal $BOARD_ID;then
+                STATE="SET_MAC"
+                if set_mac $MAC_ADDRESS;then
+                    STATE="SAVE_MAC_IN_EEPROM"
+                    save_mac_and_board_id_to_eprom $BOARD_ID_FULL $MAC_ADDRESS 
+                    STATE="SAVE_MAC_IN_NVRAM"
+                    save_mac_and_board_id_to_nvram $BOARD_ID_FULL $MAC_ADDRESS 
+                    return 0
+                else
+                    return 1
+                fi
+            else
+                return 1
+            fi
+        else
+            return 1
+        fi
+    else
+        STATE="SET_MAC"
+        set_mac $MAC_ADDRESS
+        return 0
+    fi
+}
+
+
+restore_all()
+{
+    if restore_mac $1;then
+        STATE="READ_BOARD_ID"
+        if read_board_id;then
+            STATE="READ_REST_DATA_FROM_API"
+            if get_rest_data_from_production_portal_by_log $BOARD_ID $MAC_ADDRESS;then
+                STATE="SAVE_REST_DATA_BY_SETENV"
+                save_res_data
+            else
+                return 1
+            fi
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
+restore_mac_board_id_in_memory(){
+    STATE="READ_BOARD_ID"
+    if read_board_id;then
+        STATE="READ_BASIC_DATA_FROM_API"
+        if get_basic_data_from_production_portal $BOARD_ID;then
+            STATE="SAVE_MAC_IN_EEPROM"
+            save_mac_and_board_id_to_eprom $BOARD_ID_FULL $MAC_ADDRESS 
+            STATE="SAVE_MAC_IN_NVRAM"
+            save_mac_and_board_id_to_nvram $BOARD_ID_FULL $MAC_ADDRESS 
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+check_configuration(){
+    if compare_configuration_device_with_production;then
+        return 0
+    else
+        return 1
+    fi
+}
+
+help(){
+    echo "Restore settings on the device"
+    echo "For restor all: -r"
+    echo "For restor only mac: -m"
+}
+
+### main
+if [ $# -eq 0 ]; then
+    help
+    exit 1
+fi
+
+mode=''
+data=''
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        '-h'|'--help')
+            help
+            exit 0
+        ;;
+        '-r')
+            mode='-r'
+        ;;
+        '-m')
+            mode='-m'
+        ;;
+        '-e')
+            mode='-e'
+        ;;
+        '-d')
+            mode='-d'
+        ;;
+        *)
+            echo "Unknown argument $1"
+            exit 1
+        ;;
+    esac
+    shift 1
+done
+
+case "$mode" in
+    '-r')
+        if restore_all $mode; then
+            exit 0
+        else
+            exit 1
+        fi
+    ;;
+    '-m')
+        if restore_mac $mode; then
+            exit 0
+        else
+            exit 1
+        fi
+    ;;
+    '-e')
+        if restore_mac_board_id_in_memory $mode; then
+            exit 0
+        else
+            exit 1
+        fi
+    ;;
+    '-d')
+        if check_configuration $mode; then
+            exit 0
+        else
+            exit 1
+        fi
+    ;;
+    *)
+        echo "Error: no/unknown mode"
+        help
+        exit 1
+    ;;
+esac

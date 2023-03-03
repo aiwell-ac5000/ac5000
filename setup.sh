@@ -6,7 +6,7 @@ resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
 #restore_settings -r
-bash ex_card_configure.sh
+#bash ex_card_configure.sh
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy chromium-browser -y
