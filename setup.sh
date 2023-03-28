@@ -10,7 +10,7 @@ softmgr update all
 #bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy chromium-browser -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi jq openbox xserver-xorg-legacy chromium-browser -y
 #apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
