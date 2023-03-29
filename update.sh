@@ -4,7 +4,7 @@
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
-#softmgr update all
+softmgr update all
 
 docker compose down --volumes
 rm docker-compose.yml
@@ -86,17 +86,6 @@ echo "sleep 7" >> /etc/xdg/openbox/autostart
 echo "chromium-browser --disable-infobars --kiosk 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
-
-#sette hostname
-A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
-B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
-
-host=ac5000$A$B$C$D$E$F
-echo $host
 
 touch /etc/network/if-up.d/macchange
 echo "#!/bin/sh" > /etc/network/if-up.d/macchange
