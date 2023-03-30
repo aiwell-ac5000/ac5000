@@ -10,6 +10,7 @@ npm -g remove node-red-admin
 rm -R ~/.node-red
 apt-get remove nodejs -y
 rm AC5000
+rm docker-compose.yml
 
 softmgr update all
 apt-get update --allow-releaseinfo-change -y
