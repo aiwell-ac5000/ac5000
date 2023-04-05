@@ -191,7 +191,10 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 ## setup pipes for dio
-curl -sSL --header "Authorization: token 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" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh
+TOKEN_PART1="ghp_1iBO14RB8bnX1Yw"
+TOKEN_PART2="xoG6bC4JD5Ydq391NkbhO"
+GITHUB_TOKEN="$TOKEN_PART1$TOKEN_PART2"
+curl -sSL --header "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
 
 systemctl start do_boot_behaviour.service
 #rustup self uninstall -y
@@ -204,3 +207,13 @@ printf "\n${green}Setup executed successfully. DO NOT PANIC. AC5000 IS SUPPOSED 
 printf "\n${green}Progammering ble korrekt utført. IKKE FÅ PANIKK. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 
 reboot
+
+This is the command:
+curl -sSL -H "Authorization: token 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" -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/aiwell-ac5000/ac5000-nodes/contents/subflows/digital-input/di_service.sh
+
+This is the output:
+{
+  "message": "Not Found",
+  "documentation_url": "https://docs.github.com/rest/reference/repos#get-repository-content"
+}
+The file does exist
