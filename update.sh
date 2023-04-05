@@ -21,7 +21,7 @@ apt-get update --allow-releaseinfo-change -y
 softmgr update all
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox xserver-xorg-legacy -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -95,6 +95,10 @@ echo 'fi' >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
 
+TOKEN_PART1="ghp_IfPNH5Tyjnd9ZZhONz"
+TOKEN_PART2="PywjxkDow7B52rQ0kg"
+curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
@@ -163,11 +167,6 @@ echo "StandardOutput=tty" >> /etc/systemd/system/splashscreen.service
 echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
-
-
-TOKEN_PART1="ghp_IfPNH5Tyjnd9ZZhONz"
-TOKEN_PART2="PywjxkDow7B52rQ0kg"
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
 
 #rustup self uninstall -y
 #apt purge build-essential -y
