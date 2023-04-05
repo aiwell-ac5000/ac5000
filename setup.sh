@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # curl -sSL ac5000setup.aiwell.no | sh
+
 touch /root/setup
 
 resize2fs /dev/mmcblk0p3
@@ -188,6 +189,9 @@ echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.serv
 echo "" >> /etc/systemd/system/do_boot_behaviour.service
 echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
+
+## setup pipes for dio
+curl -sSL --header "Authorization: token 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" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh
 
 systemctl start do_boot_behaviour.service
 #rustup self uninstall -y

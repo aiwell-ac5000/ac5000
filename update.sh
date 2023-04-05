@@ -164,6 +164,9 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
+## setup pipes for dio
+curl -sSL --header "Authorization: token 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" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh
+
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
