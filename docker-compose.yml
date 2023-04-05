@@ -30,6 +30,9 @@ services:
       #  source: /bin
       #  target: /root/bin
       - type: bind
+        source: /root/pipes
+        target: /pipes
+      - type: bind
         source: /dev
         target: /dev
       - type: bind
