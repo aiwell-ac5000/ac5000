@@ -164,10 +164,10 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
-TOKEN_PART1="ghp_1iBO14RB8bnX1Yw"
-TOKEN_PART2="xoG6bC4JD5Ydq391NkbhO"
-GITHUB_TOKEN="$TOKEN_PART1$TOKEN_PART2"
-curl -sSL --header "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
+
+TOKEN_PART1="ghp_IfPNH5Tyjnd9ZZhONz"
+TOKEN_PART2="PywjxkDow7B52rQ0kg"
+curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
 
 #rustup self uninstall -y
 #apt purge build-essential -y
