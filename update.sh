@@ -23,7 +23,7 @@ softmgr update all
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
-apt-get purge docker docker-engine docker.io containerd runc -y
+#apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
