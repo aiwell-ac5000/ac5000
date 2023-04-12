@@ -205,13 +205,3 @@ printf "\n${green}Setup executed successfully. DO NOT PANIC. AC5000 IS SUPPOSED 
 printf "\n${green}Progammering ble korrekt utført. IKKE FÅ PANIKK. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 
 reboot
-
-This is the command:
-curl -sSL -H "Authorization: token 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" -H "Accept: application/vnd.github.VERSION.raw" https://api.github.com/repos/aiwell-ac5000/ac5000-nodes/contents/subflows/digital-input/di_service.sh
-
-This is the output:
-{
-  "message": "Not Found",
-  "documentation_url": "https://docs.github.com/rest/reference/repos#get-repository-content"
-}
-The file does exist
