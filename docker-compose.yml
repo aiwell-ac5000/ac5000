@@ -12,7 +12,7 @@ services:
       - TZ=Europe/Oslo
     network_mode: host
   node-red:
-    image: ghcr.io/aiwell-ac5000/node-red-ac5000:beta
+    image: ghcr.io/aiwell-ac5000/node-red-ac5000:latest
     restart: unless-stopped
     user: root
     privileged: true
