@@ -107,6 +107,8 @@ echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/mac
 echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
 
+getenv > /root/pipes/env
+
 TOKEN_PART1="ghp_IfPNH5Tyjnd9ZZhONz"
 TOKEN_PART2="PywjxkDow7B52rQ0kg"
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
@@ -156,6 +158,7 @@ echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/dhcpcd.exit-hook
+ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
 
 systemctl daemon-reload
 service dhcpcd restart
