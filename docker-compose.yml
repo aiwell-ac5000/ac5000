@@ -2,7 +2,7 @@ version: "3.8"
 
 services:  
   fw:
-    image: roarge/fw-ac5000:latest
+    image: ghcr.io/aiwell-ac5000/fw-ac5000:latest
     restart: unless-stopped
     user: root
     privileged: true
