@@ -11,7 +11,7 @@ softmgr update all
 #bash ex_card_configure.sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi jq openbox xserver-xorg-legacy chromium-browser -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
 #apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -74,7 +74,7 @@ sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.tx
 
 #echo "sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/'Local State'" >> /etc/xdg/openbox/autostart
 #echo "sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type\":\"[^\"]\+\"/\"exit_type\":\"Normal\"/' ~/.config/chromium/Default/Preferences" >> /etc/xdg/openbox/autostart
-echo "sleep 10" >> /etc/xdg/openbox/autostart
+echo "sleep 15" >> /etc/xdg/openbox/autostart
 echo "chromium-browser --disable-infobars --kiosk --allow-insecure-localhost 'http://user:AiwellAC5000@localhost/user'" >> /etc/xdg/openbox/autostart
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
@@ -100,6 +100,7 @@ chmod 755 /etc/network/if-up.d/macchange
 
 TOKEN_PART1="ghp_IfPNH5Tyjnd9ZZhONz"
 TOKEN_PART2="PywjxkDow7B52rQ0kg"
+echo "$TOKEN_PART1$TOKEN_PART2" | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | sh
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
