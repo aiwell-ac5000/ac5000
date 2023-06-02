@@ -4,7 +4,7 @@
 #softmgr update all
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/production_portal.sh
 #mv production_portal.sh /home/core/library/system_plugin/production_portal.sh 
-restore_settings -m
+restore_settings -r
 printf "p\nd\n3\nn\np\n3\n4628480\n\nN\nw\n" | fdisk /dev/mmcblk0
 #touch /root/restore
 #touch /etc/network/if-up.d/restore
