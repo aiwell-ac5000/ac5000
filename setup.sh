@@ -7,7 +7,7 @@ touch /root/setup
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
-#restore_settings -r
+restore_settings -r
 #bash ex_card_configure.sh
 
 #Oppsett GUI
@@ -204,5 +204,5 @@ green='\033[0;32m'
 clear='\033[0m'
 printf "\n${green}Setup executed successfully. DO NOT PANIC. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
 printf "\n${green}Progammering ble korrekt utført. IKKE FÅ PANIKK. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
-restore_settings -r
+
 reboot
