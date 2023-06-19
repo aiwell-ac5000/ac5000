@@ -104,6 +104,7 @@ echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
 echo 'exit 0' >> /etc/network/if-up.d/macchange
 echo 'fi' >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
+echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/macchange
 echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
 
