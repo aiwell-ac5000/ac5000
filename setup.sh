@@ -125,6 +125,8 @@ mv daemon.json /etc/docker/daemon.json
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
+cp logo.png /home/user/
 
 mv rsyslog /etc/logrotate.d/rsyslog
 mv mosquitto /etc/logrotate.d/mosquitto
@@ -172,8 +174,6 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
-cp logo.png /home/user/
 touch /etc/systemd/system/splashscreen.service
 
 echo "[Unit]" > /etc/systemd/system/splashscreen.service
