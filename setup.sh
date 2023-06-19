@@ -76,6 +76,7 @@ sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.tx
 #echo "sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/'Local State'" >> /etc/xdg/openbox/autostart
 #echo "sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type\":\"[^\"]\+\"/\"exit_type\":\"Normal\"/' ~/.config/chromium/Default/Preferences" >> /etc/xdg/openbox/autostart
 #echo "sleep 15" >> /etc/xdg/openbox/autostart
+echo "chromium-browser --disable-infobars --kiosk --allow-insecure-localhost logo.png &" >> /etc/xdg/openbox/autostart
 echo "check_server() {" >> /etc/xdg/openbox/autostart
 echo "  curl --output /dev/null --silent --head --fail 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
 echo "}" >> /etc/xdg/openbox/autostart
@@ -172,6 +173,7 @@ raspi-config nonint do_hostname $host
 #raspi-config nonint do_boot_behaviour B2
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
+cp logo.png /home/user/
 touch /etc/systemd/system/splashscreen.service
 
 echo "[Unit]" > /etc/systemd/system/splashscreen.service
