@@ -8,7 +8,7 @@ resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
 softmgr update all
 #restore_settings -r
-#bash ex_card_configure.sh
+#bash ex_card_configure.sh &
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
@@ -60,8 +60,8 @@ systemctl enable docker
 #Sette oppstarts-skript
 
 #Konfigurere RS485
-service_port_ctrl off
-comctrl 1 RS-485 2 RS-485
+#service_port_ctrl off
+#comctrl 1 RS-485 2 RS-485
 
 echo "xset s off" > /etc/xdg/openbox/autostart
 echo "xset s noblank" >> /etc/xdg/openbox/autostart
