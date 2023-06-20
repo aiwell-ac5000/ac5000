@@ -127,6 +127,9 @@ curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: a
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
+docker compose pull
+yes | docker system prune
+
 docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
