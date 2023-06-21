@@ -165,6 +165,9 @@ echo "ip rule add from 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
 
+echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/dhcpcd.exit-hook
+ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
+
 systemctl daemon-reload
 service dhcpcd restart
 
