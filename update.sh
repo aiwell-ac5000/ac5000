@@ -132,7 +132,8 @@ yes | docker system prune
 docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
 
-rm logo.png
+rm logo.png*
+
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
