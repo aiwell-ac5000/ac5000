@@ -30,7 +30,8 @@ apt autoremove -y
 export DEBIAN_FRONTEND=noninteractive
 apt install -yq macchanger
 
-curl -sSL https://get.docker.com | sh
+#curl -sSL https://get.docker.com | sh
+docker update
 #apt-get install libffi-dev libssl-dev -y
 #apt install python3-dev -y
 apt-get install -y python3 python3-pip
@@ -40,7 +41,7 @@ export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
-docker compose pull
+
 
 apt install dnsmasq -y
 
