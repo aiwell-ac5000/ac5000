@@ -66,8 +66,6 @@ echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
 echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
 
-systemctl enable docker
-
 #Sette oppstarts-skript
 
 #Konfigurere RS485
@@ -130,6 +128,7 @@ docker compose pull
 yes | docker system prune
 
 docker compose -f docker-compose.yml up -d
+systemctl enable docker
 mv daemon.json /etc/docker/daemon.json
 
 rm logo.png*
