@@ -4,8 +4,6 @@
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
-softmgr update all
-
 docker compose down --volumes
 rm docker-compose.yml
 #docker image rm roarge/fw-ac5000 -f
@@ -18,7 +16,18 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
 apt-get update --allow-releaseinfo-change -y
-softmgr update all
+# Run the firmware update command
+softmgr update firmware -b x500_5.10-beta
+
+# Check if the previous command succeeded
+if [ $? -eq 0 ]; then
+  # If successful, run the following commands
+  softmgr update lib -b x500_5.10-beta
+  softmgr update core -b x500_5.10-beta
+else
+  # If not successful, use standard update
+  softmgr update all
+fi
 
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy -y
