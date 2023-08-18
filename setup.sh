@@ -6,7 +6,20 @@ touch /root/setup
 
 resize2fs /dev/mmcblk0p3
 apt-get update --allow-releaseinfo-change -y
-softmgr update all
+
+# Run the firmware update command
+softmgr update firmware -b x500_5.10-beta
+
+# Check if the previous command succeeded
+if [ $? -eq 0 ]; then
+  # If successful, run the following commands
+  softmgr update lib -b x500_5.10-beta
+  softmgr update core -b x500_5.10-beta
+else
+  # If not successful, use standard update
+  softmgr update all
+fi
+
 #restore_settings -r
 #bash ex_card_configure.sh &
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh &
