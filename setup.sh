@@ -74,8 +74,8 @@ systemctl enable docker
 #Sette oppstarts-skript
 
 #Konfigurere RS485
-#service_port_ctrl off
-#comctrl 1 RS-485 2 RS-485
+service_port_ctrl off
+comctrl 1 RS-485 2 RS-485
 
 echo "xset s off" > /etc/xdg/openbox/autostart
 echo "xset s noblank" >> /etc/xdg/openbox/autostart
