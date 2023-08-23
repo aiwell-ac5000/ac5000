@@ -96,7 +96,7 @@ sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.tx
 #echo "sleep 15" >> /etc/xdg/openbox/autostart
 echo "chromium-browser --disable-infobars --kiosk --allow-insecure-localhost logo.png &" >> /etc/xdg/openbox/autostart
 echo "check_server() {" >> /etc/xdg/openbox/autostart
-echo "  curl --output /dev/null --silent --head --fail 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
+echo "  curl -k --output /dev/null --silent --head --fail 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
 echo "}" >> /etc/xdg/openbox/autostart
 echo "until check_server" >> /etc/xdg/openbox/autostart
 echo "do" >> /etc/xdg/openbox/autostart
