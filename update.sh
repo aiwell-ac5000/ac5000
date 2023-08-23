@@ -30,7 +30,7 @@ else
     softmgr update core -b x500_5.10-beta
   else
     # If not successful, use standard update
-    softmgr update all
+    timeout 30 softmgr update all
   fi
 fi
 
