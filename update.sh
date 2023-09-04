@@ -17,14 +17,14 @@ rm /var/log/*.[1-9]
 
 apt-get update --allow-releaseinfo-change -y
 # Run the firmware update command with a timeout
-timeout 30 softmgr update firmware -b x500_5.10-beta
-
+timeout 60 softmgr update firmware -b x500_5.10-beta
+RES=$?
 # Check if the previous command timed out
-if [ $? -eq 124 ]; then
+if [ $RES -eq 124 ]; then
   echo "The firmware update command timed out. Skipping the if-else block."
 else
   # Check if the previous command succeeded
-  if [ $? -eq 0 ]; then
+  if [ $RES -eq 0 ]; then
     # If successful, run the following commands
     softmgr update lib -b x500_5.10-beta
     softmgr update core -b x500_5.10-beta
