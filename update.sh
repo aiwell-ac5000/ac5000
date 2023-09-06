@@ -143,9 +143,9 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 docker compose pull
 yes | docker system prune
 
+mv daemon.json /etc/docker/daemon.json
 docker compose -f docker-compose.yml up -d
 systemctl enable docker
-mv daemon.json /etc/docker/daemon.json
 
 rm logo.png*
 
