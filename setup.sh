@@ -139,8 +139,8 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 #docker load < fw.tar
 #docker load < node.tar.gz
-docker compose -f docker-compose.yml up -d
 mv daemon.json /etc/docker/daemon.json
+docker compose -f docker-compose.yml up -d
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
