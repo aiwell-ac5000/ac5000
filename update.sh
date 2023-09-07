@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# curl -sSL ac5000update.aiwell.no | sh
+# curl -sSL ac5000update.aiwell.no | bash
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
