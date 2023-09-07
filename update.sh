@@ -16,6 +16,24 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
 apt-get update --allow-releaseinfo-change -y
+
+#Backup av nettverk
+cp /etc/dhcpcd.conf dhcpcd.backup
+run_techbase_update() {
+  local output
+  output=$(eval "$1")
+
+  if [ $? -eq 0 ]; then
+    if [[ "$output" == *"No updates available"* ]]; then
+      echo "Alt er oppdatert"
+    else
+      echo "Nye oppdateringer er installert. Fikser innstillinger."
+      cp dhcpcd.backup /etc/dhcpcd.conf
+    fi
+  else
+    echo "Klarte ikke å utføre kommandoen: $1"
+  fi
+}
 # Run the firmware update command with a timeout
 timeout 60 softmgr update firmware -b x500_5.10-beta
 RES=$?
@@ -25,12 +43,12 @@ if [ $RES -eq 124 ]; then
 else
   # Check if the previous command succeeded
   if [ $RES -eq 0 ]; then
-    # If successful, run the following commands
-    softmgr update lib -b x500_5.10-beta
-    softmgr update core -b x500_5.10-beta
+    # If successful, run the following commands    
+    run_techbase_update "timeout 30 softmgr update lib -b x500_5.10-beta"
+    run_techbase_update "timeout 30 softmgr update core -b x500_5.10-beta"
   else
     # If not successful, use standard update
-    timeout 30 softmgr update all
+    run_techbase_update "timeout 30 softmgr update all"
   fi
 fi
 
