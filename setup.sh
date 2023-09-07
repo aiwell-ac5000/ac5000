@@ -64,7 +64,12 @@ addresses=("20" "21" "22")
 check_board_presence() {
   local address="$1"
   i2cget -y "$i2c_bus" "0x$address" >/dev/null 2>&1
-  return $?  # Return the exit code from i2cget
+  local exit_code=$?
+  if [ $exit_code -eq 0 ] || [ $exit_code -eq 1 ]; then
+    return 0  # Return 0 if i2cget returns 0 or 1
+  else
+    return $exit_code  # Return the actual exit code from i2cget
+  fi
 }
 
 # Loop to check each address
