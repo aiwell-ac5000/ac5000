@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # curl -sSL ac5000setup.aiwell.no | sh
 
@@ -59,6 +59,7 @@ fi
 
 # Define the I2C addresses to check (expressed without "0x" prefix)
 addresses=("20" "21" "22")
+#The previous line causes the error sh: 61: Syntax error: "(" unexpected
 
 # Function to check the presence of a board at an address
 check_board_presence() {
