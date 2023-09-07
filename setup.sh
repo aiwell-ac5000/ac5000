@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # curl -sSL ac5000setup.aiwell.no | sh
 
