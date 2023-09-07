@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# curl -sSL ac5000setup.aiwell.no | sh
+# curl -sSL ac5000setup.aiwell.no | bash
 
 touch /root/setup
 
