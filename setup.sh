@@ -6,6 +6,42 @@ touch /root/setup
 
 #Expand storage
 resize2fs /dev/mmcblk0p3
+# Function to check if available storage space is larger than the provided argument (in MB)
+check_storage_space() {
+  local required_space=$1  # Required space in megabytes
+  local available_space=$(df -BM . | awk 'NR==2 {print $4}' | tr -d 'M')  # Available space in megabytes
+
+  if [ "$available_space" -ge "$required_space" ]; then
+    return 0  # Available space is larger or equal to the required space
+  else
+    return 1  # Available space is smaller than the required space
+  fi
+}
+
+check_storage_space 500
+
+if [ $? -eq 0 ]; then
+  echo "Det er nok lagringsplass på enheten."
+else
+  echo "Ikke nok lagringsplass."
+  echo "Sletter logger og prøver igjen."
+  rm /var/log/*.gz
+  rm /var/log/*.[1-9]
+  
+  check_storage_space 500
+
+  if [ $? -eq 0 ]; then
+    echo "Det er nok lagringsplass på enheten."
+  else
+    printf "p\nd\n3\nn\np\n3\n2785280\n\nN\nw\n" | fdisk /dev/mmcblk0
+    green='\033[0;32m'
+    clear='\033[0m'
+    printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
+    printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
+    reboot
+    #
+  fi  
+fi
 
 apt-get update --allow-releaseinfo-change -y
 # Detect the platform (CM3 or CM4)
