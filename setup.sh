@@ -4,9 +4,45 @@
 
 touch /root/setup
 
+#Expand storage
 resize2fs /dev/mmcblk0p3
-apt-get update --allow-releaseinfo-change -y
 
+apt-get update --allow-releaseinfo-change -y
+# Detect the platform (CM3 or CM4)
+platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
+
+# Define the default I2C bus number (CM3)
+i2c_bus=0
+setenv I2C_ADDRESS_EXCARD 0
+
+# If the platform is CM4, change the I2C bus number
+if [ "$platform" = "BCM2711" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
+
+# Define the I2C addresses to check (expressed without "0x" prefix)
+addresses=("20" "21" "22")
+
+# Function to check the presence of a board at an address
+check_board_presence() {
+  local address="$1"
+  i2cget -y "$i2c_bus" "0x$address" >/dev/null 2>&1
+  return $?  # Return the exit code from i2cget
+}
+
+# Loop to check each address
+for address in "${addresses[@]}"; do
+  if check_board_presence "$address"; then
+    echo "Board found at address $address"
+    case "$address" in
+      "20") setenv EX_CARD_1 4R ;;
+      "21") setenv EX_CARD_2 4R ;;
+      "22") setenv EX_CARD_3 4R ;;
+      *) echo "Unknown board at address 0x$address";;
+    esac
+  fi
+done
 # Run the firmware update command with a timeout
 timeout 60 softmgr update firmware -b x500_5.10-beta
 RES=$?
