@@ -51,7 +51,7 @@ else
     run_techbase_update "timeout 30 softmgr update all"
   fi
 fi
-
+cp dhcpcd.backup /etc/dhcpcd.conf
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
