@@ -2,7 +2,7 @@
 {
 	rotate 0
 	maxsize 40M
-	daily
+	hourly
 	missingok
 	notifempty
 	delaycompress
@@ -17,7 +17,7 @@
 {
 	rotate 0
 	maxsize 1M
-	daily
+	hourly
 	missingok
 	notifempty
 	delaycompress
