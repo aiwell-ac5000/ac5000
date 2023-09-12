@@ -165,7 +165,7 @@ echo "xset s noblank" >> /etc/xdg/openbox/autostart
 
 echo "setxkbmap -option terminate:ctrl_alt_bksp" >> /etc/xdg/openbox/autostart
 
-sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
+#sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 
  echo "rm -rf /home/user/.config/chromium" >> /etc/xdg/openbox/autostart
 
