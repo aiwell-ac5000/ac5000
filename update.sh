@@ -125,10 +125,13 @@ if [[ -d "$DIR_TO_COPY" ]]; then
     apt install cerbot -y
     cp "$DIR_TO_COPY"/*.pem "$DEST_DIR"
     echo "Files copied from $DIR_TO_COPY to $DEST_DIR."
-    echo "NODE_PORT=80" | tee -a /etc/environment
+    echo "NODE_PORT=443" | tee -a /etc/environment
+    export NODE_PORT=443
+
 else
     echo "No encryption directory found."
     echo "NODE_PORT=80" | tee -a /etc/environment
+    export NODE_PORT=80
 fi
 
 
