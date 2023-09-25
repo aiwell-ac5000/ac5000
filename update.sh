@@ -104,8 +104,33 @@ echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
 
+#Get clean environment
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
+mv environment /etc/environment
 #Set node-red port varaibel
-echo "NODE_PORT=80" | tee -a /etc/environment
+
+
+
+# Base directory to start the search
+BASE_DIR="/etc/letsencrypt/live"
+
+# Destination directory
+DEST_DIR="/var/lib/docker/volumes/root_node-red-data/_data/"
+
+# Find the first directory matching the pattern
+DIR_TO_COPY=$(find "$BASE_DIR" -type d -name "ac*" | head -n 1)
+
+# If the directory exists, copy the .pem files
+if [[ -d "$DIR_TO_COPY" ]]; then
+    apt install cerbot -y
+    cp "$DIR_TO_COPY"/*.pem "$DEST_DIR"
+    echo "Files copied from $DIR_TO_COPY to $DEST_DIR."
+    echo "NODE_PORT=80" | tee -a /etc/environment
+else
+    echo "No encryption directory found."
+    echo "NODE_PORT=80" | tee -a /etc/environment
+fi
+
 
 #Sette oppstarts-skript
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
