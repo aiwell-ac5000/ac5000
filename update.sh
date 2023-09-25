@@ -105,6 +105,9 @@ service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
 
 #Set node-red port varaibel
+echo "NODE_PORT=80" | tee -a /etc/environment
+
+#Sette oppstarts-skript
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
 mv autostart /etc/xdg/openbox/autostart
 
@@ -221,4 +224,4 @@ systemctl enable splashscreen
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
-#reboot
+reboot

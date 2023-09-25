@@ -18,7 +18,7 @@ services:
     privileged: true
     environment:
       - TZ=Europe/Oslo
-      - PORT=80
+      - PORT=${NODE_PORT}
     network_mode: host
     volumes:
       - node-red-data:/data
