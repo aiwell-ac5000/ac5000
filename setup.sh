@@ -176,27 +176,8 @@ systemctl enable docker
 service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
 
-echo "xset s off" > /etc/xdg/openbox/autostart
-echo "xset s noblank" >> /etc/xdg/openbox/autostart
-
-echo "setxkbmap -option terminate:ctrl_alt_bksp" >> /etc/xdg/openbox/autostart
-
-sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
-
- echo "rm -rf /home/user/.config/chromium" >> /etc/xdg/openbox/autostart
-
-#echo "sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' ~/.config/chromium/'Local State'" >> /etc/xdg/openbox/autostart
-#echo "sed -i 's/\"exited_cleanly\":false/\"exited_cleanly\":true/; s/\"exit_type\":\"[^\"]\+\"/\"exit_type\":\"Normal\"/' ~/.config/chromium/Default/Preferences" >> /etc/xdg/openbox/autostart
-#echo "sleep 15" >> /etc/xdg/openbox/autostart
-echo "chromium-browser --disable-infobars --kiosk --allow-insecure-localhost logo.png &" >> /etc/xdg/openbox/autostart
-echo "check_server() {" >> /etc/xdg/openbox/autostart
-echo "  curl -k --output /dev/null --silent --head --fail 'http://user:AiwellAC5000@127.0.0.1/user'" >> /etc/xdg/openbox/autostart
-echo "}" >> /etc/xdg/openbox/autostart
-echo "until check_server" >> /etc/xdg/openbox/autostart
-echo "do" >> /etc/xdg/openbox/autostart
-echo "  sleep 2" >> /etc/xdg/openbox/autostart
-echo "done" >> /etc/xdg/openbox/autostart
-echo "chromium-browser --disable-infobars --kiosk --allow-insecure-localhost 'http://user:AiwellAC5000@localhost/user'" >> /etc/xdg/openbox/autostart
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
+mv autostart /etc/xdg/openbox/autostart
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
