@@ -1,0 +1,26 @@
+xset s off
+xset s noblank
+setxkbmap -option terminate:ctrl_alt_bksp
+
+rm -rf /home/user/.config/chromium
+chromium-browser --disable-infobars --kiosk --allow-insecure-localhost logo.png &
+
+# Check if NODE_PORT is set, if not, default to 80
+PORT=${NODE_PORT:-80}
+
+# If port is 443, use https, otherwise use http
+if [ "$PORT" -eq 443 ]; then
+    PROTOCOL="https"
+else
+    PROTOCOL="http"
+fi
+
+check_server() {
+  curl -k --output /dev/null --silent --head --fail "${PROTOCOL}://user:AiwellAC5000@127.0.0.1:${PORT}/user"
+}
+
+until check_server
+do
+  sleep 2
+done
+chromium-browser --disable-infobars --kiosk --allow-insecure-localhost "${PROTOCOL}://user:AiwellAC5000@127.0.0.1:${PORT}/user"
