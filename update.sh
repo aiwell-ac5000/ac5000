@@ -146,6 +146,12 @@ curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: a
 
 #curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/ac5000ENV/ac5000ENV.sh | sh
 getenv > /root/pipes/env
+
+systemctl stop ENV.service
+systemctl disable ENV.service
+rm /etc/systemd/system/ENV.service
+rm /root/pipes/ENV.sh
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
