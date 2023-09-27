@@ -249,6 +249,7 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
+
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
