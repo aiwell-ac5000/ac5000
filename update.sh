@@ -14,6 +14,7 @@ yes | docker system prune
 
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
+rm /var/log/*.old
 
 apt-get update --allow-releaseinfo-change -y
 
