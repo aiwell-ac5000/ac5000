@@ -23,4 +23,4 @@ until check_server
 do
   sleep 2
 done
-chromium-browser --disable-infobars --kiosk --allow-insecure-localhost "${PROTOCOL}://user:AiwellAC5000@127.0.0.1:${PORT}/user"
+chromium-browser --disable-infobars --kiosk --allow-insecure-localhost "${PROTOCOL}://user:AiwellAC5000@127.0.0.1/user"
