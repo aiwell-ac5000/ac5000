@@ -53,6 +53,48 @@ else
   fi
 fi
 cp dhcpcd.backup /etc/dhcpcd.conf
+platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
+
+# Define the default I2C bus number (CM3)
+i2c_bus=0
+setenv I2C_ADDRESS_EXCARD 0
+
+# If the platform is CM4, change the I2C bus number
+if [ "$platform" = "BCM2711" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
+
+# Define the I2C addresses to check (expressed without "0x" prefix)
+addresses=("20" "21" "22")
+#The previous line causes the error sh: 61: Syntax error: "(" unexpected
+
+# Function to check the presence of a board at an address
+check_board_presence() {
+  local address="$1"
+  i2cget -y "$i2c_bus" "0x$address" >/dev/null 2>&1
+  local exit_code=$?
+  if [ $exit_code -eq 0 ] || [ $exit_code -eq 1 ]; then
+    return 0  # Return 0 if i2cget returns 0 or 1
+  else
+    return $exit_code  # Return the actual exit code from i2cget
+  fi
+}
+
+# Loop to check each address
+for address in "${addresses[@]}"; do
+  if check_board_presence "$address"; then
+    echo "Board found at address $address"
+    case "$address" in
+      "20") setenv EX_CARD_1 4R ;;
+      "21") setenv EX_CARD_2 4R ;;
+      "22") setenv EX_CARD_3 4R ;;
+      *) echo "Unknown board at address 0x$address";;
+    esac
+  fi
+done
+
+
 #Oppsett GUI
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy -y
 apt-get install --no-install-recommends chromium-browser -y
