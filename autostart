@@ -16,11 +16,11 @@ else
 fi
 
 check_server() {
-  curl -k --output /dev/null --silent --head --fail "${PROTOCOL}://user:AiwellAC5000@127.0.0.1:${PORT}/user"
+  curl -k --output /dev/null --silent --head --fail "${PROTOCOL}://user:AiwellAC5000@127.0.0.1/user"
 }
 
 until check_server
 do
   sleep 2
 done
-chromium-browser --disable-infobars --kiosk --allow-insecure-localhost "${PROTOCOL}://user:AiwellAC5000@127.0.0.1:${PORT}/user"
+chromium-browser --disable-infobars --kiosk --allow-insecure-localhost "${PROTOCOL}://user:AiwellAC5000@127.0.0.1/user"
