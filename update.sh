@@ -45,6 +45,7 @@ else
   # Check if the previous command succeeded
   if [ $RES -eq 0 ]; then
     # If successful, run the following commands    
+    echo "Firmware oppdatert. Installerer øvrige oppdateringer."
     run_techbase_update "timeout 30 softmgr update lib -b x500_5.10-beta"
     run_techbase_update "timeout 30 softmgr update core -b x500_5.10-beta"
   else
