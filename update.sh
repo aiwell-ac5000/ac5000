@@ -2,6 +2,10 @@
 
 # curl -sSL ac5000update.aiwell.no | bash
 
+red='\033[0;31m'
+green='\033[0;32m'
+clear='\033[0m'
+
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
 docker compose down --volumes
@@ -32,25 +36,25 @@ run_techbase_update() {
       cp dhcpcd.backup /etc/dhcpcd.conf
     fi
   else
-    echo "Klarte ikke å utføre kommandoen: $1"
+    printf "\n${red}Klarte ikke å utføre kommandoen: $1${clear}!"
   fi
 }
 # Run the firmware update command with a timeout
-timeout 60 softmgr update firmware -b x500_5.10-beta
+timeout 120 softmgr update firmware -b x500_5.10-beta
 RES=$?
 # Check if the previous command timed out
 if [ $RES -eq 124 ]; then
-  echo "The firmware update command timed out. Skipping the if-else block."
+  printf "\n${red}Techbase-server svarer ikke.${clear}!"
 else
   # Check if the previous command succeeded
   if [ $RES -eq 0 ]; then
     # If successful, run the following commands    
     echo "Firmware oppdatert. Installerer øvrige oppdateringer."
-    run_techbase_update "timeout 30 softmgr update lib -b x500_5.10-beta"
-    run_techbase_update "timeout 30 softmgr update core -b x500_5.10-beta"
+    run_techbase_update "timeout 120 softmgr update lib -b x500_5.10-beta"
+    run_techbase_update "timeout 120 softmgr update core -b x500_5.10-beta"
   else
     # If not successful, use standard update
-    run_techbase_update "timeout 30 softmgr update all"
+    run_techbase_update "timeout 120 softmgr update all"
   fi
 fi
 cp dhcpcd.backup /etc/dhcpcd.conf
