@@ -33,7 +33,7 @@ run_techbase_update() {
       echo "Alt er oppdatert"
     else
       echo "Nye oppdateringer er installert. Fikser innstillinger."
-      cp dhcpcd.backup /etc/dhcpcd.conf
+      #cp dhcpcd.backup /etc/dhcpcd.conf
     fi
   else
     printf "\n${red}Klarte ikke å utføre kommandoen: $1${clear}!"
@@ -52,9 +52,9 @@ else
     echo "Firmware oppdatert. Installerer øvrige oppdateringer."
     run_techbase_update "timeout 120 softmgr update lib -b x500_5.10-beta"
     run_techbase_update "timeout 120 softmgr update core -b x500_5.10-beta"
-  else
+  #else
     # If not successful, use standard update
-    run_techbase_update "timeout 120 softmgr update all"
+    #run_techbase_update "timeout 120 softmgr update all"
   fi
 fi
 cp dhcpcd.backup /etc/dhcpcd.conf
