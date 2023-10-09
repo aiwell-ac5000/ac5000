@@ -119,8 +119,13 @@ export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
-curl -sSL https://get.docker.com | sh
-#docker update
+timeout 120 docker update
+RES=$?
+#if RES does not equal 0, then install docker
+if [ $RES -ne 0 ]; then
+  echo "Docker er ikke installert. Installerer docker."
+  curl -sSL https://get.docker.com | sh
+fi
 
 apt install dnsmasq -y
 
