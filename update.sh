@@ -166,12 +166,21 @@ echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/use
 
 #sette hostname
 A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
-B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)
 
+if [ "$A" -eq 0 ]; then
+  A=18
+  B=83
+  C=C4
+  D=AC
+  E=50
+  F=00
+else
+  B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
+  C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
+  D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
+  E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
+  F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)  
+fi
 host=ac5000$A$B$C$D$E$F
 echo $host
 
