@@ -85,6 +85,7 @@ for address in "${addresses[@]}"; do
     esac
   fi
 done
+
 # Run the firmware update command with a timeout
 run_techbase_update() {
   local output
@@ -171,6 +172,7 @@ echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.
 systemctl enable docker
 
 sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
+sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 #Sette oppstarts-skript
 
 #Konfigurere RS485
@@ -249,6 +251,7 @@ echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
 echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
 echo "static domain_name_servers=8.8.8.8" >> /etc/dhcpcd.conf
+cp /etc/dhcpcd.conf dhcpcd.base
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
