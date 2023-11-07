@@ -40,7 +40,7 @@ run_techbase_update() {
   fi
 }
 # Run the firmware update command with a timeout
-timeout 120 softmgr update firmware -b x500_5.10-beta
+timeout 120 softmgr update firmware -b x500_5.10-beta -f yes
 RES=$?
 # Check if the previous command timed out
 if [ $RES -eq 124 ]; then
@@ -50,8 +50,8 @@ else
   if [ $RES -eq 0 ]; then
     # If successful, run the following commands    
     echo "Firmware oppdatert. Installerer øvrige oppdateringer."
-    run_techbase_update "timeout 120 softmgr update lib -b x500_5.10-beta"
-    run_techbase_update "timeout 120 softmgr update core -b x500_5.10-beta"
+    run_techbase_update "timeout 120 softmgr update lib -b x500_5.10-beta -f yes"
+    run_techbase_update "timeout 120 softmgr update core -b x500_5.10-beta -f yes"
   #else
     # If not successful, use standard update
     #run_techbase_update "timeout 120 softmgr update all"
