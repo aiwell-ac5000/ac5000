@@ -224,6 +224,7 @@ curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: a
 #curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/ac5000ENV/ac5000ENV.sh | sh
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/setTime/setTime.sh | bash
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/systemTime/systemTimeReaderScript.sh | bash
+curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/staticIP/setIP.sh | bash
 getenv > /root/pipes/env
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
@@ -251,7 +252,7 @@ echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
 echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
 echo "static domain_name_servers=8.8.8.8" >> /etc/dhcpcd.conf
-cp /etc/dhcpcd.conf dhcpcd.base
+cp /etc/dhcpcd.conf /etc/dhcpcd.base
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
