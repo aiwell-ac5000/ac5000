@@ -37,6 +37,9 @@ services:
         source: /dev
         target: /dev
       - type: bind
+        source: /etc
+        target: /etc
+      - type: bind
         source: /sys/bus/i2c/devices/0-006c/iio:device0
         target: /ai
     logging:
