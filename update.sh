@@ -315,7 +315,26 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
+echo "#!/bin/bash" > /home/user/boot.sh
+echo "echo AiwellAC5000 | sudo -S raspi-config nonint do_boot_behaviour B2" >> /home/user/boot.sh
+chmod 777 /home/user/boot.sh
+usermod -aG sudo user
 
+touch /etc/systemd/system/do_boot_behaviour.service
+echo "[Unit]" > /etc/systemd/system/do_boot_behaviour.service
+echo "Description=Set boot behaviour" >> /etc/systemd/system/do_boot_behaviour.service
+echo "After=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
+echo "" >> /etc/systemd/system/do_boot_behaviour.service
+echo "[Service]" >> /etc/systemd/system/do_boot_behaviour.service
+echo "Type=oneshot" >> /etc/systemd/system/do_boot_behaviour.service
+echo "User=user" >> /etc/systemd/system/do_boot_behaviour.service
+echo "ExecStart=/home/user/boot.sh" >> /etc/systemd/system/do_boot_behaviour.service
+echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.service
+echo "" >> /etc/systemd/system/do_boot_behaviour.service
+echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
+echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
+
+systemctl start do_boot_behaviour.service
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
