@@ -335,7 +335,7 @@ apt autoremove -y
 
 green='\033[0;32m'
 clear='\033[0m'
-printf "\n${green}Setup executed successfully. DO NOT PANIC. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
-printf "\n${green}Progammering ble korrekt utført. IKKE FÅ PANIKK. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
+printf "\n${green}Setup executed successfully. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
+printf "\n${green}Progammering ble korrekt utført. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 
 reboot
