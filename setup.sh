@@ -264,7 +264,7 @@ echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.ex
 echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 
-if ping -c 1 192.168.0.1 >/dev/null 2>&1; then
+echo "if ping -c 1 192.168.0.1 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
   echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
   echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
   #docker hub
@@ -279,7 +279,7 @@ if ping -c 1 192.168.0.1 >/dev/null 2>&1; then
   ##172.65.32.248 letsencrypt
   echo "ip rule add to 172.65.32.248/32 table rt2" >> /etc/dhcpcd.exit-hook
   echo "ip rule add from 172.65.32.248/32 table rt2" >> /etc/dhcpcd.exit-hook
-fi
+echo "fi" >> /etc/dhcpcd.exit-hook
 
 echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/dhcpcd.exit-hook
 ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
