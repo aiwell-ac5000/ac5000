@@ -146,7 +146,7 @@ source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
 
-apt install dnsmasq -y
+DEBIAN_FRONTEND=noninteractive apt install dnsmasq -y
 
 user=user
 upwd=AiwellAC5000
