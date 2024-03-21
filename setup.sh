@@ -161,7 +161,8 @@ EOF
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
-apt install dnsmasq -y
+# apt install dnsmasq -y
+apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
 
 echo "interface=eth1" > /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
