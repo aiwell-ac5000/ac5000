@@ -163,7 +163,7 @@ EOF
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
-echo "interface=eth1" >> /etc/dnsmasq.conf
+echo "interface=eth1" > /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
 echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
@@ -172,7 +172,7 @@ echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.
 systemctl enable docker
 
 sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
-sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
+#sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 #Sette oppstarts-skript
 
 #Konfigurere RS485
@@ -229,10 +229,12 @@ getenv > /root/pipes/env
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
+
+# This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
-#docker load < fw.tar
-#docker load < node.tar.gz
+#File is not moved, no error message is displayed
 mv daemon.json /etc/docker/daemon.json
+# This command doen't seem to run, no error message is displayed
 docker compose -f docker-compose.yml up -d
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
@@ -244,10 +246,10 @@ cp logo.png /home/user/
 mv rsyslog /etc/logrotate.d/rsyslog
 mv mosquitto /etc/logrotate.d/mosquitto
 mv nodered /etc/logrotate.d/nodered
-
+#The commands below run
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
-
+# Why is the last command executed, and the first, but not those in the middle? 
 echo "interface eth1" >> /etc/dhcpcd.conf
 echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
 echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
