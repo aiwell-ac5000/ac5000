@@ -3,6 +3,7 @@
 # curl -sSL ac5000setup.aiwell.no | bash
 
 touch /root/setup
+export DEBIAN_FRONTEND=noninteractive
 
 #Expand storage
 resize2fs /dev/mmcblk0p3
@@ -131,7 +132,6 @@ apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-export DEBIAN_FRONTEND=noninteractive
 apt install -yq macchanger
 
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
@@ -145,8 +145,6 @@ apt-get install -y python3 python3-pip
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
-
-DEBIAN_FRONTEND=noninteractive apt install dnsmasq -y
 
 user=user
 upwd=AiwellAC5000
@@ -162,6 +160,8 @@ EOF
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
+
+apt install dnsmasq -y
 
 echo "interface=eth1" > /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf

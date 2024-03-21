@@ -2,6 +2,7 @@
 
 # curl -sSL ac5000update.aiwell.no | bash
 
+export DEBIAN_FRONTEND=noninteractive
 red='\033[0;31m'
 green='\033[0;32m'
 clear='\033[0m'
@@ -109,7 +110,7 @@ apt-get install --no-install-recommends chromium-browser -y
 apt autoremove -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-export DEBIAN_FRONTEND=noninteractive
+
 apt install -yq macchanger
 
 apt-get install libffi-dev libssl-dev -y
@@ -123,8 +124,6 @@ export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
 
 curl -sSL https://get.docker.com | sh
-
-apt install dnsmasq -y
 
 user=user
 upwd=AiwellAC5000
@@ -140,6 +139,14 @@ EOF
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
+
+apt install dnsmasq -y
+
+echo "interface=eth1" > /etc/dnsmasq.conf
+echo "bind-dynamic" >> /etc/dnsmasq.conf
+echo "domain-needed" >> /etc/dnsmasq.conf
+echo "bogus-priv" >> /etc/dnsmasq.conf
+echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
 
 #echo "interface=eth1" >> /etc/dnsmasq.conf
 #echo "bind-dynamic" >> /etc/dnsmasq.conf
