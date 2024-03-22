@@ -126,20 +126,22 @@ fi
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
 
 #Oppsett GUI
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
+#apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
 #apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
+
 apt autoremove -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser macchanger dnsmasq libffi-dev libssl-dev python3 python3-pip -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-apt install -yq macchanger
+# apt install -yq macchanger
 
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
 curl -sSL https://get.docker.com | sh
-apt-get install libffi-dev libssl-dev -y
+#apt-get install libffi-dev libssl-dev -y
 #apt install python3-dev -y
-apt-get install -y python3 python3-pip
+# apt-get install -y python3 python3-pip
 #pip3 install smbus
 
 source "$HOME/.cargo/env"
@@ -162,7 +164,7 @@ echo "allowed_users=console" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
 # apt install dnsmasq -y
-apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
+# apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
 
 echo "interface=eth1" > /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
