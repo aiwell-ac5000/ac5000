@@ -1,38 +1,19 @@
-
 version: "3.8"
 
 services:  
-  fw:
-    image: roarge/fw-ac5000:beta
-    restart: unless-stopped
-    user: root
-    privileged: true
-    #depends_on:
-    #  - "node-red"
-    environment:
-      - TZ=Europe/Amsterdam
-    network_mode: host
   node-red:
-    image: roarge/node-red-ac5000:latest
+    image: ghcr.io/aiwell-ac5000/node-red-ac5000:pc
+    container_name: root-node-red-1
     restart: unless-stopped
-    user: root
-    privileged: true
     environment:
-      - TZ=Europe/Amsterdam
-    network_mode: host
+      - TZ=Europe/Oslo
+      - PORT=1880
     volumes:
       - node-red-data:/data
-      #- type: bind
-      #  source: /root/logg
-      #  target: /logg
-      #- type: bind
-      #  source: /bin
-      #  target: /root/bin
-      - type: bind
-        source: /dev
-        target: /dev
-      - type: bind
-        source: /sys/bus/i2c/devices/0-006c/iio:device0
-        target: /ai
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "1"     
 volumes:
   node-red-data:

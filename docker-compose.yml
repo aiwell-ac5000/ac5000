@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:  
   fw:
     image: ghcr.io/aiwell-ac5000/fw-ac5000:latest
