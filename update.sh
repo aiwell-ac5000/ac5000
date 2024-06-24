@@ -13,7 +13,8 @@ docker compose down --volumes
 rm docker-compose.yml
 docker image rm roarge/fw-ac5000 -f
 docker image rm roarge/node-red-ac5000 -f
-
+docker image rm ghcr.io/aiwell-ac5000/node-red-ac5000:beta -f
+docker image rm ghcr.io/aiwell-ac5000/fw-ac5000:beta -f
 
 yes | docker system prune
 
