@@ -235,8 +235,11 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.
 
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
+
 #File is not moved, no error message is displayed
 mv daemon.json /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
 # This command doen't seem to run, no error message is displayed
 docker compose -f docker-compose.yml up -d
 

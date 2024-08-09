@@ -230,6 +230,9 @@ docker compose pull
 yes | docker system prune
 
 mv daemon.json /etc/docker/daemon.json
+systemctl daemon-reload
+systemctl restart docker
+
 docker compose -f docker-compose.yml up -d
 systemctl enable docker
 # Base directory to start the search
