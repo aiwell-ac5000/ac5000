@@ -10,9 +10,9 @@ services:
       - TZ=Europe/Oslo
     network_mode: host
     logging:
-      driver: "json-file"
+      driver: "local"
       options:
-        max-size: "50m"
+        max-size: "10m"
         max-file: "1" 
   node-red:
     image: ghcr.io/aiwell-ac5000/node-red-ac5000:latest
@@ -46,9 +46,9 @@ services:
         source: /sys/bus/i2c/devices/0-006c/iio:device0
         target: /ai
     logging:
-      driver: "json-file"
+      driver: "local"
       options:
-        max-size: "50m"
+        max-size: "10m"
         max-file: "1"     
 volumes:
   node-red-data:
