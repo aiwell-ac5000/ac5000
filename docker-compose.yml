@@ -13,7 +13,8 @@ services:
       driver: "local"
       options:
         max-size: "10m"
-        max-file: "1" 
+        max-file: "1"
+        compress: "false" 
   node-red:
     image: ghcr.io/aiwell-ac5000/node-red-ac5000:latest
     container_name: root-node-red-1
@@ -49,6 +50,7 @@ services:
       driver: "local"
       options:
         max-size: "10m"
-        max-file: "1"     
+        max-file: "1"
+        compress: "false"     
 volumes:
   node-red-data:
