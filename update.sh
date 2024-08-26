@@ -235,26 +235,6 @@ systemctl restart docker
 
 docker compose -f docker-compose.yml up -d
 systemctl enable docker
-# Base directory to start the search
-BASE_DIR="/etc/letsencrypt/live"
-
-# Destination directory
-DEST_DIR="/var/lib/docker/volumes/root_node-red-data/_data/"
-
-# Find the first directory matching the pattern
-DIR_TO_COPY=$(find "$BASE_DIR" -type d -name "ac*" | head -n 1)
-
-# If the directory exists, copy the .pem files
-if [[ -d "$DIR_TO_COPY" ]]; then
-    apt install cerbot -y
-    cp "$DIR_TO_COPY"/*.pem "$DEST_DIR"
-    echo "Files copied from $DIR_TO_COPY to $DEST_DIR."
-    echo "NODE_PORT=443" | tee -a /etc/environment
-
-else
-    echo "No encryption directory found."
-    echo "NODE_PORT=80" | tee -a /etc/environment
-fi
 
 rm logo.png*
 

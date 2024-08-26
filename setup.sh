@@ -182,8 +182,8 @@ sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.tx
 service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
 
-#Set node-red port varaibel
-echo "NODE_PORT=80" | tee -a /etc/environment
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
+mv environment /etc/environment
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
 mv autostart /etc/xdg/openbox/autostart
