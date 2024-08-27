@@ -273,29 +273,16 @@ echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
 
 echo "if ping -c 1 192.168.0.1 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
-  echo "if ! ping -c 1 157.249.81.141 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
+  
+  #81.167.40.222 - aiwell.no ping for å sjekke om internett er tilgjengelig
+  echo "if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
+  # api.met.no - værdata
   echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
   echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "fi" >> /etc/dhcpcd.exit-hook
-
-  #81.167.40.222 - aiwell.no
-  echo "if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
+  # Aiwell
   echo "ip rule add to 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
   echo "ip rule add from 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
   echo "fi" >> /etc/dhcpcd.exit-hook
-
-  #docker hub
-  echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add to 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 34.205.13.154/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-  echo "ip rule add to 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 104.18.122.25/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-  ##172.65.32.248 letsencrypt
-  echo "ip rule add to 172.65.32.248/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 172.65.32.248/32 table rt2" >> /etc/dhcpcd.exit-hook
 echo "fi" >> /etc/dhcpcd.exit-hook
 
 echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/dhcpcd.exit-hook
