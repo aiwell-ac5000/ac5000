@@ -277,8 +277,10 @@ echo "if ping -c 1 192.168.0.1 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
   echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
 
   #81.167.40.222 - aiwell.no
-  ##echo "ip rule add to 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
-  ##echo "ip rule add from 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
+  echo "if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
+  echo "ip rule add to 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
+  echo "ip rule add from 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
+  echo "fi" >> /etc/dhcpcd.exit-hook
 
   #docker hub
   echo "ip rule add to 18.210.197.188/32 table rt2" >> /etc/dhcpcd.exit-hook
