@@ -131,7 +131,7 @@ curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh 
 apt-get purge docker docker-engine docker.io containerd runc -y
 
 apt autoremove -y
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser macchanger dnsmasq libffi-dev libssl-dev python3 python3-pip -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser openvpn macchanger dnsmasq libffi-dev libssl-dev python3 python3-pip -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 # apt install -yq macchanger
