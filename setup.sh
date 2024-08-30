@@ -230,6 +230,9 @@ curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: a
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/staticIP/setIP.sh | bash
 getenv > /root/pipes/env
 
+#Opsett av sikkerhet
+mkdir /root/keys
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 

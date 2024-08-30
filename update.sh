@@ -223,6 +223,9 @@ systemctl disable ENV.service
 rm /etc/systemd/system/ENV.service
 rm /root/pipes/ENV.sh
 
+#Opsett av sikkerhet
+mkdir /root/keys
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json

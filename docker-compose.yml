@@ -28,9 +28,9 @@ services:
     volumes:
       - node-red-data:/data
       - /var/run/docker.sock:/var/run/docker.sock
-      #- type: bind
-      #  source: /root/logg
-      #  target: /logg
+      - type: bind
+        source: /root/keys
+        target: /keys
       #- type: bind
       #  source: /bin
       #  target: /root/bin
