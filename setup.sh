@@ -4,6 +4,7 @@
 
 touch /root/setup
 export DEBIAN_FRONTEND=noninteractive
+mkdir /root/storage
 
 #Expand storage
 resize2fs /dev/mmcblk0p3

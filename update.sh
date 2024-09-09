@@ -9,6 +9,8 @@ clear='\033[0m'
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
+mkdir /root/storage
+
 docker compose down --volumes
 rm docker-compose.yml
 docker image rm roarge/fw-ac5000 -f

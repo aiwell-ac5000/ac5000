@@ -31,9 +31,9 @@ services:
       - type: bind
         source: /root/keys
         target: /keys
-      #- type: bind
-      #  source: /bin
-      #  target: /root/bin
+      - type: bind
+        source: /root/storage
+        target: /storage
       - type: bind
         source: /root/pipes
         target: /pipes
