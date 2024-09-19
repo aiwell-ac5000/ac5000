@@ -7,3 +7,4 @@ rm /var/log/*.[1-9]
 rm /var/log/*.old
 
 rm /var/lib/docker/containers/*/*.log
+reboot
