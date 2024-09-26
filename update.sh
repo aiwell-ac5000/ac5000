@@ -2,6 +2,8 @@
 
 # curl -sSL ac5000update.aiwell.no | bash
 
+# curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
+
 export DEBIAN_FRONTEND=noninteractive
 red='\033[0;31m'
 green='\033[0;32m'
@@ -109,7 +111,7 @@ done
 
 
 #Oppsett GUI
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser macchanger dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser lldpd macchanger dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
 # apt-get install --no-install-recommends chromium-browser -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -209,6 +211,12 @@ echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/mac
 echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
 
+V=$(uname -r)
+DEBIAN_VERSION=$(grep "^VERSION=" /etc/os-release | cut -d '"' -f 2)
+echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $V armv7l'" > /etc/lldpd.conf
+systemctl restart lldpd
+systemctl enable lldpd
+
 TOKEN_PART1="ghp_mnhxnnaXCfnIWI"
 TOKEN_PART2="PKdwvSjOBOoo9IwG45MxrL"
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
@@ -286,7 +294,7 @@ echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/i
 ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
 
 systemctl daemon-reload
-service dhcpcd restart
+timeout 20 service dhcpcd restart
 
 cd /etc
 touch udev/rules.d/99-eth-mac.rules
