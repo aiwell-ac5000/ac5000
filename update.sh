@@ -265,33 +265,9 @@ mv nodered /etc/logrotate.d/nodered
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
-#echo "interface eth1" >> /etc/dhcpcd.conf
-#echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
+mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
 
-#echo "1 rt2" >>  /etc/iproute2/rt_tables
-echo "ip rule flush table rt2" > /etc/dhcpcd.exit-hook
-echo "ip route flush table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route flush cache" >> /etc/dhcpcd.exit-hook
-
-echo "ip route add 192.168.0.0/24 dev eth1 src 192.168.0.10 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip route add default via 192.168.0.1 dev eth1 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add to 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-echo "ip rule add from 192.168.0.10/32 table rt2" >> /etc/dhcpcd.exit-hook
-
-echo "if ping -c 1 192.168.0.1 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
-  
-   #81.167.40.222 - aiwell.no ping for å sjekke om internett er tilgjengelig
-  echo "if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then" >> /etc/dhcpcd.exit-hook
-  # api.met.no - værdata
-  echo "ip rule add to 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 157.249.81.141/32 table rt2" >> /etc/dhcpcd.exit-hook
-  # Aiwell
-  echo "ip rule add to 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "ip rule add from 81.167.40.222/32 table rt2" >> /etc/dhcpcd.exit-hook
-  echo "fi" >> /etc/dhcpcd.exit-hook 
-echo "fi" >> /etc/dhcpcd.exit-hook
-
-echo "ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/dhcpcd.exit-hook
 ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
 
 systemctl daemon-reload
