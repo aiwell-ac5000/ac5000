@@ -1,0 +1,12 @@
+[Unit]
+Description=Custom Service to Run Before Docker
+Before=docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+ExecStart=/root/setup_gpio.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

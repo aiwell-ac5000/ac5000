@@ -237,6 +237,15 @@ rm /root/pipes/ENV.sh
 #Opsett av sikkerhet
 mkdir /root/keys
 
+rm setup_gpio.sh
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
+chmod +x setup_gpio.sh
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/before_docker
+cp before_docker /etc/systemd/system/custom-before-docker.service
+systemctl enable custom-before-docker.service
+systemctl start custom-before-docker.service
+
+
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
