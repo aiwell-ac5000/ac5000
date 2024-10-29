@@ -46,6 +46,9 @@ services:
       - type: bind
         source: /sys/bus/i2c/devices/0-006c/iio:device0
         target: /ai
+      - type: bind
+        source: /sys
+        target: /sys
     logging:
       driver: "local"
       options:
