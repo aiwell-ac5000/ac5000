@@ -156,7 +156,7 @@ echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
 echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
 
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" >> nano ~/.bashrc
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
 #echo "interface=eth1" >> /etc/dnsmasq.conf
 #echo "bind-dynamic" >> /etc/dnsmasq.conf
