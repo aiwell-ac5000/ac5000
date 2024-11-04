@@ -179,6 +179,8 @@ sed -i.bck '$s/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.tx
 #sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 #Sette oppstarts-skript
 
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" >> nano ~/.bashrc
+
 #Konfigurere RS485
 service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
