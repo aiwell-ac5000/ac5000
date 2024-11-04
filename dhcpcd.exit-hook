@@ -40,4 +40,6 @@ if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then
     ip rule add from 157.249.81.141/32 table rt2
     ip rule add to 81.167.40.222/32 table rt2
     ip rule add from 81.167.40.222/32 table rt2
+    ip rule add to 8.8.8.8/32 table rt2
+    ip rule add from 8.8.8.8/32 table rt2
 fi
