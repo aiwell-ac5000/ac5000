@@ -292,6 +292,23 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
+
+# Define the override directory and file
+OVERRIDE_DIR="/etc/systemd/system/docker.service.d"
+OVERRIDE_FILE="${OVERRIDE_DIR}/override.conf"
+
+# Ensure the override directory exists
+echo "Creating override directory if it doesn't exist..."
+sudo mkdir -p "$OVERRIDE_DIR"
+
+# Write the configuration to the override file
+echo "Writing configuration to ${OVERRIDE_FILE}..."
+sudo bash -c "cat > ${OVERRIDE_FILE}" <<EOL
+[Unit]
+After=mosquitto.service
+Requires=mosquitto.service
+EOL
+
 touch /etc/systemd/system/splashscreen.service
 
 echo "[Unit]" > /etc/systemd/system/splashscreen.service
