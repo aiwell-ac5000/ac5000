@@ -172,6 +172,7 @@ echo "bind-dynamic" >> /etc/dnsmasq.conf
 echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
 echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
+echo "server=8.8.8.8" >> /etc/dnsmasq.conf
 
 systemctl enable docker
 
