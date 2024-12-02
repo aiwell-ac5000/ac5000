@@ -1,5 +1,3 @@
-# Should always be done
-
 # Store the IP of eth0 to /root/pipes/ip
 ip addr list eth0 | grep inet | cut -d' ' -f6 | cut -d/ -f1 > /root/pipes/ip
 
@@ -26,7 +24,7 @@ ip route flush table rt2
 ip route flush cache
 
 # Set routes with dynamically assigned src IP and calculated default gateway for eth1
-ip route add "$IP_SUBNET".0/24 dev eth1 src "$IP" table rt2
+ip route add "$IP_SUBNET"/24 dev eth1 src "$IP" table rt2
 ip route add default via "$DEFAULT_GW" dev eth1 table rt2
 
 # Add rules for traffic from/to the dynamically assigned IP
@@ -43,3 +41,4 @@ if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then
     ip rule add to 8.8.8.8/32 table rt2
     ip rule add from 8.8.8.8/32 table rt2
 fi
+# Why does 192.168.0.153 not receive ACK?
