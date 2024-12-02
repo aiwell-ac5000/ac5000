@@ -23,8 +23,11 @@ ip rule flush table rt2
 ip route flush table rt2
 ip route flush cache
 
+NETWORK=$(ipcalc -n "$IP"/"$IP_SUBNET" | grep Network | awk '{print $2}')
+
 # Set routes with dynamically assigned src IP and calculated default gateway for eth1
-ip route add "$IP_SUBNET"/24 dev eth1 src "$IP" table rt2
+#ip route add "$IP_SUBNET"/24 dev eth1 src "$IP" table rt2
+ip route add "$NETWORK" dev eth1 src "$IP" table rt2
 ip route add default via "$DEFAULT_GW" dev eth1 table rt2
 
 # Add rules for traffic from/to the dynamically assigned IP
