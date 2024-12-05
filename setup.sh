@@ -118,6 +118,8 @@ else
     run_techbase_update "timeout 30 softmgr update core -b x500_5.10-beta"
   else
     # If not successful, use standard update
+    run_techbase_update "timeout 120 softmgr update core -f yes"
+    run_techbase_update "timeout 120 softmgr update firmware -f yes"
     run_techbase_update "timeout 30 softmgr update all"
   fi
 fi
