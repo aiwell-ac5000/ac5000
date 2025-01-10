@@ -260,7 +260,7 @@ systemctl daemon-reload
 systemctl restart docker
 
 #Sette up symlink for å hindre problemer med kernel 5.10
-ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /tmp/iio_device0
+ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /iio_device0
 
 docker compose -f docker-compose.yml up -d
 systemctl enable docker
