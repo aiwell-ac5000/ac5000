@@ -259,6 +259,9 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 
+#Sette up symlink for å hindre problemer med kernel 5.10
+ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /tmp/iio_device0
+
 #File is not moved, no error message is displayed
 mv daemon.json /etc/docker/daemon.json
 systemctl daemon-reload
