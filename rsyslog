@@ -23,7 +23,7 @@
 	delaycompress
 	compress
 	postrotate
-		ystemctl restart rsyslog.service
+		systemctl restart rsyslog.service
 	endscript
 }
 
