@@ -8,7 +8,7 @@
 	delaycompress
 	compress
 	postrotate
-		invoke-rc.d rsyslog rotate > /dev/null
+		systemctl restart rsyslog.service
 	endscript
 }
 
@@ -23,7 +23,7 @@
 	delaycompress
 	compress
 	postrotate
-		invoke-rc.d rsyslog rotate > /dev/null
+		ystemctl restart rsyslog.service
 	endscript
 }
 
@@ -47,6 +47,6 @@
 	compress
 	delaycompress
 	postrotate
-		invoke-rc.d rsyslog rotate > /dev/null
+		systemctl restart rsyslog.service
 	endscript
 }
