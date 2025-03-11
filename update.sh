@@ -293,7 +293,7 @@ chmod +x network_recovery.sh
 mv network_recovery.sh /usr/local/bin/network_recovery.sh
 (crontab -l | grep -Fq "/usr/local/bin/network_recovery.sh") || (crontab -l; echo "*/30 * * * * /usr/local/bin/network_recovery.sh") | crontab -
 
-/etc/logrotate.d/network_recovery > /dev/null <<EOF
+tee /etc/logrotate.d/network_recovery > /dev/null <<EOF
 /var/log/network_recovery.log
 {
         rotate 0
