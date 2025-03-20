@@ -9,19 +9,6 @@ red='\033[0;31m'
 green='\033[0;32m'
 clear='\033[0m'
 
-cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
-
-mkdir /root/storage
-
-docker compose down --volumes
-rm docker-compose.yml
-docker image rm roarge/fw-ac5000 -f
-docker image rm roarge/node-red-ac5000 -f
-docker image rm ghcr.io/aiwell-ac5000/node-red-ac5000:beta -f
-docker image rm ghcr.io/aiwell-ac5000/fw-ac5000:beta -f
-
-yes | docker system prune
-
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
@@ -109,28 +96,9 @@ for address in "${addresses[@]}"; do
   fi
 done
 
-
-#Oppsett GUI
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
-# apt-get install --no-install-recommends chromium-browser -y
-#apt-get purge docker docker-engine docker.io containerd runc -y
-apt autoremove -y
-#apt install build-essential -y
-#curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-
-#apt install -yq macchanger
-
-#apt-get install libffi-dev libssl-dev -y
-#apt install python3-dev -y
-#apt-get install -y python3 python3-pip
-#pip3 install smbus
-
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
-#pip3 install docker-compose
-
-curl -sSL https://get.docker.com | sh
 
 user=user
 upwd=AiwellAC5000
@@ -144,45 +112,16 @@ chpasswd <<EOF
 $user:$upwd
 EOF
 
-echo "allowed_users=console" > /etc/X11/Xwrapper.config
-echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
-
-# apt install dnsmasq -y
-#apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
-
 echo "interface=eth1" > /etc/dnsmasq.conf
 echo "bind-dynamic" >> /etc/dnsmasq.conf
 echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
 echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
-
-#echo "interface=eth1" >> /etc/dnsmasq.conf
-#echo "bind-dynamic" >> /etc/dnsmasq.conf
-#echo "domain-needed" >> /etc/dnsmasq.conf
-#echo "bogus-priv" >> /etc/dnsmasq.conf
-#echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
 echo "server=8.8.8.8" >> /etc/dnsmasq.conf
-
-#Sette oppstarts-skript
-
-#Konfigurere RS485
-service_port_ctrl off
-comctrl 1 RS-485 2 RS-485
 
 #Get clean environment
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
 mv environment /etc/environment
-#Set node-red port varaibel
-
-
-
-#Sette oppstarts-skript
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
-mv autostart /etc/xdg/openbox/autostart
-
-echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
 #sette hostname
 A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
@@ -221,15 +160,6 @@ echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $
 systemctl restart lldpd
 systemctl enable lldpd
 
-TOKEN_PART1="ghp_ruQYTd0Xs4dxyEf"
-TOKEN_PART2="sQ4NX9fsvfzf31536jcGD"
-echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/setTime/setTime.sh | bash
-
-#curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/ac5000ENV/ac5000ENV.sh | sh
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/systemTime/systemTimeReaderScript.sh | bash
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/staticIP/setIP.sh | bash
 getenv > /root/pipes/env
 
 systemctl stop ENV.service
@@ -237,45 +167,13 @@ systemctl disable ENV.service
 rm /etc/systemd/system/ENV.service
 rm /root/pipes/ENV.sh
 
-#Opsett av sikkerhet
-mkdir /root/keys
-
-rm setup_gpio.sh
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
-chmod +x setup_gpio.sh
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/before_docker
-mv before_docker /etc/systemd/system/custom-before-docker.service
-systemctl enable custom-before-docker.service
-systemctl start custom-before-docker.service
-
-
-#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
-docker compose pull
-yes | docker system prune
-
-mv daemon.json /etc/docker/daemon.json
-systemctl daemon-reload
-systemctl restart docker
-
-#Sette up symlink for å hindre problemer med kernel 5.10
-ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /iio_device0
-
-docker compose -f docker-compose.yml up -d
-systemctl enable docker
-
 rm logo.png*
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/mosquitto
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/nodered
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
 cp logo.png /home/user/
 
 mv rsyslog /etc/logrotate.d/rsyslog
-mv mosquitto /etc/logrotate.d/mosquitto
-mv nodered /etc/logrotate.d/nodered
 
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
@@ -312,38 +210,6 @@ echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}
 echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.2", KERNEL=="eth*", NAME="eth1" RUN+="/sbin/ip link set dev eth1 address AC:50:00:AC:50:00"' >> udev/rules.d/99-eth-mac.rules
 
 raspi-config nonint do_hostname $host 
-#raspi-config nonint do_boot_behaviour B2
-
-
-# Define the override directory and file
-OVERRIDE_DIR="/etc/systemd/system/docker.service.d"
-OVERRIDE_FILE="${OVERRIDE_DIR}/override.conf"
-
-# Ensure the override directory exists
-echo "Creating override directory if it doesn't exist..."
-sudo mkdir -p "$OVERRIDE_DIR"
-
-# Write the configuration to the override file
-echo "Writing configuration to ${OVERRIDE_FILE}..."
-sudo bash -c "cat > ${OVERRIDE_FILE}" <<EOL
-[Unit]
-After=mosquitto.service
-Requires=mosquitto.service
-EOL
-
-touch /etc/systemd/system/splashscreen.service
-
-echo "[Unit]" > /etc/systemd/system/splashscreen.service
-echo "Description=Splash screen" >> /etc/systemd/system/splashscreen.service
-echo "DefaultDependencies=no" >> /etc/systemd/system/splashscreen.service
-echo "After=local-fs.target" >> /etc/systemd/system/splashscreen.service
-echo "[Service]" >> /etc/systemd/system/splashscreen.service
-echo "ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose -a /root/logo.png" >> /etc/systemd/system/splashscreen.service
-echo "StandardInput=tty" >> /etc/systemd/system/splashscreen.service
-echo "StandardOutput=tty" >> /etc/systemd/system/splashscreen.service
-echo "[Install]" >> /etc/systemd/system/splashscreen.service
-echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
-systemctl enable splashscreen
 
 echo "#!/bin/bash" > /home/user/boot.sh
 echo "echo AiwellAC5000 | sudo -S raspi-config nonint do_boot_behaviour B2" >> /home/user/boot.sh
@@ -365,7 +231,5 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
-#rustup self uninstall -y
-#apt purge build-essential -y
 apt autoremove -y
 reboot

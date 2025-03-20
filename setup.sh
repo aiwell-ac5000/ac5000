@@ -305,6 +305,24 @@ ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
 systemctl daemon-reload
 timeout 20 service dhcpcd restart
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/network_recovery.sh
+chmod +x network_recovery.sh
+mv network_recovery.sh /usr/local/bin/network_recovery.sh
+(crontab -l | grep -Fq "/usr/local/bin/network_recovery.sh") || (crontab -l; echo "*/30 * * * * /usr/local/bin/network_recovery.sh") | crontab -
+
+tee /etc/logrotate.d/network_recovery > /dev/null <<EOF
+/var/log/network_recovery.log
+{
+        rotate 0
+        maxsize 2M
+        hourly
+        missingok
+        notifempty
+        delaycompress
+        compress
+}
+EOF
+
 #cd /etc
 #touch udev/rules.d/99-eth-mac.rules
 #echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.1", KERNEL=="eth*", NAME="eth0"' > udev/rules.d/99-eth-mac.rules
