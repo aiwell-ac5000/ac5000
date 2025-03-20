@@ -124,114 +124,12 @@ else
   fi
 fi
 
-#restore_settings -r
-#bash ex_card_configure.sh &
-curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
-
-apt-get purge docker docker-engine docker.io containerd runc -y
-
-apt autoremove -y
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" screen ipcalc macchanger openvpn lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
-
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-source "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-echo "interface=eth1" > /etc/dnsmasq.conf
-echo "bind-dynamic" >> /etc/dnsmasq.conf
-echo "domain-needed" >> /etc/dnsmasq.conf
-echo "bogus-priv" >> /etc/dnsmasq.conf
-echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.conf
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
-mv environment /etc/environment
-
-#sette hostname
-A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
-
-if [ "$A" -eq 0 ]; then
-  A=18
-  B=83
-  C=C4
-  D=AC
-  E=50
-  F=00
-else
-  B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-  C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-  D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-  E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-  F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)  
-fi
-host=ac5000$A$B$C$D$E$F
-echo $host
-
-touch /etc/network/if-up.d/macchange
-echo "#!/bin/sh" > /etc/network/if-up.d/macchange
-echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
-echo 'exit 0' >> /etc/network/if-up.d/macchange
-echo 'fi' >> /etc/network/if-up.d/macchange
-echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
-echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/macchange
-echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
-chmod 755 /etc/network/if-up.d/macchange
-
-V=$(uname -r)
-ARCH = $(uname -m)
-DEBIAN_VERSION=$(grep "^VERSION=" /etc/os-release | cut -d '"' -f 2)
-echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $V $ARCH'" > /etc/lldpd.conf
-systemctl restart lldpd
-systemctl enable lldpd
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
-mv rsyslog /etc/logrotate.d/rsyslog
-#The commands below run
-rm /var/log/*.gz
-rm /var/log/*.[1-9]
-# Why is the last command executed, and the first, but not those in the middle? 
-echo "timeout 240" >> /etc/dhcpcd.conf
-#fallback to static IP eth1
-echo "profile static_eth1" >> /etc/dhcpcd.conf
-echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
-echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
-echo "static domain_name_servers=8.8.8.8" >> /etc/dhcpcd.conf
-#Apply staic profile to eth1
-echo "interface eth1" >> /etc/dhcpcd.conf
-echo "fallback static_eth1" >> /etc/dhcpcd.conf
-echo "timeout 60" >> /etc/dhcpcd.conf
-
-cp /etc/dhcpcd.conf /etc/dhcpcd.base
-
-echo "1 rt2" >>  /etc/iproute2/rt_tables
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
-mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
-
-ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
-
-systemctl daemon-reload
-timeout 20 service dhcpcd restart
-
-raspi-config nonint do_hostname $host 
-
-apt autoremove -y
 
 green='\033[0;32m'
 clear='\033[0m'
 printf "\n${green}Firmware Setup executed successfully. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
 printf "\n${green}Progammering ble korrekt utført. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
+
+sleep 5
 
 reboot

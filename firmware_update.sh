@@ -2,8 +2,6 @@
 
 # curl -sSL ac5000update.aiwell.no | bash
 
-# curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
-
 export DEBIAN_FRONTEND=noninteractive
 red='\033[0;31m'
 green='\033[0;32m'
@@ -15,10 +13,6 @@ rm /var/log/*.old
 
 apt-get update --allow-releaseinfo-change -y
 
-#Backup av nettverk
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
-mv dhcpcd.conf /etc/dhcpcd.base
-cp /etc/dhcpcd.conf dhcpcd.backup
 run_techbase_update() {
   local output
   output=$(eval "$1")
@@ -96,140 +90,4 @@ for address in "${addresses[@]}"; do
   fi
 done
 
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-source "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
-
-user=user
-upwd=AiwellAC5000
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-user=root
-upwd=Prod2001
-chpasswd <<EOF
-$user:$upwd
-EOF
-
-echo "interface=eth1" > /etc/dnsmasq.conf
-echo "bind-dynamic" >> /etc/dnsmasq.conf
-echo "domain-needed" >> /etc/dnsmasq.conf
-echo "bogus-priv" >> /etc/dnsmasq.conf
-echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.conf
-
-#Get clean environment
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
-mv environment /etc/environment
-
-#sette hostname
-A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
-
-if [ "$A" -eq 0 ]; then
-  A=18
-  B=83
-  C=C4
-  D=AC
-  E=50
-  F=00
-else
-  B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-  C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-  D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-  E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-  F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)  
-fi
-host=ac5000$A$B$C$D$E$F
-echo $host
-
-touch /etc/network/if-up.d/macchange
-echo "#!/bin/sh" > /etc/network/if-up.d/macchange
-echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
-echo 'exit 0' >> /etc/network/if-up.d/macchange
-echo 'fi' >> /etc/network/if-up.d/macchange
-echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
-echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/macchange
-echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
-chmod 755 /etc/network/if-up.d/macchange
-
-V=$(uname -r)
-ARCH = $(uname -m)
-DEBIAN_VERSION=$(grep "^VERSION=" /etc/os-release | cut -d '"' -f 2)
-echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $V $ARCH'" > /etc/lldpd.conf
-systemctl restart lldpd
-systemctl enable lldpd
-
-getenv > /root/pipes/env
-
-systemctl stop ENV.service
-systemctl disable ENV.service
-rm /etc/systemd/system/ENV.service
-rm /root/pipes/ENV.sh
-
-rm logo.png*
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/rsyslog
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/logo.png
-cp logo.png /home/user/
-
-mv rsyslog /etc/logrotate.d/rsyslog
-
-rm /var/log/*.gz
-rm /var/log/*.[1-9]
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
-mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
-
-ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
-
-systemctl daemon-reload
-timeout 20 service dhcpcd restart
-
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/network_recovery.sh
-chmod +x network_recovery.sh
-mv network_recovery.sh /usr/local/bin/network_recovery.sh
-(crontab -l | grep -Fq "/usr/local/bin/network_recovery.sh") || (crontab -l; echo "*/30 * * * * /usr/local/bin/network_recovery.sh") | crontab -
-
-tee /etc/logrotate.d/network_recovery > /dev/null <<EOF
-/var/log/network_recovery.log
-{
-        rotate 0
-        maxsize 2M
-        hourly
-        missingok
-        notifempty
-        delaycompress
-        compress
-}
-EOF
-
-cd /etc
-touch udev/rules.d/99-eth-mac.rules
-echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.1", KERNEL=="eth*", NAME="eth0"' > udev/rules.d/99-eth-mac.rules
-echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.2", KERNEL=="eth*", NAME="eth1" RUN+="/sbin/ip link set dev eth1 address AC:50:00:AC:50:00"' >> udev/rules.d/99-eth-mac.rules
-
-raspi-config nonint do_hostname $host 
-
-echo "#!/bin/bash" > /home/user/boot.sh
-echo "echo AiwellAC5000 | sudo -S raspi-config nonint do_boot_behaviour B2" >> /home/user/boot.sh
-chmod 777 /home/user/boot.sh
-usermod -aG sudo user
-
-touch /etc/systemd/system/do_boot_behaviour.service
-echo "[Unit]" > /etc/systemd/system/do_boot_behaviour.service
-echo "Description=Set boot behaviour" >> /etc/systemd/system/do_boot_behaviour.service
-echo "After=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Service]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "Type=oneshot" >> /etc/systemd/system/do_boot_behaviour.service
-echo "User=user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "ExecStart=/home/user/boot.sh" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-
-systemctl start do_boot_behaviour.service
-apt autoremove -y
 reboot
