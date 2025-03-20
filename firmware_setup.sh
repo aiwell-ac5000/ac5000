@@ -133,6 +133,7 @@ apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
 apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" screen ipcalc macchanger openvpn lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
 
+export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 
