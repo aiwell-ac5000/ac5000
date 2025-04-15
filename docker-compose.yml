@@ -2,7 +2,7 @@ services:
   fw:
     image: ghcr.io/aiwell-ac5000/fw-ac5000:latest
     restart: unless-stopped
-    user: root
+    #user: root
     privileged: true
     #depends_on:
     #  - "node-red"
