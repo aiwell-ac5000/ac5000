@@ -11,7 +11,23 @@ clear='\033[0m'
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 
-mkdir /root/storage
+
+
+FOLDER="/root/storage"
+if [ -d "$FOLDER" ]; then
+  echo "Mappe '$FOLDER' eksisterer."
+else
+  echo "Mappe '$FOLDER' eksisterer ikke."
+  mkdir -p "$FOLDER"
+  echo "Kopierer context til /root/storage"
+  if [ -d /var/lib/docker/volumes/root_node-red-data/_data/context ]; then
+    cp -r /var/lib/docker/volumes/root_node-red-data/_data/context /root/storage/context
+  else
+    echo "Kildekatalogen /var/lib/docker/volumes/root_node-red-data/_data/context finnes ikke, hopper over kopiering."
+  fi
+  # optionally create it:
+  # mkdir -p "$FOLDER"
+fi
 
 docker compose down --volumes
 rm docker-compose.yml
