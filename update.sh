@@ -17,7 +17,7 @@ FOLDER="/root/storage"
 if [ -d "$FOLDER" ]; then
   echo "Mappe '$FOLDER' eksisterer."
 else
-  echo "Mappe '$FOLDER' eksisterer ikke."
+  echo "Mappe '$FOLDER' eksisterer ikke. Lager den nå."
   mkdir -p "$FOLDER"
   echo "Kopierer context til /root/storage"
   if [ -d /var/lib/docker/volumes/root_node-red-data/_data/context ]; then
@@ -25,8 +25,6 @@ else
   else
     echo "Kildekatalogen /var/lib/docker/volumes/root_node-red-data/_data/context finnes ikke, hopper over kopiering."
   fi
-  # optionally create it:
-  # mkdir -p "$FOLDER"
 fi
 
 docker compose down --volumes
