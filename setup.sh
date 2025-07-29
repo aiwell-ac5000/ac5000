@@ -141,11 +141,13 @@ apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o 
 
 export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 
-curl -sSL https://get.docker.com | sh
+# curl -sSL https://get.docker.com | sh
 #apt-get install libffi-dev libssl-dev -y
 #apt install python3-dev -y
 # apt-get install -y python3 python3-pip
 #pip3 install smbus
+curl -fsSL https://get.docker.com -o get-docker.sh
+VERSION=26.1 sh get-docker.sh
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
