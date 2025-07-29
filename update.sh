@@ -144,7 +144,9 @@ source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
 
-curl -sSL https://get.docker.com | sh
+#curl -sSL https://get.docker.com | sh
+curl -fsSL https://get.docker.com -o get-docker.sh
+VERSION=26.1 sh get-docker.sh
 
 user=user
 upwd=AiwellAC5000
