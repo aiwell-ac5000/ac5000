@@ -298,6 +298,7 @@ rm /var/log/*.[1-9]
 
 # Backup original cmdline.txt
 cp /boot/cmdline.txt /boot/cmdline.bck
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
