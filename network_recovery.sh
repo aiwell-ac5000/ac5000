@@ -46,6 +46,14 @@ get_new_logs() {
         LAST_POS=0
     fi
 
+    CURRENT_LINES=$(wc -l < "$LOG_FILE")
+
+    # Handle log rotation (file shrunk)
+    if (( CURRENT_LINES < LAST_POS )); then
+        log_action "Log rotation detected, resetting marker."
+        LAST_POS=0
+    fi
+
     # Extract new log entries since last processed position
     NEW_LOGS=$(tail -n +"$((LAST_POS + 1))" "$LOG_FILE")
     echo "$NEW_LOGS"
@@ -69,42 +77,9 @@ check_log_errors() {
     return 1
 }
 
-# Ping test to check connectivity
-check_ping() {
-    for host in "${PING_HOSTS[@]}"; do
-        if ping -c 2 "$host" > /dev/null 2>&1; then
-            log_action "Ping to $host successful. Network seems fine."
-            return 0
-        else
-            log_action "Ping to $host failed."
-        fi
-    done
-    return 1
-}
-
-# Restart the eth1 interface
-restart_eth1() {
-    log_action "Attempting to restart eth1..."
-    if sudo ifconfig eth1 down && sudo ifconfig eth1 up; then
-        log_action "eth1 restart successful."
-    else
-        log_action "eth1 restart failed with exit code $?"
-    fi
-}
-
-# Restart the networking service
-restart_networking() {
-    log_action "Attempting to restart networking service..."
-    if sudo systemctl restart networking; then
-        log_action "Networking service restart successful."
-    else
-        log_action "Networking service restart failed with exit code $?"
-    fi
-}
-
-# Reboot the device as a last resort
+# Reboot the device
 reboot_device() {
-    log_action "All recovery attempts failed. Rebooting the device..."
+    log_action "Rebooting the device due to smsc95xx driver error..."
     sudo shutdown -r now
     log_action "Reboot command issued, but this line might not be executed if the system shuts down."
 }
@@ -121,23 +96,8 @@ main() {
 
     # Step 2: Check for errors in the new logs
     if check_log_errors "$new_logs"; then
-        # Step 3: Attempt to restart eth1 and networking
-        restart_eth1
-        restart_networking
-
-        # Step 4: Wait for 60 seconds before pinging
-        log_action "Waiting 60 seconds to allow network recovery..."
-        sleep 60
-
-        # Step 5: Perform a ping test
-        if check_ping; then
-            log_action "Network recovery successful. Exiting."
-            update_marker
-            exit 0
-        else
-            log_action "Ping failed after recovery attempts."
-            reboot_device
-        fi
+        update_marker
+        reboot_device
     else
         log_action "No relevant errors detected in logs."
     fi
