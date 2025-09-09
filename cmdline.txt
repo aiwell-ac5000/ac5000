@@ -1,0 +1,1 @@
+console=tty1 root=PARTUUID=4a866160-03 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait smsc95xx.macaddr=00:00:00:69:69:87 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 dwc_otg.fiq_fix_enable=1 dwc_otg.fiq_fsm_mask=0x3 dwc_otg.speed=1 logo.nologo consoleblank=0 loglevel=1 quiet
