@@ -184,6 +184,7 @@ systemctl enable docker
 #sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 # Backup original cmdline.txt
 cp /boot/cmdline.txt /boot/cmdline.bck
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
 #Sette oppstarts-skript
 
