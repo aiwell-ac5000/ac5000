@@ -1,19 +1,59 @@
-version: "3.8"
-
 services:  
-  node-red:
-    image: ghcr.io/aiwell-ac5000/node-red-ac5000:pc
-    container_name: root-node-red-1
+  fw:
+    image: ghcr.io/aiwell-ac5000/fw-ac5000:latest_arm64
     restart: unless-stopped
+    #user: root
+    privileged: true
+    #depends_on:
+    #  - "node-red"
     environment:
       - TZ=Europe/Oslo
-      - PORT=1880
+    network_mode: host
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "1"
+        compress: "false" 
+  node-red:
+    image: ghcr.io/aiwell-ac5000/node-red-ac5000:latest
+    container_name: root-node-red-1
+    restart: unless-stopped
+    user: root
+    privileged: true
+    environment:
+      - TZ=Europe/Oslo
+      - PORT=${NODE_PORT}
+    network_mode: host
     volumes:
       - node-red-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: /root/keys
+        target: /keys
+      - type: bind
+        source: /root/storage
+        target: /storage
+      - type: bind
+        source: /root/pipes
+        target: /pipes
+      - type: bind
+        source: /dev
+        target: /dev
+      - type: bind
+        source: /etc
+        target: /etc
+      - type: bind
+        source: /iio_device0
+        target: /ai
+      - type: bind
+        source: /sys
+        target: /sys
     logging:
-      driver: "json-file"
+      driver: "local"
       options:
-        max-size: "50m"
-        max-file: "1"     
+        max-size: "10m"
+        max-file: "1"
+        compress: "false"     
 volumes:
   node-red-data:

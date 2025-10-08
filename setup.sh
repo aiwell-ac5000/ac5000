@@ -266,8 +266,11 @@ systemctl enable custom-before-docker.service
 systemctl start custom-before-docker.service
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
+if [ "$(uname -m)" = "aarch64" ]; then
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose-beta.yml
+else
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
-
+fi
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 
