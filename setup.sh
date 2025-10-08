@@ -146,8 +146,14 @@ export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 #apt install python3-dev -y
 # apt-get install -y python3 python3-pip
 #pip3 install smbus
-curl -fsSL https://get.docker.com -o get-docker.sh
-VERSION=26.1 sh get-docker.sh
+if [ "$(uname -m)" = "aarch64" ]; then
+    echo "Running on aarch64"
+    curl -sSL https://get.docker.com | sh
+else
+    echo "Running on armhf"
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    VERSION=26.1 sh get-docker.sh
+fi
 
 source "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
