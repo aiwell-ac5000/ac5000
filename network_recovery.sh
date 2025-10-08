@@ -8,7 +8,6 @@ NETWORK_LOG="/var/log/network_recovery.log"
 ERROR_MSGS=("smsc95xx.*Error reading MII_ACCESS" \
             "smsc95xx.*Failed to read MII_BMSR" \
             "smsc95xx.*Failed to read reg index.*" \
-            "dwc2.*Channel .* ChHltd set, but reason is unknown" \
             "dwc2.*dwc2_update_urb_state_abn.*trimming xfer length")
 PING_HOSTS=("8.8.8.8" "81.167.40.222")
 LOG_ACTIONS="/var/log/network_recovery.log"
