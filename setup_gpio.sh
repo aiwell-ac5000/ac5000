@@ -1,6 +1,48 @@
 
 #!/bin/bash
 
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+# DO
+echo 534 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio534/direction
+
+echo 535 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio535/direction
+
+echo 536 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio536/direction
+
+echo 537 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio537/direction
+
+# Opto DI
+echo 530 > /sys/class/gpio/export
+echo 531 > /sys/class/gpio/export
+echo 532 > /sys/class/gpio/export
+echo 533 > /sys/class/gpio/export
+
+# DIO IN
+echo 582 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio582/direction
+echo 583 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio583/direction
+echo 584 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio584/direction
+echo 585 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio585/direction
+
+# DIO OUT
+echo 578 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio578/direction
+echo 579 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio579/direction
+echo 580 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio580/direction
+echo 581 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio581/direction
+
+
+else
 # DO
 echo 22 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio22/direction
@@ -37,6 +79,7 @@ echo in > /sys/class/gpio/gpio500/direction
 echo in > /sys/class/gpio/gpio501/direction
 echo in > /sys/class/gpio/gpio502/direction
 echo in > /sys/class/gpio/gpio503/direction
+fi
 
 #if /sys/bus/i2c/devices/0-006c/iio:device0 does not exist, then print error message and create a symbolic link to /root/busfolder
 if [ ! -d /sys/bus/i2c/devices/0-006c/iio:device0 ]; then
