@@ -64,7 +64,10 @@ if [ "$platform" = "BCM2711" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
 fi
-
+if [ "$platform" = "BCM2835" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
 # Define the I2C addresses to check (expressed without "0x" prefix)
 addresses=("20" "21" "22")
 #The previous line causes the error sh: 61: Syntax error: "(" unexpected
@@ -273,12 +276,8 @@ mv before_docker /etc/systemd/system/custom-before-docker.service
 systemctl enable custom-before-docker.service
 systemctl start custom-before-docker.service
 
-#wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
-if [ "$(uname -m)" = "aarch64" ]; then
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose-beta.yml
-else
+
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
-fi
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 
