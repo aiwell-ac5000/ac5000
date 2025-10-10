@@ -14,8 +14,7 @@ else
 resize2fs /dev/mmcblk0p3
 fi
 # Function to check if available storage space is larger than the provided argument (in MB)
-check_storage_space() {
-  echo "Checking storage space"
+check_storage_space() {  
   local required_space=$1  # Required space in megabytes
   local available_space=$(df -BM . | awk 'NR==2 {print $4}' | tr -d 'M')  # Available space in megabytes
 
@@ -25,7 +24,7 @@ check_storage_space() {
     return 1  # Available space is smaller than the required space
   fi
 }
-
+echo "Checking storage space"
 check_storage_space 500
 
 if [ $? -eq 0 ]; then
