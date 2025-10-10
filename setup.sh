@@ -35,7 +35,13 @@ else
   if [ $? -eq 0 ]; then
     echo "Det er nok lagringsplass på enheten."
   else
+    if [ "$(uname -m)" = "aarch64" ]; then
+    echo "Running on aarch64"
+    # 6062080
+    printf "p\nd\n3\nn\np\n3\n6062080\n\nN\nw\n" | fdisk /dev/mmcblk0
+    else
     printf "p\nd\n3\nn\np\n3\n2785280\n\nN\nw\n" | fdisk /dev/mmcblk0
+    fi
     green='\033[0;32m'
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
@@ -139,7 +145,8 @@ apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o 
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 # apt install -yq macchanger
 
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+#apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser openvpn macchanger lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
+
 
 # curl -sSL https://get.docker.com | sh
 #apt-get install libffi-dev libssl-dev -y
@@ -151,6 +158,7 @@ if [ "$(uname -m)" = "aarch64" ]; then
     curl -sSL https://get.docker.com | sh
 else
     echo "Running on armhf"
+    export CRYPTOGRAPHY_DONT_BUILD_RUST=1
     curl -fsSL https://get.docker.com -o get-docker.sh
     VERSION=26.1 sh get-docker.sh
 fi
