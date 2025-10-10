@@ -7,7 +7,11 @@ export DEBIAN_FRONTEND=noninteractive
 mkdir /root/storage
 
 #Expand storage
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+resize2fs /dev/mmcblk0p2
+else 
 resize2fs /dev/mmcblk0p3
+fi
 # Function to check if available storage space is larger than the provided argument (in MB)
 check_storage_space() {
   local required_space=$1  # Required space in megabytes
