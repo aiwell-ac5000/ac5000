@@ -35,7 +35,11 @@ else
   if [ $? -eq 0 ]; then
     echo "Det er nok lagringsplass på enheten."
   else
-    if [ "$(uname -m)" = "aarch64" ]; then
+    if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+    echo "Running on 6.6.72-v8+ kernel"
+    # 1056768
+    printf "p\nd\n2\nn\np\n2\n1056768\n\nN\nw\n" | fdisk /dev/mmcblk0
+    else if [ "$(uname -m)" = "aarch64" ]; then
     echo "Running on aarch64"
     # 6062080
     printf "p\nd\n3\nn\np\n3\n6062080\n\nN\nw\n" | fdisk /dev/mmcblk0
@@ -46,7 +50,7 @@ else
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
-    reboot
+    #reboot
     #
   fi  
 fi
@@ -68,6 +72,13 @@ if [ "$platform" = "BCM2835" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
 fi
+
+cm=$(cat /proc/cpuinfo | grep "Model" | awk '{print $7}')
+if [ "$cm" = "4" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
+
 # Define the I2C addresses to check (expressed without "0x" prefix)
 addresses=("20" "21" "22")
 #The previous line causes the error sh: 61: Syntax error: "(" unexpected
