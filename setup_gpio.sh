@@ -22,25 +22,26 @@ echo 532 > /sys/class/gpio/export
 echo 533 > /sys/class/gpio/export
 
 # DIO IN
+echo 578 > /sys/class/gpio/export
+echo 579 > /sys/class/gpio/export
+echo 580 > /sys/class/gpio/export
+echo 581 > /sys/class/gpio/export
 echo 582 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio582/direction
+
 echo 583 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio583/direction
 echo 584 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio584/direction
 echo 585 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio585/direction
 
 # DIO OUT
-echo 578 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio578/direction
-echo 579 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio579/direction
-echo 580 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio580/direction
-echo 581 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio581/direction
 
+echo in > /sys/class/gpio/gpio578/direction
+echo in > /sys/class/gpio/gpio579/direction
+echo in > /sys/class/gpio/gpio580/direction
+echo in > /sys/class/gpio/gpio581/direction
+echo in > /sys/class/gpio/gpio582/direction
+echo in > /sys/class/gpio/gpio583/direction
+echo in > /sys/class/gpio/gpio584/direction
+echo in > /sys/class/gpio/gpio585/direction
 
 else
 # DO
