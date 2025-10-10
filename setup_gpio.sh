@@ -1,6 +1,6 @@
 
 #!/bin/bash
-
+update-rc.d npe_service remove
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
 # DO
 echo 534 > /sys/class/gpio/export
@@ -22,26 +22,24 @@ echo 532 > /sys/class/gpio/export
 echo 533 > /sys/class/gpio/export
 
 # DIO IN
-echo 578 > /sys/class/gpio/export
-echo 579 > /sys/class/gpio/export
-echo 580 > /sys/class/gpio/export
-echo 581 > /sys/class/gpio/export
 echo 582 > /sys/class/gpio/export
-
 echo 583 > /sys/class/gpio/export
 echo 584 > /sys/class/gpio/export
 echo 585 > /sys/class/gpio/export
-
+echo 586 > /sys/class/gpio/export
+echo 587 > /sys/class/gpio/export
+echo 588 > /sys/class/gpio/export
+echo 589 > /sys/class/gpio/export
 # DIO OUT
 
-echo in > /sys/class/gpio/gpio578/direction
-echo in > /sys/class/gpio/gpio579/direction
-echo in > /sys/class/gpio/gpio580/direction
-echo in > /sys/class/gpio/gpio581/direction
 echo in > /sys/class/gpio/gpio582/direction
 echo in > /sys/class/gpio/gpio583/direction
 echo in > /sys/class/gpio/gpio584/direction
 echo in > /sys/class/gpio/gpio585/direction
+echo in > /sys/class/gpio/gpio586/direction
+echo in > /sys/class/gpio/gpio587/direction
+echo in > /sys/class/gpio/gpio588/direction
+echo in > /sys/class/gpio/gpio589/direction
 
 else
 # DO
