@@ -44,7 +44,7 @@ else
     echo "Running on 6.6.72-v8+ kernel"
     # 1056768
     printf "p\nd\n2\nn\np\n2\n1056768\n\nN\nw\n" | fdisk /dev/mmcblk0
-    else if [ "$(uname -m)" = "aarch64" ]; then
+    elif [ "$(uname -m)" = "aarch64" ]; then
     echo "Running on aarch64"
     # 6062080
     printf "p\nd\n3\nn\np\n3\n6062080\n\nN\nw\n" | fdisk /dev/mmcblk0
