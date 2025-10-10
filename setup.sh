@@ -7,6 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 mkdir /root/storage
 
 #Expand storage
+echo "Expanding storage"
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
 resize2fs /dev/mmcblk0p2
 else 
