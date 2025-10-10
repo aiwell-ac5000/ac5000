@@ -51,6 +51,7 @@ else
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
     #reboot
+    exit
     #
   fi  
 fi
