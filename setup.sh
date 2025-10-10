@@ -131,25 +131,10 @@ run_techbase_update() {
   fi
 }
 # Run the firmware update command with a timeout
-timeout 60 softmgr update firmware -b x500_5.10-beta
-RES=$?
-# Check if the previous command timed out
-if [ $RES -eq 124 ]; then
-  echo "The firmware update command timed out. Skipping the if-else block."
-else
-  # Check if the previous command succeeded
-  if [ $RES -eq 0 ]; then
-    # If successful, run the following commands    
-    run_techbase_update "timeout 30 softmgr update lib -b x500_5.10-beta"
-    run_techbase_update "timeout 30 softmgr update core -b x500_5.10-beta"
-  else
-    # If not successful, use standard update
-    run_techbase_update "timeout 120 softmgr update firmware -f yes"
-    run_techbase_update "timeout 120 softmgr update core -f yes"
-    run_techbase_update "timeout 120 softmgr update lib -f yes"
-    run_techbase_update "timeout 30 softmgr update all"
-  fi
-fi
+run_techbase_update "timeout 120 softmgr update firmware -f yes"
+run_techbase_update "timeout 120 softmgr update core -f yes"
+run_techbase_update "timeout 120 softmgr update lib -f yes"
+run_techbase_update "timeout 30 softmgr update all"
 
 #restore_settings -r
 #bash ex_card_configure.sh &
