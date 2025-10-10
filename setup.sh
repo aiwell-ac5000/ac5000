@@ -200,9 +200,11 @@ systemctl enable docker
 ##sed -i.bck '$s/$/ smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 dwc_otg.fiq_fix_enable=1 dwc_otg.fiq_fsm_mask=0x3 dwc_otg.speed=1 logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 #sed -i.bck '$s/$/ consoleblank=0 loglevel=1 quiet/' /boot/cmdline.txt
 # Backup original cmdline.txt
+if [ "$(uname -m)" != "aarch64" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
+fi
 #Sette oppstarts-skript
 
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
