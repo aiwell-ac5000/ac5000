@@ -53,8 +53,10 @@ run_techbase_update() {
   if [ $? -eq 0 ]; then
     if [[ "$output" == *"No updates available"* ]]; then
       echo "Alt er oppdatert"
+      return 0
     else
       echo "Nye oppdateringer er installert. Fikser innstillinger."
+      return 1
       #cp dhcpcd.backup /etc/dhcpcd.conf
     fi
   else
@@ -62,38 +64,24 @@ run_techbase_update() {
   fi
 }
 
-check=$(softmgr check firmware -b x500_6.6.72-beta | grep "No")
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    if [ "$check" = "No updates available" ]; then
+    run_techbase_update "timeout 120 softmgr update firmware -b x500_6.6.72-beta"
+    if [ $? -eq 0 ]; then
         echo "Firmware up to date"
-        check=$(softmgr check lib -b x500_6.6.72-beta | grep "No")
-        if [ "$check" = "No updates available" ]; then
-            echo "Lib up to date"
-        else
-            echo "Updating lib"
-            timeout 120 softmgr update lib -b x500_6.6.72-beta
-        fi
-        check=$(softmgr check core -b x500_6.6.72-beta | grep "No")
-        if [ "$check" = "No updates available" ]; then
-            echo "Core up to date"
-        else
-            echo "Updating core"
-            timeout 120 softmgr update core -b x500_6.6.72-beta
-        fi
-        timeout 120 softmgr update all -b x500_6.6.72-beta
+        
+        echo "Updating lib"
+        run_techbase_update "timeout 120 softmgr update lib -b x500_6.6.72-beta"
+      
+        echo "Updating core"
+        run_techbase_update "timeout 120 softmgr update core -b x500_6.6.72-beta"
+        run_techbase_update "timeout 120 softmgr update all -b x500_6.6.72-beta"
     else
-        timeout 120 softmgr update firmware -b x500_6.6.72-beta
-        RES=$?
-        if [ $RES -eq 0 ]; then
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}Kjør update på nytt etter omstart${clear}!"
-        reboot
-        else
-        echo "Firmware update failed with exit code $RES"
-        fi
+        reboot        
     fi
 else
 # Run the firmware update command with a timeout
