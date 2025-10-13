@@ -61,26 +61,36 @@ run_techbase_update() {
     printf "\n${red}Klarte ikke å utføre kommandoen: $1${clear}!"
   fi
 }
-# Run the firmware update command with a timeout
-timeout 120 softmgr update firmware -b x500_5.10-beta -f yes
-RES=$?
-# Check if the previous command timed out
-if [ $RES -eq 124 ]; then
-  printf "\n${red}Techbase-server svarer ikke.${clear}!"
+
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+    echo "Running on 6.6.72-v8+ kernel"
+    if [ "$(cat firmware_updated)" = "1" ]; then
+        echo "Firmware already updated"
+        echo "Updating lib and core"
+        timeout 120 softmgr update lib -b x500_6.6.72-beta
+        timeout 120 softmgr update core -b x500_6.6.72-beta
+    else
+        timeout 120 softmgr update firmware -b x500_6.6.72-beta -f yes
+        RES=$?
+        if [ $RES -eq 0 ]; then
+        echo "1" > firmware_updated
+        echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}Kjør update på nytt etter omstart${clear}!"
+        reboot
+        else
+        echo "Firmware update failed with exit code $RES"
+        fi
+    fi
 else
-  # Check if the previous command succeeded
-  if [ $RES -eq 0 ]; then
-    # If successful, run the following commands    
-    echo "Firmware oppdatert. Installerer øvrige oppdateringer."
-    run_techbase_update "timeout 120 softmgr update lib -b x500_5.10-beta -f yes"
-    run_techbase_update "timeout 120 softmgr update core -b x500_5.10-beta -f yes"
-  else
-    # If not successful, use standard update
-    run_techbase_update "timeout 120 softmgr update core -f yes"
-    run_techbase_update "timeout 120 softmgr update firmware -f yes"
-    run_techbase_update "timeout 120 softmgr update all"
-  fi
+# Run the firmware update command with a timeout
+run_techbase_update "timeout 120 softmgr update firmware -f yes"
+run_techbase_update "timeout 120 softmgr update core -f yes"
+run_techbase_update "timeout 120 softmgr update lib -f yes"
+run_techbase_update "timeout 30 softmgr update all"
 fi
+
 cp dhcpcd.backup /etc/dhcpcd.conf
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
 
@@ -90,6 +100,16 @@ setenv I2C_ADDRESS_EXCARD 0
 
 # If the platform is CM4, change the I2C bus number
 if [ "$platform" = "BCM2711" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
+if [ "$platform" = "BCM2835" ]; then
+  i2c_bus=1
+  setenv I2C_ADDRESS_EXCARD 1
+fi
+
+cm=$(cat /proc/cpuinfo | grep "Model" | awk '{print $7}')
+if [ "$cm" = "4" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
 fi
@@ -125,7 +145,7 @@ done
 
 
 #Oppsett GUI
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
 # apt-get install --no-install-recommends chromium-browser -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
@@ -139,14 +159,15 @@ apt autoremove -y
 #apt-get install -y python3 python3-pip
 #pip3 install smbus
 
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-source "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
-#pip3 install docker-compose
-
-#curl -sSL https://get.docker.com | sh
-curl -fsSL https://get.docker.com -o get-docker.sh
-VERSION=26.1 sh get-docker.sh
+if [ "$(uname -m)" = "aarch64" ]; then
+    echo "Running on aarch64"
+    curl -sSL https://get.docker.com | sh
+else
+    echo "Running on armhf"
+    export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    VERSION=26.1 sh get-docker.sh
+fi
 
 user=user
 upwd=AiwellAC5000
@@ -297,9 +318,11 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
 # Backup original cmdline.txt
+if [ "$(uname -m)" != "aarch64" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
+fi
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
 mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook

@@ -193,8 +193,6 @@ else
     VERSION=26.1 sh get-docker.sh
 fi
 
-source "$HOME/.cargo/env"
-export PATH="$HOME/.cargo/bin:$PATH"
 #pip3 install docker-compose
 
 user=user
