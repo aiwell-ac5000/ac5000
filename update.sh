@@ -83,7 +83,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         fi
         timeout 120 softmgr update all -b x500_6.6.72-beta
     else
-        timeout 120 softmgr update firmware -b x500_6.6.72-beta -f yes
+        timeout 120 softmgr update firmware -b x500_6.6.72-beta
         RES=$?
         if [ $RES -eq 0 ]; then
         echo "Firmware updated successfully - Will reboot now"
