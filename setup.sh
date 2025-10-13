@@ -148,6 +148,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     else
         run_techbase_update "timeout 120 softmgr update firmware -b x500_6.6.72-beta"
         if [ $? -eq 1 ]; then
+        echo 1 > /root/firmware_updated
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
@@ -239,6 +240,11 @@ fi
 #Sette oppstarts-skript
 
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+
+echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
+echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
+echo '  update_all' >> ~/.bashrc
+echo 'fi' >> ~/.bashrc
 
 #Konfigurere RS485
 service_port_ctrl off
