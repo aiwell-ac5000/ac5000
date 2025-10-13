@@ -130,11 +130,32 @@ run_techbase_update() {
     echo "Klarte ikke å utføre kommandoen: $1"
   fi
 }
+
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+    echo "Running on 6.6.72-v8+ kernel"
+    if [ "$(cat firmware_updated)" = "1" ]; then
+        echo "Firmware already updated"
+        echo "Updating lib and core"
+        timeout 120 softmgr update lib -b x500_6.6.72-beta
+        timeout 120 softmgr update core -b x500_6.6.72-beta
+    else
+        timeout 120 softmgr update firmware -b x500_6.6.72-beta -f yes
+        RES=$?
+        if [ $RES -eq 0 ]; then
+        echo "1" > firmware_updated
+        echo "Firmware updated successfully - Will reboot now"
+        reboot
+        else
+        echo "Firmware update failed with exit code $RES"
+        fi
+    fi
+else
 # Run the firmware update command with a timeout
 run_techbase_update "timeout 120 softmgr update firmware -f yes"
 run_techbase_update "timeout 120 softmgr update core -f yes"
 run_techbase_update "timeout 120 softmgr update lib -f yes"
 run_techbase_update "timeout 30 softmgr update all"
+fi
 
 #restore_settings -r
 #bash ex_card_configure.sh &
@@ -146,7 +167,7 @@ curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh 
 apt-get purge docker docker-engine docker.io containerd runc -y
 
 apt autoremove -y
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser openvpn macchanger lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser mosquitto openvpn macchanger lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
 # apt install -yq macchanger
@@ -207,6 +228,9 @@ if [ "$(uname -m)" != "aarch64" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
+elif [ "$(uname -r)" = "6.6.72-v8+" ]; then
+echo 'disable_splash=1' | sudo tee -a /boot/firmware/config.txt
+sed -i 's/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
 fi
 #Sette oppstarts-skript
 
