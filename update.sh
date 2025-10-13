@@ -96,14 +96,6 @@ run_techbase_update "timeout 30 softmgr update all"
 fi
 
 cp dhcpcd.backup /etc/dhcpcd.conf
-    fi
-else
-# Run the firmware update command with a timeout
-run_techbase_update "timeout 120 softmgr update firmware -f yes"
-run_techbase_update "timeout 120 softmgr update core -f yes"
-run_techbase_update "timeout 120 softmgr update lib -f yes"
-run_techbase_update "timeout 30 softmgr update all"
-fi
 
 cp dhcpcd.backup /etc/dhcpcd.conf
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
