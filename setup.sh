@@ -144,6 +144,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         if [ $RES -eq 0 ]; then
         echo "1" > firmware_updated
         echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
         reboot
         else
         echo "Firmware update failed with exit code $RES"
