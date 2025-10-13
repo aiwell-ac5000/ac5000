@@ -157,9 +157,9 @@ run_techbase_update "timeout 120 softmgr update lib -f yes"
 run_techbase_update "timeout 30 softmgr update all"
 fi
 
-#restore_settings -r
+restore_settings -r
 #bash ex_card_configure.sh &
-curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
+# curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
 
 #Oppsett GUI
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
