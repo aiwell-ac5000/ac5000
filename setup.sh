@@ -77,7 +77,7 @@ fi
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
 echo "check_server() {" > ~/.bashrc
-echo 'curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
+echo 'curl -k --output /dev/null --silent --head --fail https://ac5000update.aiwell.no' >> ~/.bashrc
 echo "}" >> ~/.bashrc
 echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
 echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
