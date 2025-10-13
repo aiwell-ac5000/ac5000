@@ -88,11 +88,11 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         fi
     fi
 else
-# Run the firmware update command with a timeout
-run_techbase_update "timeout 120 softmgr update firmware -f yes"
-run_techbase_update "timeout 120 softmgr update core -f yes"
-run_techbase_update "timeout 120 softmgr update lib -f yes"
-run_techbase_update "timeout 30 softmgr update all"
+    # Run the firmware update command with a timeout
+    run_techbase_update "timeout 120 softmgr update firmware -f yes"
+    run_techbase_update "timeout 120 softmgr update core -f yes"
+    run_techbase_update "timeout 120 softmgr update lib -f yes"
+    run_techbase_update "timeout 30 softmgr update all"
 fi
 
 cp dhcpcd.backup /etc/dhcpcd.conf
