@@ -242,7 +242,7 @@ host=ac5000$A$B$C$D$E$F
 echo $host
 
 touch /etc/network/if-up.d/macchange
-echo "#!/bin/sh" > /etc/network/if-up.d/macchange
+echo "#!/bin/bash" > /etc/network/if-up.d/macchange
 echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
 echo 'exit 0' >> /etc/network/if-up.d/macchange
 echo 'fi' >> /etc/network/if-up.d/macchange
@@ -261,7 +261,7 @@ systemctl enable lldpd
 TOKEN_PART1="ghp_ruQYTd0Xs4dxyEf"
 TOKEN_PART2="sQ4NX9fsvfzf31536jcGD"
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
-curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
+# curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/setTime/setTime.sh | bash
 
 #curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/ac5000ENV/ac5000ENV.sh | sh
@@ -327,7 +327,13 @@ fi
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
 mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
 
-ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
+# ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
+echo "#!/bin/bash" > /etc/network/if-up.d/ipchange
+echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/ipchange
+echo 'exit 0' >> /etc/network/if-up.d/ipchange
+echo 'fi' >> /etc/network/if-up.d/ipchange
+echo "ip addr list eth0 |grep 'inet ' |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
+chmod 755 /etc/network/if-up.d/ipchange
 
 systemctl daemon-reload
 timeout 20 service dhcpcd restart
