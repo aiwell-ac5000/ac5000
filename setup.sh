@@ -150,7 +150,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
             echo "Updating core"
             timeout 120 softmgr update core -b x500_6.6.72-beta
         fi
-        timeout 120 softmgr update all
+        timeout 120 softmgr update all -b x500_6.6.72-beta
     else
         timeout 120 softmgr update firmware -b x500_6.6.72-beta -f yes
         RES=$?
