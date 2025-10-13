@@ -354,7 +354,9 @@ echo "1 rt2" >>  /etc/iproute2/rt_tables
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
 mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
 
-ip addr list eth0 |grep "inet " |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip
+touch /etc/network/if-up.d/ipchange
+echo "ip addr list eth0 |grep 'inet ' |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" > /etc/network/if-up.d/ipchange
+chmod 755 /etc/network/if-up.d/ipchange
 
 systemctl daemon-reload
 timeout 20 service dhcpcd restart
