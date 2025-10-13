@@ -82,7 +82,7 @@ echo "}" >> ~/.bashrc
 echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
 echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
 echo "  until check_server" >> ~/.bashrc
-echo '  update_all' >> ~/.bashrc
+echo '  timeout 120 update_all' >> ~/.bashrc
 echo 'fi' >> ~/.bashrc
 
 apt-get update --allow-releaseinfo-change -y
