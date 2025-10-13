@@ -114,7 +114,6 @@ for address in "${addresses[@]}"; do
   fi
 done
 
-# Run the firmware update command with a timeout
 run_techbase_update() {
   local output
   output=$(eval "$1")
@@ -130,12 +129,13 @@ run_techbase_update() {
     fi
   else
     printf "\n${red}Klarte ikke å utføre kommandoen: $1${clear}!"
+    return -1
   fi
 }
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    run_techbase_update "timeout 120 softmgr update firmware -b x500_6.6.72-beta"
+    run_techbase_update "timeout 120 softmgr check firmware -b x500_6.6.72-beta"
     if [ $? -eq 0 ]; then
         echo "Firmware up to date"
         
@@ -146,18 +146,21 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         run_techbase_update "timeout 120 softmgr update core -b x500_6.6.72-beta"
         run_techbase_update "timeout 120 softmgr update all -b x500_6.6.72-beta"
     else
+        run_techbase_update "timeout 120 softmgr update firmware -b x500_6.6.72-beta"
+        if [ $? -eq 1 ]; then
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}Kjør update på nytt etter omstart${clear}!"
-        reboot        
+        reboot    
+        fi
     fi
 else
-# Run the firmware update command with a timeout
-run_techbase_update "timeout 120 softmgr update firmware -f yes"
-run_techbase_update "timeout 120 softmgr update core -f yes"
-run_techbase_update "timeout 120 softmgr update lib -f yes"
-run_techbase_update "timeout 30 softmgr update all"
+    # Run the firmware update command with a timeout
+    run_techbase_update "timeout 120 softmgr update firmware -f yes"
+    run_techbase_update "timeout 120 softmgr update core -f yes"
+    run_techbase_update "timeout 120 softmgr update lib -f yes"
+    run_techbase_update "timeout 30 softmgr update all"
 fi
 
 restore_settings -r
