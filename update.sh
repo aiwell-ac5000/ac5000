@@ -96,8 +96,6 @@ run_techbase_update "timeout 30 softmgr update all"
 fi
 
 cp dhcpcd.backup /etc/dhcpcd.conf
-
-cp dhcpcd.backup /etc/dhcpcd.conf
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
 
 # Define the default I2C bus number (CM3)
