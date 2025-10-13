@@ -61,6 +61,15 @@ else
   fi  
 fi
 
+#Sette oppstarts-skript
+
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+
+echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
+echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
+echo '  update_all' >> ~/.bashrc
+echo 'fi' >> ~/.bashrc
+
 apt-get update --allow-releaseinfo-change -y
 # Detect the platform (CM3 or CM4)
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
@@ -152,7 +161,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
-        printf "\n${green}Kjør update på nytt etter omstart${clear}!"
+        printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
         reboot    
         fi
     fi
@@ -237,14 +246,6 @@ elif [ "$(uname -r)" = "6.6.72-v8+" ]; then
 echo 'disable_splash=1' | sudo tee -a /boot/firmware/config.txt
 sed -i 's/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
 fi
-#Sette oppstarts-skript
-
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
-
-echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
-echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
-echo '  update_all' >> ~/.bashrc
-echo 'fi' >> ~/.bashrc
 
 #Konfigurere RS485
 service_port_ctrl off

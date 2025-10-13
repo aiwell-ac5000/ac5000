@@ -40,6 +40,13 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
 
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+
+echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
+echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
+echo '  update_all' >> ~/.bashrc
+echo 'fi' >> ~/.bashrc
+
 apt-get update --allow-releaseinfo-change -y
 
 #Backup av nettverk
@@ -197,13 +204,6 @@ echo "bind-dynamic" >> /etc/dnsmasq.conf
 echo "domain-needed" >> /etc/dnsmasq.conf
 echo "bogus-priv" >> /etc/dnsmasq.conf
 echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
-
-echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
-echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
-echo '  update_all' >> ~/.bashrc
-echo 'fi' >> ~/.bashrc
 
 #echo "interface=eth1" >> /etc/dnsmasq.conf
 #echo "bind-dynamic" >> /etc/dnsmasq.conf
