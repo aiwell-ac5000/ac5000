@@ -54,7 +54,14 @@ else
     green='\033[0;32m'
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
-    printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
+    printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
+
+    echo 0 > /root/run_setup
+    echo 'if [ "$(cat /root/run_setup)" = "1" ]; then' > ~/.bashrc
+    echo '  echo 0 > /root/run_setup' >> ~/.bashrc
+    echo '  curl -sSL ac5000setup.aiwell.no | bash' >> ~/.bashrc
+    echo 'fi' >> ~/.bashrc
+
     reboot
     #exit
     #
