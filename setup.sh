@@ -131,22 +131,34 @@ run_techbase_update() {
   fi
 }
 
+check=$(softmgr check firmware -b x500_6.6.72-beta | grep "No")
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    if [ "$(cat firmware_updated)" = "1" ]; then
-        echo "Firmware already updated"
-        echo "Updating lib and core"
-        timeout 120 softmgr update lib -b x500_6.6.72-beta
-        timeout 120 softmgr update core -b x500_6.6.72-beta
+    if [ "$check" = "No updates available" ]; then
+        echo "Firmware up to date"
+        check=$(softmgr check lib -b x500_6.6.72-beta | grep "No")
+        if [ "$check" = "No updates available" ]; then
+            echo "Lib up to date"
+        else
+            echo "Updating lib"
+            timeout 120 softmgr update lib -b x500_6.6.72-beta
+        fi
+        check=$(softmgr check core -b x500_6.6.72-beta | grep "No")
+        if [ "$check" = "No updates available" ]; then
+            echo "Core up to date"
+        else
+            echo "Updating core"
+            timeout 120 softmgr update core -b x500_6.6.72-beta
+        fi
+        timeout 120 softmgr update all
     else
         timeout 120 softmgr update firmware -b x500_6.6.72-beta -f yes
         RES=$?
         if [ $RES -eq 0 ]; then
-        echo "1" > firmware_updated
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
-        printf "\n${green}Kjør setup på nytt etter omstart${clear}!"
+        printf "\n${green}Kjør update på nytt etter omstart${clear}!"
         reboot
         else
         echo "Firmware update failed with exit code $RES"
