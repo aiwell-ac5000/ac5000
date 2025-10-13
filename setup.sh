@@ -57,7 +57,11 @@ else
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
 
     echo 0 > /root/run_setup
-    echo 'if [ "$(cat /root/run_setup)" = "1" ]; then' > ~/.bashrc
+    echo "check_server() {" > ~/.bashrc
+    echo 'curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
+    echo "}" >> ~/.bashrc
+    echo "until check_server" >> ~/.bashrc
+    echo 'if [ "$(cat /root/run_setup)" = "1" ]; then' >> ~/.bashrc
     echo '  echo 0 > /root/run_setup' >> ~/.bashrc
     echo '  curl -sSL ac5000setup.aiwell.no | bash' >> ~/.bashrc
     echo 'fi' >> ~/.bashrc
@@ -72,8 +76,12 @@ fi
 
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
+echo "check_server() {" > ~/.bashrc
+echo 'curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
+echo "}" >> ~/.bashrc
 echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
 echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
+echo "  until check_server" >> ~/.bashrc
 echo '  update_all' >> ~/.bashrc
 echo 'fi' >> ~/.bashrc
 
