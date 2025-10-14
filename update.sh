@@ -69,18 +69,18 @@ run_techbase_update() {
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    run_techbase_update "timeout 120 softmgr check firmware -b x500_6.6.72-beta"
+    run_techbase_update "timeout 240 softmgr check firmware -b x500_6.6.72-beta"
     if [ $? -eq 0 ]; then
         echo "Firmware up to date"
         
         echo "Updating lib"
-        run_techbase_update "timeout 120 softmgr update lib -b x500_6.6.72-beta"
+        run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
       
         echo "Updating core"
-        run_techbase_update "timeout 120 softmgr update core -b x500_6.6.72-beta"
-        run_techbase_update "timeout 120 softmgr update all -b x500_6.6.72-beta"
+        run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
+        run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
     else
-        run_techbase_update "timeout 120 softmgr update firmware -b x500_6.6.72-beta"
+        run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
         if [ $? -eq 1 ]; then
         echo 1 > /root/firmware_updated
         #Schedule new update after reboot
@@ -89,7 +89,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo "}" >> ~/.bashrc
         echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
         echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
-        echo "  timeout 120 until check_server" >> ~/.bashrc
+        echo "  timeout 240 until check_server" >> ~/.bashrc
         echo '  update_all' >> ~/.bashrc
         echo 'fi' >> ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
@@ -101,10 +101,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     fi
 else
     # Run the firmware update command with a timeout
-    run_techbase_update "timeout 120 softmgr update firmware -f yes"
-    run_techbase_update "timeout 120 softmgr update core -f yes"
-    run_techbase_update "timeout 120 softmgr update lib -f yes"
-    run_techbase_update "timeout 30 softmgr update all"
+    run_techbase_update "timeout 240 softmgr update firmware -f yes"
+    run_techbase_update "timeout 240 softmgr update core -f yes"
+    run_techbase_update "timeout 240 softmgr update lib -f yes"
+    run_techbase_update "timeout 240 softmgr update all"
 fi
 
 cp dhcpcd.backup /etc/dhcpcd.conf
