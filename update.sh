@@ -310,8 +310,20 @@ mv daemon.json /etc/docker/daemon.json
 systemctl daemon-reload
 systemctl restart docker
 
-#Sette up symlink for å hindre problemer med kernel 5.10
-ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /iio_device0
+#Sette up symlink for å hindre problemer med kernel 5.10/6.6
+rm -f /iio_device0
+addresses=("6c" "6b" "6d" "e" "6f")
+for address in "${addresses[@]}"; do
+  FOLDER="/sys/bus/i2c/devices/0-00$address/iio:device0"
+  if [ -d "$FOLDER" ]; then
+    echo "Mappe '$FOLDER' eksisterer."
+    ln -s "$FOLDER" /iio_device0
+    break
+  else
+    echo "Mappe '$FOLDER' eksisterer ikke."
+  fi
+done
+#ln -s "/sys/bus/i2c/devices/0-006c/iio:device0" /iio_device0
 
 docker compose -f docker-compose.yml up -d
 systemctl enable docker
