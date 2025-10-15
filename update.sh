@@ -119,10 +119,6 @@ if [ "$platform" = "BCM2711" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
 fi
-if [ "$platform" = "BCM2835" ]; then
-  i2c_bus=1
-  setenv I2C_ADDRESS_EXCARD 1
-fi
 
 cm=$(cat /proc/cpuinfo | grep "Model" | awk '{print $7}')
 if [ "$cm" = "4" ]; then

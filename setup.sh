@@ -84,12 +84,8 @@ platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
 i2c_bus=0
 setenv I2C_ADDRESS_EXCARD 0
 
-# If the platform is CM4, change the I2C bus number
+# If the platform is CM4, change the I2C bus number BCM2711
 if [ "$platform" = "BCM2711" ]; then
-  i2c_bus=1
-  setenv I2C_ADDRESS_EXCARD 1
-fi
-if [ "$platform" = "BCM2835" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
 fi
