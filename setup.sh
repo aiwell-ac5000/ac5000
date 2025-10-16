@@ -146,6 +146,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     run_techbase_update "timeout 240 softmgr check firmware -b x500_6.6.72-beta"
     if [ $? -eq 0 ]; then
         echo "Firmware up to date"
+
+        echo "Updating softmgr"
+        run_techbase_update "timeout 240 softmgr update softmgr -b x500_6.6.72-beta"
         
         echo "Updating lib"
         run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
