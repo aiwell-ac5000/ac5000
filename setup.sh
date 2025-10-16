@@ -2,8 +2,23 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
-mkdir /root/storage
-mkdir /etc/systemd/system/getty@tty1.service.d
+FOLDER=/root/storage
+if [ -d "$FOLDER" ]; then
+  echo "Mappe '$FOLDER' eksisterer."
+else
+  echo "Mappe '$FOLDER' eksisterer ikke. Lager den nå."
+  mkdir -p "$FOLDER"
+fi
+
+
+FOLDER=/etc/systemd/system/getty@tty1.service.d
+if [ -d "$FOLDER" ]; then
+  echo "Mappe '$FOLDER' eksisterer."
+else
+  echo "Mappe '$FOLDER' eksisterer ikke. Lager den nå."
+  mkdir -p "$FOLDER"
+fi
+
 restore_settings -r
 
 #Expand storage
