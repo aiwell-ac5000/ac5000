@@ -61,8 +61,9 @@ else
     tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
     [Service]
     ExecStart=
-    ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
+    ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
     EOF
+
     systemctl daemon-reload
     systemctl restart getty@tty1.service
 
@@ -467,12 +468,12 @@ echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.servi
 
 systemctl start do_boot_behaviour.service
 tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
-    [Service]
-    ExecStart=
-    ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
-    EOF
-    systemctl daemon-reload
-    systemctl restart getty@tty1.service
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
+EOF
+systemctl daemon-reload
+systemctl restart getty@tty1.service
 
 #rustup self uninstall -y
 #apt purge build-essential -y
