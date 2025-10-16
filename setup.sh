@@ -2,6 +2,8 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
+echo "Starting setup script" > /root/setup.log
+
 FOLDER=/root/storage
 if [ -d "$FOLDER" ]; then
   echo "Mappe '$FOLDER' eksisterer."
@@ -79,7 +81,7 @@ else
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"   
     echo "0" > setup
- 
+    sleep 5
     reboot
     exit 0
     #
@@ -88,6 +90,8 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update --allow-releaseinfo-change -y
+
+echo "Installing i2c tools" > /root/setup.log
 # Detect the platform (CM3 or CM4)
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
 
@@ -107,6 +111,7 @@ if [ "$cm" = "4" ]; then
   setenv I2C_ADDRESS_EXCARD 1
 fi
 
+echo "Setting up relays" > /root/setup.log
 # Define the I2C addresses to check (expressed without "0x" prefix)
 addresses=("20" "21" "22")
 #The previous line causes the error sh: 61: Syntax error: "(" unexpected
@@ -135,6 +140,8 @@ for address in "${addresses[@]}"; do
     esac
   fi
 done
+
+echo "Techbase update" > /root/setup.log
 
 run_techbase_update() {
   local output
@@ -192,6 +199,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         #systemctl restart getty@tty1.service
     
         echo "0" > setup
+        sleep 5
         reboot
         exit 0
         fi
@@ -213,6 +221,7 @@ fi
 #apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 
+echo "Installing required packages" > /root/setup.log
 apt autoremove -y
 apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser mosquitto openvpn macchanger lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
 #apt install build-essential -y
@@ -227,6 +236,8 @@ apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o 
 #apt install python3-dev -y
 # apt-get install -y python3 python3-pip
 #pip3 install smbus
+
+echo "Installing Docker" > /root/setup.log
 if [ "$(uname -m)" = "aarch64" ]; then
     echo "Running on aarch64"
     curl -sSL https://get.docker.com | sh
@@ -238,7 +249,7 @@ else
 fi
 
 #pip3 install docker-compose
-
+echo "Setting up users" > /root/setup.log
 user=user
 upwd=AiwellAC5000
 chpasswd <<EOF
@@ -279,6 +290,7 @@ sed -i 's/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdlin
 fi
 
 #Konfigurere RS485
+echo "Configuring RS485" > /root/setup.log
 service_port_ctrl off
 comctrl 1 RS-485 2 RS-485
 
@@ -310,6 +322,7 @@ fi
 host=ac5000$A$B$C$D$E$F
 echo $host
 
+echo "Setting hostname to $host" > /root/setup.log
 touch /etc/network/if-up.d/macchange
 echo "#!/bin/bash" > /etc/network/if-up.d/macchange
 echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
@@ -340,6 +353,7 @@ getenv > /root/pipes/env
 #Opsett av sikkerhet
 mkdir /root/keys
 
+echo "Setting up GPIO" > /root/setup.log
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
 chmod +x setup_gpio.sh
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/before_docker
@@ -347,7 +361,7 @@ mv before_docker /etc/systemd/system/custom-before-docker.service
 systemctl enable custom-before-docker.service
 systemctl start custom-before-docker.service
 
-
+echo "Downloading docker files" > /root/setup.log
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
@@ -386,6 +400,7 @@ echo "interface eth1" >> /etc/dhcpcd.conf
 echo "fallback static_eth1" >> /etc/dhcpcd.conf
 echo "timeout 60" >> /etc/dhcpcd.conf
 
+echo "Configuring network" > /root/setup.log
 cp /etc/dhcpcd.conf /etc/dhcpcd.base
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
@@ -478,5 +493,7 @@ printf "\n${green}Setup executed successfully. AC5000 IS SUPPOSED TO REBOOT. THI
 printf "\n${green}Progammering ble korrekt utført. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 rm /root/setup
 #Sette oppstarts-skript
+echo "Configure update alias" > /root/setup.log
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+sleep 5
 reboot

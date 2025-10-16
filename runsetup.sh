@@ -20,9 +20,11 @@ if [ "$server_ready" -eq 0 ]; then
     if [ "$(cat setup)" = "1" ]; then
         while [ "$(cat setup)" = "1" ]; do
             echo "Waiting for setup to complete..."
+            cat /root/setup.log
             sleep 2
         done
         echo "Setup completed, starting normal operation."
+        sleep 5
         reboot
         exit 0
     else
