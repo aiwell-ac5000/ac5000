@@ -2,8 +2,6 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
-touch /root/setup
-export DEBIAN_FRONTEND=noninteractive
 mkdir /root/storage
 restore_settings -r
 
@@ -77,6 +75,7 @@ fi
 
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
+export DEBIAN_FRONTEND=noninteractive
 apt-get update --allow-releaseinfo-change -y
 # Detect the platform (CM3 or CM4)
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
@@ -185,7 +184,7 @@ else
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
-restore_settings -r
+# restore_settings -r
 #bash ex_card_configure.sh &
 # curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
 
