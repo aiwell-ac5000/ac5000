@@ -56,12 +56,10 @@ else
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
 
     echo 0 > /root/run_setup
-    echo "check_server() {" > ~/.bashrc
-    echo 'curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
+    echo "check_server() {" >> ~/.bashrc
+    echo '  curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
     echo "}" >> ~/.bashrc
-    echo "until check_server" >> ~/.bashrc
-    echo 'if [ "$(cat /root/run_setup)" = "1" ]; then' >> ~/.bashrc
-    echo '  echo 0 > /root/run_setup' >> ~/.bashrc
+    echo "if timeout 240 bash -c 'until check_server; do sleep 1; echo \"Waiting for setup server...\"; done'; then" >> ~/.bashrc
     echo '  curl -sSL ac5000setup.aiwell.no | bash' >> ~/.bashrc
     echo 'fi' >> ~/.bashrc
 
@@ -162,12 +160,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo 1 > /root/firmware_updated
         #Schedule new update after reboot
         echo "check_server() {" >> ~/.bashrc
-        echo 'curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
+        echo '  curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
         echo "}" >> ~/.bashrc
-        echo 'if [ "$(cat /root/firmware_updated)" = "1" ]; then' >> ~/.bashrc
-        echo '  echo 0 > /root/firmware_updated' >> ~/.bashrc
-        echo "  timeout 240 until check_server" >> ~/.bashrc
-        echo '  update_all' >> ~/.bashrc
+        echo "if timeout 240 bash -c 'until check_server; do sleep 1; echo \"Waiting for setup server...\"; done'; then" >> ~/.bashrc
+        echo '  curl -sSL ac5000setup.aiwell.no | bash' >> ~/.bashrc
         echo 'fi' >> ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
