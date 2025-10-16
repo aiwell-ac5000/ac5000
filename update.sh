@@ -109,7 +109,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         systemctl daemon-reload
         systemctl restart getty@tty1.service
 
-        rm /root/update
+        echo "0" > update
         reboot
         exit 0
         fi
@@ -442,4 +442,5 @@ systemctl restart getty@tty1.service
 #apt purge build-essential -y
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+rm update
 reboot

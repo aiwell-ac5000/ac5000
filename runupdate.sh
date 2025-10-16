@@ -22,6 +22,9 @@ if [ "$server_ready" -eq 0 ]; then
             echo "Waiting for setup to complete..."
             sleep 2
         done
+        echo "Update completed, starting normal operation."
+        reboot
+        exit 0
     else
         echo "1" > update
         echo "Setup server is ready, running update script..."
