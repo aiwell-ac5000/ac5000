@@ -1,6 +1,7 @@
 wait_limit=240          # seconds
 elapsed=0
 server_ready=1
+rm /root/setup
 
 check_server() {
   curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no
