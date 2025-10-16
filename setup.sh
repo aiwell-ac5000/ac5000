@@ -133,6 +133,8 @@ run_techbase_update() {
       return 1
       #cp dhcpcd.backup /etc/dhcpcd.conf
     fi
+  elif [ $? -eq 124 ]; then
+    echo "Timed out"
   else
     printf "\n${red}Klarte ikke å utføre kommandoen: $1${clear}!"
     return -1
