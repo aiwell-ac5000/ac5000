@@ -277,7 +277,7 @@ echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
 
 V=$(uname -r)
-ARCH = $(uname -m)
+ARCH=$(uname -m)
 DEBIAN_VERSION=$(grep "^VERSION=" /etc/os-release | cut -d '"' -f 2)
 echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $V $ARCH'" > /etc/lldpd.conf
 systemctl restart lldpd
