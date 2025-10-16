@@ -13,12 +13,20 @@ while [ "$elapsed" -lt "$wait_limit" ]; do
   fi
   sleep 1
   elapsed=$((elapsed + 1))
-  echo "Waiting for setup server..."
+  echo "Waiting for update server..."
 done
 
 if [ "$server_ready" -eq 0 ]; then
-    echo "Setup server is ready, running setup script..."
-    curl -sSL ac5000update.aiwell.no | bash    
+    if [ "$(cat update)" = "1" ]; then
+        while [ "$(cat update)" = "1" ]; do
+            echo "Waiting for setup to complete..."
+            sleep 2
+        done
+    else
+        echo "1" > update
+        echo "Setup server is ready, running update script..."
+        curl -sSL ac5000update.aiwell.no | bash
+    fi     
 else
   echo "Setup server did not respond within ${wait_limit}s"
   echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc

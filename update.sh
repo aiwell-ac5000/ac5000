@@ -27,6 +27,14 @@ else
   fi
 fi
 
+FOLDER=/etc/systemd/system/getty@tty1.service.d
+if [ -d "$FOLDER" ]; then
+  echo "Mappe '$FOLDER' eksisterer."
+else
+  echo "Mappe '$FOLDER' eksisterer ikke. Lager den nå."
+  mkdir -p "$FOLDER"
+fi
+
 docker compose down --volumes
 rm docker-compose.yml
 docker image rm roarge/fw-ac5000 -f
@@ -39,8 +47,6 @@ yes | docker system prune
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
-
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
 apt-get update --allow-releaseinfo-change -y
 
@@ -90,15 +96,22 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     else
         run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
         if [ $? -eq 1 ]; then
-        echo 1 > /root/firmware_updated
-        #Schedule new update after reboot
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh
         mv runupdate.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
-        reboot   
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        
+        systemctl daemon-reload
+        systemctl restart getty@tty1.service
+
+        rm /root/update
+        reboot
+        exit 0
         fi
     fi
 else
@@ -419,27 +432,14 @@ echo "[Install]" >> /etc/systemd/system/splashscreen.service
 echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
 systemctl enable splashscreen
 
-echo "#!/bin/bash" > /home/user/boot.sh
-echo "echo AiwellAC5000 | sudo -S raspi-config nonint do_boot_behaviour B2" >> /home/user/boot.sh
-chmod 777 /home/user/boot.sh
-usermod -aG sudo user
+echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-touch /etc/systemd/system/do_boot_behaviour.service
-echo "[Unit]" > /etc/systemd/system/do_boot_behaviour.service
-echo "Description=Set boot behaviour" >> /etc/systemd/system/do_boot_behaviour.service
-echo "After=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Service]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "Type=oneshot" >> /etc/systemd/system/do_boot_behaviour.service
-echo "User=user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "ExecStart=/home/user/boot.sh" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WorkingDirectory=/home/user" >> /etc/systemd/system/do_boot_behaviour.service
-echo "" >> /etc/systemd/system/do_boot_behaviour.service
-echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
-
-systemctl start do_boot_behaviour.service
+systemctl daemon-reload
+systemctl restart getty@tty1.service
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 reboot
