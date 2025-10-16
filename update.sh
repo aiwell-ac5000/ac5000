@@ -56,6 +56,9 @@ run_techbase_update() {
     if [[ "$output" == *"No updates available"* ]]; then
       echo "Alt er oppdatert"
       return 0
+    elif [[ "$output" == *"ACTION=none"* ]]; then
+      echo "Alt er oppdatert"
+      return 0
     else
       echo "Nye oppdateringer er installert. Fikser innstillinger."
       return 1
