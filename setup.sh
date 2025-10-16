@@ -56,7 +56,8 @@ else
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
-    raspi-config nonint do_boot_behaviour B2    
+    raspi-config nonint do_boot_behaviour B2
+    rm /root/setup   
     reboot
     exit 0
     #
@@ -166,6 +167,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
         raspi-config nonint do_boot_behaviour B2
+        rm /root/setup
         reboot
         exit 0
         fi
