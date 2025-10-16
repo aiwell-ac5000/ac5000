@@ -58,7 +58,7 @@ else
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
 
     reboot
-    #exit
+    exit 0
     #
   fi  
 fi
