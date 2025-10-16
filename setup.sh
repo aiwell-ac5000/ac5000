@@ -63,8 +63,8 @@ else
     echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
     echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-    systemctl daemon-reload
-    systemctl restart getty@tty1.service
+    #systemctl daemon-reload
+    #systemctl restart getty@tty1.service
     # 1056768
     printf "p\nd\n2\nn\np\n2\n1056768\n\nN\nw\n" | fdisk /dev/mmcblk0
     elif [ "$(uname -m)" = "aarch64" ]; then
@@ -188,8 +188,8 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
         echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-        systemctl daemon-reload
-        systemctl restart getty@tty1.service
+        #systemctl daemon-reload
+        #systemctl restart getty@tty1.service
     
         echo "0" > setup
         reboot
