@@ -56,7 +56,16 @@ else
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
-    raspi-config nonint do_boot_behaviour B2
+    
+    mkdir -p /etc/systemd/system/getty@tty1.service.d
+    tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
+    [Service]
+    ExecStart=
+    ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
+    EOF
+    systemctl daemon-reload
+    systemctl restart getty@tty1.service
+
     rm /root/setup   
     reboot
     exit 0
@@ -457,6 +466,14 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
+tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
+    [Service]
+    ExecStart=
+    ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
+    EOF
+    systemctl daemon-reload
+    systemctl restart getty@tty1.service
+
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
