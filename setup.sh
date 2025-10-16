@@ -3,6 +3,7 @@
 # curl -sSL ac5000setup.aiwell.no | bash
 
 mkdir /root/storage
+mkdir -p /etc/systemd/system/getty@tty1.service.d
 restore_settings -r
 
 #Expand storage
