@@ -125,6 +125,9 @@ run_techbase_update() {
     if [[ "$output" == *"No updates available"* ]]; then
       echo "Alt er oppdatert"
       return 0
+    elif [[ "$output" == *"ACTION=none"* ]]; then
+      echo "Alt er oppdatert"
+      return 0
     else
       echo "Nye oppdateringer er installert. Fikser innstillinger."
       return 1
@@ -149,11 +152,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
         run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
     else
-        exit 0
         run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
         if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
-        cp runsetup.sh ~/.bashrc
+        mv runsetup.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
