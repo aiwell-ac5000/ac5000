@@ -57,17 +57,13 @@ else
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
     
-    mkdir -p /etc/systemd/system/getty@tty1.service.d
-    tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
-    [Service]
-    ExecStart=
-    ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
-    EOF
+    echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
     systemctl daemon-reload
     systemctl restart getty@tty1.service
-
-    rm /root/setup   
+ 
     reboot
     exit 0
     #
@@ -176,8 +172,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
-        raspi-config nonint do_boot_behaviour B2
-        rm /root/setup
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
         reboot
         exit 0
         fi
@@ -467,11 +464,11 @@ echo "[Install]" >> /etc/systemd/system/do_boot_behaviour.service
 echo "WantedBy=multi-user.target" >> /etc/systemd/system/do_boot_behaviour.service
 
 systemctl start do_boot_behaviour.service
-tee /etc/systemd/system/getty@tty1.service.d/autologin.conf >/dev/null <<'EOF'
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin user --noclear %I $TERM
-EOF
+
+echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
 systemctl daemon-reload
 systemctl restart getty@tty1.service
 
