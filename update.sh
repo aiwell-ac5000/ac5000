@@ -106,8 +106,8 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
         echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
         
-        systemctl daemon-reload
-        systemctl restart getty@tty1.service
+        #systemctl daemon-reload
+        #systemctl restart getty@tty1.service
 
         echo "0" > update
         reboot
