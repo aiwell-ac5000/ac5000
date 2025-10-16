@@ -3,7 +3,7 @@ elapsed=0
 server_ready=1
 
 check_server() {
-  curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no
+  curl -k --output /dev/null --silent --head --fail https://ac5000update.aiwell.no
 }
 
 while [ "$elapsed" -lt "$wait_limit" ]; do
@@ -18,7 +18,7 @@ done
 
 if [ "$server_ready" -eq 0 ]; then
     echo "Setup server is ready, running setup script..."
-    curl -sSL ac5000setup.aiwell.no | bash    
+    curl -sSL ac5000update.aiwell.no | bash    
 else
   echo "Setup server did not respond within ${wait_limit}s"
   echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
