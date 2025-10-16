@@ -42,7 +42,7 @@ else
     if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
-    cp runsetup.sh ~/.bashrc
+    mv runsetup.sh ~/.bashrc
     # 1056768
     printf "p\nd\n2\nn\np\n2\n1056768\n\nN\nw\n" | fdisk /dev/mmcblk0
     elif [ "$(uname -m)" = "aarch64" ]; then

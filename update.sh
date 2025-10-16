@@ -85,7 +85,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo 1 > /root/firmware_updated
         #Schedule new update after reboot
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh
-        cp runupdate.sh ~/.bashrc
+        mv runupdate.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
