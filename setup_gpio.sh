@@ -1,6 +1,6 @@
 
 #!/bin/bash
-update-rc.d npe_service remove
+# update-rc.d npe_service remove
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
 # DO
 echo 534 > /sys/class/gpio/export
