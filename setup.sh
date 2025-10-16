@@ -44,6 +44,12 @@ else
     echo "Running on 6.6.72-v8+ kernel"
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
     mv runsetup.sh ~/.bashrc
+    echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
+    systemctl daemon-reload
+    systemctl restart getty@tty1.service
     # 1056768
     printf "p\nd\n2\nn\np\n2\n1056768\n\nN\nw\n" | fdisk /dev/mmcblk0
     elif [ "$(uname -m)" = "aarch64" ]; then
@@ -56,14 +62,7 @@ else
     green='\033[0;32m'
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
-    printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
-    
-    echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-
-    systemctl daemon-reload
-    systemctl restart getty@tty1.service
+    printf "\n${green}Kjører setup på nytt etter omstart${clear}!"   
     rm /root/setup
  
     reboot
@@ -71,10 +70,6 @@ else
     #
   fi  
 fi
-
-#Sette oppstarts-skript
-
-echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update --allow-releaseinfo-change -y
@@ -463,4 +458,6 @@ clear='\033[0m'
 printf "\n${green}Setup executed successfully. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
 printf "\n${green}Progammering ble korrekt utført. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 rm /root/setup
+#Sette oppstarts-skript
+echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 reboot
