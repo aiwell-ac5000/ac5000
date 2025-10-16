@@ -84,12 +84,8 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         if [ $? -eq 1 ]; then
         echo 1 > /root/firmware_updated
         #Schedule new update after reboot
-        echo "check_server() {" >> ~/.bashrc
-        echo '  curl -k --output /dev/null --silent --head --fail https://ac5000setup.aiwell.no' >> ~/.bashrc
-        echo "}" >> ~/.bashrc
-        echo "if timeout 240 bash -c 'until check_server; do sleep 1; echo \"Waiting for setup server...\"; done'; then" >> ~/.bashrc
-        echo '  curl -sSL ac5000setup.aiwell.no | bash' >> ~/.bashrc
-        echo 'fi' >> ~/.bashrc
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        cp runsetup.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
