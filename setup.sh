@@ -5,6 +5,7 @@
 touch /root/setup
 export DEBIAN_FRONTEND=noninteractive
 mkdir /root/storage
+restore_settings -r
 
 #Expand storage
 echo "Trying to expand storage"
