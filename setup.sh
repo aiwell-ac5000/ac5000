@@ -56,7 +56,7 @@ else
     clear='\033[0m'
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"
-    raspi-config nonint do_boot_behaviour B2
+    raspi-config nonint do_boot_behaviour B2    
     reboot
     exit 0
     #
