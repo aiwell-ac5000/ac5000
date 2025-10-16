@@ -286,7 +286,8 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
 elif [ "$(uname -r)" = "6.6.72-v8+" ]; then
 echo 'disable_splash=1' | sudo tee -a /boot/firmware/config.txt
-sed -i 's/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
+echo 'force_mac_address='$A:$B:$C:$D:$E:$F'' | sudo tee -a /boot/firmware/config.txt
+sed -i 's/$/ smsc95xx.macaddr='$A:$B:$C:$D:$E:$F' logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
 fi
 
 #Konfigurere RS485
