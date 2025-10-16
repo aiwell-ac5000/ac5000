@@ -436,8 +436,8 @@ echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-systemctl daemon-reload
-systemctl restart getty@tty1.service
+#systemctl daemon-reload
+#systemctl restart getty@tty1.service
 #rustup self uninstall -y
 #apt purge build-essential -y
 apt autoremove -y
