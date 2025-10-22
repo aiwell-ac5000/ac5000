@@ -389,17 +389,6 @@ mv nodered /etc/logrotate.d/nodered
 #The commands below run
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
-# Why is the last command executed, and the first, but not those in the middle? 
-echo "timeout 240" >> /etc/dhcpcd.conf
-#fallback to static IP eth1
-echo "profile static_eth1" >> /etc/dhcpcd.conf
-echo "static ip_address=192.168.0.10/24" >> /etc/dhcpcd.conf
-echo "static routers=192.168.0.1" >> /etc/dhcpcd.conf
-echo "static domain_name_servers=8.8.8.8" >> /etc/dhcpcd.conf
-#Apply staic profile to eth1
-echo "interface eth1" >> /etc/dhcpcd.conf
-echo "fallback static_eth1" >> /etc/dhcpcd.conf
-echo "timeout 60" >> /etc/dhcpcd.conf
 
 echo "Configuring network" > /root/setup.log
 cp /etc/dhcpcd.conf /etc/dhcpcd.base
@@ -416,6 +405,10 @@ echo 'exit 0' >> /etc/network/if-up.d/ipchange
 echo 'fi' >> /etc/network/if-up.d/ipchange
 echo "ip addr list eth0 |grep 'inet ' |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
 chmod 755 /etc/network/if-up.d/ipchange
+
+## get default dhcpcd.conf
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
+mv dhcpcd.conf /etc/dhcpcd.conf
 
 systemctl daemon-reload
 timeout 20 service dhcpcd restart
