@@ -80,11 +80,17 @@ echo in > /sys/class/gpio/gpio502/direction
 echo in > /sys/class/gpio/gpio503/direction
 fi
 
-#if /sys/bus/i2c/devices/0-006c/iio:device0 does not exist, then print error message and create a symbolic link to /root/busfolder
-if [ ! -d /sys/bus/i2c/devices/0-006c/iio:device0 ]; then
-    echo "Error: i2c device not found"
-    ## create /root/busfolder
-    mkdir /root/busfolder
-    # create a symbolic link to /iio_device0
-    ln -s "/root/busfolder" /iio_device0
-fi
+#Sette up symlink for å hindre problemer med kernel 5.10/6.6
+rm -f /iio_device0
+addresses=("6c" "6b" "6d" "e" "6f")
+for address in "${addresses[@]}"; do
+  FOLDER="/sys/bus/i2c/devices/0-00$address/iio:device0"
+  if [ -d "$FOLDER" ]; then
+    echo "Mappe '$FOLDER' eksisterer."
+    ln -s "$FOLDER" /iio_device0
+    break
+  else
+    echo "Mappe '$FOLDER' eksisterer ikke."
+  fi
+done
+#ln -s "/
