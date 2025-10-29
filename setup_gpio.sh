@@ -82,15 +82,23 @@ fi
 
 #Sette up symlink for å hindre problemer med kernel 5.10/6.6
 rm -f /iio_device0
+# Possible I2C device addresses for iio:device0 symlink setup (hexadecimal, without leading 0x)
 addresses=("6c" "6b" "6d" "e" "6f")
+found=0
 for address in "${addresses[@]}"; do
   FOLDER="/sys/bus/i2c/devices/0-00$address/iio:device0"
   if [ -d "$FOLDER" ]; then
     echo "Mappe '$FOLDER' eksisterer."
     ln -s "$FOLDER" /iio_device0
+    found=1
     break
   else
     echo "Mappe '$FOLDER' eksisterer ikke."
   fi
 done
-#ln -s "/
+if [ $found -eq 0 ]; then
+  echo "Ingen gyldige i2c enheter funnet for å opprette symlink."
+  # Create /root/busfolder
+  mkdir -p /root/busfolder
+  ln -s "/root/busfolder" /iio_device0
+fi
