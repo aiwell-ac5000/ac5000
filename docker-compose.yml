@@ -47,6 +47,9 @@ services:
         source: /iio_device0
         target: /ai
       - type: bind
+        source: /gpioDIO
+        target: /gpioDIO
+      - type: bind
         source: /sys
         target: /sys
     logging:
