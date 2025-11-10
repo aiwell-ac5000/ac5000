@@ -21,7 +21,7 @@ else
   mkdir -p "$FOLDER"
 fi
 
-restore_settings -r
+# restore_settings -r
 
 #Expand storage
 echo "Trying to expand storage"
@@ -128,19 +128,6 @@ check_board_presence() {
   fi
 }
 
-# Loop to check each address
-for address in "${addresses[@]}"; do
-  if check_board_presence "$address"; then
-    echo "Board found at address $address"
-    case "$address" in
-      "20") setenv EX_CARD_1 4R ;;
-      "21") setenv EX_CARD_2 4R ;;
-      "22") setenv EX_CARD_3 4R ;;
-      *) echo "Unknown board at address 0x$address";;
-    esac
-  fi
-done
-
 echo "Techbase update" > /root/setup.log
 
 run_techbase_update() {
@@ -212,7 +199,20 @@ else
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
-# restore_settings -r
+restore_settings -r
+
+# Loop to check each address
+for address in "${addresses[@]}"; do
+  if check_board_presence "$address"; then
+    echo "Board found at address $address"
+    case "$address" in
+      "20") setenv EX_CARD_1 4R ;;
+      "21") setenv EX_CARD_2 4R ;;
+      "22") setenv EX_CARD_3 4R ;;
+      *) echo "Unknown board at address 0x$address";;
+    esac
+  fi
+done
 #bash ex_card_configure.sh &
 # curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
 
