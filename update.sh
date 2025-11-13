@@ -305,6 +305,7 @@ mkdir /root/keys
 rm setup_gpio.sh
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
 chmod +x setup_gpio.sh
+./setup_gpio.sh
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/before_docker
 mv before_docker /etc/systemd/system/custom-before-docker.service
 systemctl enable custom-before-docker.service
