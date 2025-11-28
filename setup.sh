@@ -232,7 +232,7 @@ if [ ! -f restored ]; then
     exit 0
   fi
 fi
-rm restored
+#rm restored
 
 # Loop to check each address
 for address in "${addresses[@]}"; do
