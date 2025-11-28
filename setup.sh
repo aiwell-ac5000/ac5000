@@ -210,7 +210,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
   systemctl start dhcpcd.service
 fi
 
-if [ -f restored ] && [ "$(cat restored)" != "1" ]; then
+if [ ! -f restored ]; then
   echo "Restoring settings"
   restore_settings -r
   if [ $? -eq 1 ]; then
@@ -232,6 +232,7 @@ if [ -f restored ] && [ "$(cat restored)" != "1" ]; then
     exit 0
   fi
 fi
+rm restored
 
 # Loop to check each address
 for address in "${addresses[@]}"; do
