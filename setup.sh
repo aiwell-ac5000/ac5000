@@ -210,7 +210,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
   systemctl start dhcpcd.service
 fi
 
-if [ "$(cat restored)" != "1" ]; then
+if [ -f restored ] && [ "$(cat restored)" != "1" ]; then
   restore_settings -r
   if [ $? -eq 1 ]; then
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
