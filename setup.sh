@@ -199,7 +199,10 @@ else
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
-if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+if [ ! -f restored ]; then
+  if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+  echo "Running on 6.6.72-v8+ kernel"
+  echo "Setting up dhcpcd"
   export DEBIAN_FRONTEND=noninteractive
   apt update -y
   apt install -y dhcpcd
@@ -208,12 +211,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
   systemctl disable NetworkManager-dispatcher.service 
   systemctl enable dhcpcd.service
   systemctl start dhcpcd.service
-fi
-
-if [ ! -f restored ]; then
+  fi
   echo "Restoring settings"
   restore_settings -r
-  if [ $? -eq 0 ]; then
+  if [ $? -eq 0 ]; then    
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
     mv runsetup.sh ~/.bashrc
     echo "Settings restored successfully - Will reboot now"
