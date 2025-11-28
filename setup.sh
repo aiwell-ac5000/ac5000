@@ -213,7 +213,7 @@ fi
 if [ ! -f restored ]; then
   echo "Restoring settings"
   restore_settings -r
-  if [ $? -eq 1 ]; then
+  if [ $? -eq 0 ]; then
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
     mv runsetup.sh ~/.bashrc
     echo "Settings restored successfully - Will reboot now"
@@ -232,7 +232,7 @@ if [ ! -f restored ]; then
     exit 0
   fi
 fi
-#rm restored
+rm restored
 
 # Loop to check each address
 for address in "${addresses[@]}"; do
