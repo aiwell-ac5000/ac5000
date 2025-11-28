@@ -200,12 +200,12 @@ else
 fi
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
-  systemctl disable NetworkManager.service
-  systemctl disable NetworkManager-wait-online.service
-  systemctl disable NetworkManager-dispatcher.service
   export DEBIAN_FRONTEND=noninteractive
   apt update -y
   apt install -y dhcpcd
+  systemctl disable NetworkManager.service
+  systemctl disable NetworkManager-wait-online.service
+  systemctl disable NetworkManager-dispatcher.service 
   systemctl enable dhcpcd.service
   systemctl start dhcpcd.service
 fi
