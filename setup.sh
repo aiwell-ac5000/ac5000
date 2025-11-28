@@ -199,7 +199,38 @@ else
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
-restore_settings -r
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+  systemctl disable NetworkManager.service
+  systemctl disable NetworkManager-wait-online.service
+  systemctl disable NetworkManager-dispatcher.service
+  export DEBIAN_FRONTEND=noninteractive
+  apt update -y
+  apt install -y dhcpcd
+  systemctl enable dhcpcd.service
+  systemctl start dhcpcd.service
+fi
+
+if [ "$(cat restored)" != "1" ]; then
+  restore_settings -r
+  if [ $? -eq 1 ]; then
+    wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+    mv runsetup.sh ~/.bashrc
+    echo "Settings restored successfully - Will reboot now"
+    green='\033[0;32m'
+    clear='\033[0m'
+    printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+    echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
+      
+    echo "0" > setup
+    echo "1" > restored
+    sleep 5
+    reboot
+    exit 0
+  fi
+fi
 
 # Loop to check each address
 for address in "${addresses[@]}"; do
@@ -221,6 +252,8 @@ done
 #apt-get install --no-install-recommends chromium-browser -y
 apt-get purge docker docker-engine docker.io containerd runc -y
 
+##Etter rebbot
+export DEBIAN_FRONTEND=noninteractive
 echo "Installing required packages" > /root/setup.log
 apt autoremove -y
 apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser mosquitto openvpn macchanger lldpd dnsmasq libffi-dev libssl-dev python3 python3-pip -y
@@ -430,6 +463,7 @@ chmod 755 /etc/network/if-up.d/ipchange
 
 ## get default dhcpcd.conf
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
+ 
 mv dhcpcd.conf /etc/dhcpcd.conf
 
 systemctl daemon-reload
