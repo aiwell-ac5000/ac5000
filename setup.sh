@@ -322,8 +322,9 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
 cp cmdline.txt /boot/cmdline.txt
 elif [ "$(uname -r)" = "6.6.72-v8+" ]; then
 echo 'disable_splash=1' | sudo tee -a /boot/firmware/config.txt
-echo 'force_mac_address='$A:$B:$C:$D:$E:$F'' | sudo tee -a /boot/firmware/config.txt
-sed -i 's/$/ smsc95xx.macaddr='$A:$B:$C:$D:$E:$F' logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
+#echo 'force_mac_address='$A:$B:$C:$D:$E:$F'' | sudo tee -a /boot/firmware/config.txt
+#sed -i 's/$/ smsc95xx.macaddr='$A:$B:$C:$D:$E:$F' logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
+sed -i 's/$/ logo.nologo consoleblank=0 loglevel=1 quiet/' /boot/firmware/cmdline.txt
 fi
 
 #Konfigurere RS485
@@ -461,7 +462,7 @@ echo "#!/bin/bash" > /etc/network/if-up.d/ipchange
 echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/ipchange
 echo 'exit 0' >> /etc/network/if-up.d/ipchange
 echo 'fi' >> /etc/network/if-up.d/ipchange
-echo "ip addr list eth0 |grep 'inet ' |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
+echo "ip addr list eth0 | grep 'inet ' | cut -d' ' -f6 | cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
 chmod 755 /etc/network/if-up.d/ipchange
 
 ## get default dhcpcd.conf
