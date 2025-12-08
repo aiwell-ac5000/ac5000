@@ -52,7 +52,7 @@ if [[ -z "$AUTH_HEADER" ]]; then
   if [[ -z "$access_token" ]]; then
     echo "Auth token response missing access_token" >&2
     exit 1
-  }
+  fi
 
   AUTH_HEADER="Authorization: Bearer $access_token"
 fi
