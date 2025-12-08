@@ -17,6 +17,7 @@ if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
   fi 
   umount "$USB_MNT"
 fi
+exit 1
 red='\033[0;31m'
 green='\033[0;32m'
 clear='\033[0m'
