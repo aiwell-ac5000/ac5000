@@ -391,7 +391,9 @@ echo "ip addr list eth0 |grep 'inet ' |cut -d' ' -f6|cut -d/ -f1 > /root/pipes/i
 chmod 755 /etc/network/if-up.d/ipchange
 
 systemctl daemon-reload
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 timeout 20 service dhcpcd restart
+fi
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/network_recovery.sh
 chmod +x network_recovery.sh
