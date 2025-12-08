@@ -11,19 +11,11 @@ if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
   USB_DEV=${USB_DEV:-/dev/sda1}
   USB_MNT=/mnt/usb
   mkdir -p "$USB_MNT"
-  if ! mountpoint -q "$USB_MNT"; then
-    if ! mount "$USB_DEV" "$USB_MNT"; then
-      echo "Failed to mount $USB_DEV on $USB_MNT" >&2
-    else
-      USB_SETUP="$USB_MNT/keys/setup.sh"
-      if [ ! -f "$USB_SETUP" ]; then
-        echo "Missing $USB_SETUP" >&2
-      else
-        source "$USB_SETUP"
-      fi
-      umount "$USB_MNT"
-    fi
-  fi  
+  mount "$USB_DEV" "$USB_MNT"
+  if ! source "$USB_MNT/cred.sh"; then
+    echo "Could not load credentials from USB device $USB_DEV" >&2
+  fi 
+  umount "$USB_MNT"
 fi
 red='\033[0;31m'
 green='\033[0;32m'
@@ -312,7 +304,15 @@ systemctl restart lldpd
 systemctl enable lldpd
 
 if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-  echo "Could not fetch or load credentials" >&2
+  echo "Could not fetch or load credentials from server" >&2
+  USB_DEV=${USB_DEV:-/dev/sda1}
+  USB_MNT=/mnt/usb
+  mkdir -p "$USB_MNT"
+  mount "$USB_DEV" "$USB_MNT"
+  if ! source "$USB_MNT/cred.sh"; then
+    echo "Could not load credentials from USB device $USB_DEV" >&2
+  fi 
+  umount "$USB_MNT"
 fi
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 # curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
