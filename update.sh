@@ -12,8 +12,6 @@ clear='\033[0m'
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
 
-
-
 FOLDER="/root/storage"
 if [ -d "$FOLDER" ]; then
   echo "Mappe '$FOLDER' eksisterer."

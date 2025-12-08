@@ -24,6 +24,11 @@ fi
 
 mkdir -p "$(dirname "$FLOW_FILE")"
 
+# Keep the previous backup if present.
+if [[ -f "$FLOW_FILE" ]]; then
+  mv "$FLOW_FILE" "${FLOW_FILE%.*}_old.json"
+fi
+
 # Acquire an access token if none was provided.
 if [[ -z "$AUTH_HEADER" ]]; then
   token_response=$(curl -sf -X POST "$API_BASE/auth/token" \
