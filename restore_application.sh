@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-FLOW_FILE="storage/flows/application.json"
+FLOW_FILE="/root/storage/flows/application.json"
 TAB_NAME="Applikasjon"
 API_BASE="http://localhost:80"
 AUTH_HEADER=${AUTH_HEADER:-}
