@@ -32,7 +32,6 @@ else
   fi  
 fi
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
-exit 1
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -320,8 +319,10 @@ echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $
 systemctl restart lldpd
 systemctl enable lldpd
 
-if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-  echo "Could not fetch or load credentials from server" >&2
+# Hente credentials
+cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
+if [[ -z "$cn" ]]; then
+  echo "CN not found in /etc/openvpn/client.conf" >&2
   USB_DEV=${USB_DEV:-/dev/sda1}
   USB_MNT=/mnt/usb
   mkdir -p "$USB_MNT"
@@ -330,6 +331,19 @@ if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
     echo "Could not load credentials from USB device $USB_DEV" >&2
   fi 
   umount "$USB_MNT"
+else
+  echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
+  if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+    echo "Could not fetch or load credentials from server" >&2
+    USB_DEV=${USB_DEV:-/dev/sda1}
+    USB_MNT=/mnt/usb
+    mkdir -p "$USB_MNT"
+    mount "$USB_DEV" "$USB_MNT"
+    if ! source "$USB_MNT/cred.sh"; then
+      echo "Could not load credentials from USB device $USB_DEV" >&2
+    fi 
+  umount "$USB_MNT"
+  fi  
 fi
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 # curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
