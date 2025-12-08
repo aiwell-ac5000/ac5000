@@ -10,6 +10,7 @@ green='\033[0;32m'
 clear='\033[0m'
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
+curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
 
 
 
@@ -462,5 +463,6 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #apt purge build-essential -y
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 rm update
 reboot
