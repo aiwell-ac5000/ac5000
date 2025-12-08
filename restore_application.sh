@@ -27,19 +27,32 @@ if [[ ! -s "$FLOW_FILE" ]]; then
   exit 0
 fi
 
-# Acquire an access token if none was provided.
+get_token() {
+  curl -sf -X POST "$API_BASE/auth/token" \
+    -d "client_id=$CLIENT_ID&grant_type=$GRANT_TYPE&scope=$SCOPE&username=$USERNAME&password=$PASSWORD"
+}
+
+# Acquire an access token if none was provided, retrying until Node-RED is ready (max 30s).
 if [[ -z "$AUTH_HEADER" ]]; then
-  token_response=$(curl -sf -X POST "$API_BASE/auth/token" \
-    -d "client_id=$CLIENT_ID&grant_type=$GRANT_TYPE&scope=$SCOPE&username=$USERNAME&password=$PASSWORD") || {
-      echo "Failed to fetch auth token" >&2
-      exit 1
-    }
+  echo "Waiting for Node-RED auth to become ready..."
+  token_response=""
+  for _ in {1..30}; do
+    if token_response=$(get_token 2>/dev/null); then
+      break
+    fi
+    sleep 1
+  done
+
+  if [[ -z "$token_response" ]]; then
+    echo "Failed to fetch auth token after retries" >&2
+    exit 1
+  fi
 
   access_token=$(echo "$token_response" | jq -r '.access_token // empty')
   if [[ -z "$access_token" ]]; then
     echo "Auth token response missing access_token" >&2
     exit 1
-  fi
+  }
 
   AUTH_HEADER="Authorization: Bearer $access_token"
 fi
