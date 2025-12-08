@@ -84,4 +84,16 @@ curl "${curl_common[@]}" -o "$tmp_flow" "$API_BASE/flow/$target_flow_id" || {
 echo "Saving to $FLOW_FILE"
 cp "$tmp_flow" "$FLOW_FILE"
 
+
+cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
+if [[ -z "$cn" ]]; then
+  echo "CN not found in /etc/openvpn/client.conf" >&2
+else
+  echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
+  if ! curl -v --ftp-create-dirs --retry 3 --retry-delay 2 \
+  -T "$FLOW_FILE" "ftp://10.2.0.1:2121/pub/${cn}/application.json"; then
+  echo "FTP upload failed" >&2
+  fi
+fi
+
 echo "Backup complete for tab '$TAB_NAME' -> $FLOW_FILE"
