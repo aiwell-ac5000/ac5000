@@ -20,14 +20,14 @@ if [[ -z "$cn" ]]; then
 else
   echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
   if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-  echo "Could not fetch or load credentials from server" >&2
-  USB_DEV=${USB_DEV:-/dev/sda1}
-  USB_MNT=/mnt/usb
-  mkdir -p "$USB_MNT"
-  mount "$USB_DEV" "$USB_MNT"
-  if ! source "$USB_MNT/cred.sh"; then
-    echo "Could not load credentials from USB device $USB_DEV" >&2
-  fi 
+    echo "Could not fetch or load credentials from server" >&2
+    USB_DEV=${USB_DEV:-/dev/sda1}
+    USB_MNT=/mnt/usb
+    mkdir -p "$USB_MNT"
+    mount "$USB_DEV" "$USB_MNT"
+    if ! source "$USB_MNT/cred.sh"; then
+      echo "Could not load credentials from USB device $USB_DEV" >&2
+    fi 
   umount "$USB_MNT"
   fi  
 fi
