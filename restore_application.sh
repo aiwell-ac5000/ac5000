@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -euo pipefail
 
-FLOW_FILE="storage/flows/appliction.json"
+FLOW_FILE="storage/flows/application.json"
 TAB_NAME="Applikasjon"
 API_BASE="http://localhost:80"
 AUTH_HEADER=${AUTH_HEADER:-}

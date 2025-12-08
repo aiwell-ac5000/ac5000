@@ -462,5 +462,3 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
-rm update
-reboot
