@@ -31,7 +31,7 @@ else
   umount "$USB_MNT"
   fi  
 fi
-
+exit 1
 
 red='\033[0;31m'
 green='\033[0;32m'
