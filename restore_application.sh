@@ -9,8 +9,8 @@ AUTH_HEADER=${AUTH_HEADER:-}
 CLIENT_ID=${CLIENT_ID:-node-red-admin}
 GRANT_TYPE=${GRANT_TYPE:-password}
 SCOPE=${SCOPE:-*}
-USERNAME=${USERNAME:-admin}
-PASSWORD=${PASSWORD:-Prod2001}
+#USERNAME=${USERNAME:-admin}
+#PASSWORD=${PASSWORD:-Prod2001}
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required but not installed" >&2

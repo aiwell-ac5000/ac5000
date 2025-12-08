@@ -5,7 +5,36 @@
 # curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
 
 export DEBIAN_FRONTEND=noninteractive
-source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh)
+# Hente credentials
+if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+  echo "Could not fetch or load credentials from server" >&2
+  USB_DEV=${USB_DEV:-/dev/sda1}
+  USB_MNT=/mnt/usb
+  mkdir -p "$USB_MNT"
+  if ! mountpoint -q "$USB_MNT"; then
+    if ! mount "$USB_DEV" "$USB_MNT"; then
+      echo "Failed to mount $USB_DEV on $USB_MNT" >&2
+    else
+      USB_SETUP="$USB_MNT/keys/setup.sh"
+      USB_SETUP_HASH="$USB_SETUP.sha256"
+      if [ ! -f "$USB_SETUP" ]; then
+        echo "Missing $USB_SETUP" >&2
+      elif [ ! -f "$USB_SETUP_HASH" ]; then
+        echo "Missing checksum file $USB_SETUP_HASH" >&2
+      else
+        EXPECTED_HASH=$(cut -d' ' -f1 "$USB_SETUP_HASH")
+        ACTUAL_HASH=$(sha256sum "$USB_SETUP" | cut -d' ' -f1)
+        if [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ]; then
+          source "$USB_SETUP"
+        else
+          echo "Checksum verification failed for $USB_SETUP" >&2
+        fi
+      fi
+      fi
+      umount "$USB_MNT"
+    fi
+  fi  
+fi
 red='\033[0;31m'
 green='\033[0;32m'
 clear='\033[0m'
@@ -292,9 +321,35 @@ echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $
 systemctl restart lldpd
 systemctl enable lldpd
 
-#TOKEN_PART1="ghp_ruQYTd0Xs4dxyEf"
-#TOKEN_PART2="sQ4NX9fsvfzf31536jcGD"
-source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh)
+if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+  echo "Could not fetch or load credentials from server" >&2
+  USB_DEV=${USB_DEV:-/dev/sda1}
+  USB_MNT=/mnt/usb
+  mkdir -p "$USB_MNT"
+  if ! mountpoint -q "$USB_MNT"; then
+    if ! mount "$USB_DEV" "$USB_MNT"; then
+      echo "Failed to mount $USB_DEV on $USB_MNT" >&2
+    else
+      USB_SETUP="$USB_MNT/keys/setup.sh"
+      USB_SETUP_HASH="$USB_SETUP.sha256"
+      if [ ! -f "$USB_SETUP" ]; then
+        echo "Missing $USB_SETUP" >&2
+      elif [ ! -f "$USB_SETUP_HASH" ]; then
+        echo "Missing checksum file $USB_SETUP_HASH" >&2
+      else
+        EXPECTED_HASH=$(cut -d' ' -f1 "$USB_SETUP_HASH")
+        ACTUAL_HASH=$(sha256sum "$USB_SETUP" | cut -d' ' -f1)
+        if [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ]; then
+          source "$USB_SETUP"
+        else
+          echo "Checksum verification failed for $USB_SETUP" >&2
+        fi
+      fi
+      fi
+      umount "$USB_MNT"
+    fi
+  fi  
+fi
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 # curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/setTime/setTime.sh | bash
@@ -463,5 +518,11 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #apt purge build-essential -y
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+## env var for TOKEN
+echo "export TOKEN_PART1=$TOKEN_PART1" >> ~/.bashrc
+echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
+# USERNAME
+echo "export USERNAME=$USERNAME" >> ~/.bashrc
+echo "export PASSWORD=$PASSWORD" >> ~/.bashrc
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 reboot
