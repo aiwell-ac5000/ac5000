@@ -9,14 +9,17 @@ export DEBIAN_FRONTEND=noninteractive
 cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
 if [[ -z "$cn" ]]; then
   echo "CN not found in /etc/openvpn/client.conf" >&2
+  USB_DEV=${USB_DEV:-/dev/sda1}
+  USB_MNT=/mnt/usb
+  mkdir -p "$USB_MNT"
+  mount "$USB_DEV" "$USB_MNT"
+  if ! source "$USB_MNT/cred.sh"; then
+    echo "Could not load credentials from USB device $USB_DEV" >&2
+  fi 
+  umount "$USB_MNT"
 else
   echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
-  
-fi
-
-
-
-if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+  if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
   echo "Could not fetch or load credentials from server" >&2
   USB_DEV=${USB_DEV:-/dev/sda1}
   USB_MNT=/mnt/usb
@@ -26,7 +29,9 @@ if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
     echo "Could not load credentials from USB device $USB_DEV" >&2
   fi 
   umount "$USB_MNT"
+  fi  
 fi
+
 
 red='\033[0;31m'
 green='\033[0;32m'
