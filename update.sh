@@ -16,20 +16,10 @@ if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
       echo "Failed to mount $USB_DEV on $USB_MNT" >&2
     else
       USB_SETUP="$USB_MNT/keys/setup.sh"
-      USB_SETUP_HASH="$USB_SETUP.sha256"
       if [ ! -f "$USB_SETUP" ]; then
         echo "Missing $USB_SETUP" >&2
-      elif [ ! -f "$USB_SETUP_HASH" ]; then
-        echo "Missing checksum file $USB_SETUP_HASH" >&2
       else
-        EXPECTED_HASH=$(cut -d' ' -f1 "$USB_SETUP_HASH")
-        ACTUAL_HASH=$(sha256sum "$USB_SETUP" | cut -d' ' -f1)
-        if [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ]; then
-          source "$USB_SETUP"
-        else
-          echo "Checksum verification failed for $USB_SETUP" >&2
-        fi
-      fi
+        source "$USB_SETUP"
       fi
       umount "$USB_MNT"
     fi
@@ -322,33 +312,7 @@ systemctl restart lldpd
 systemctl enable lldpd
 
 if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-  echo "Could not fetch or load credentials from server" >&2
-  USB_DEV=${USB_DEV:-/dev/sda1}
-  USB_MNT=/mnt/usb
-  mkdir -p "$USB_MNT"
-  if ! mountpoint -q "$USB_MNT"; then
-    if ! mount "$USB_DEV" "$USB_MNT"; then
-      echo "Failed to mount $USB_DEV on $USB_MNT" >&2
-    else
-      USB_SETUP="$USB_MNT/keys/setup.sh"
-      USB_SETUP_HASH="$USB_SETUP.sha256"
-      if [ ! -f "$USB_SETUP" ]; then
-        echo "Missing $USB_SETUP" >&2
-      elif [ ! -f "$USB_SETUP_HASH" ]; then
-        echo "Missing checksum file $USB_SETUP_HASH" >&2
-      else
-        EXPECTED_HASH=$(cut -d' ' -f1 "$USB_SETUP_HASH")
-        ACTUAL_HASH=$(sha256sum "$USB_SETUP" | cut -d' ' -f1)
-        if [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ]; then
-          source "$USB_SETUP"
-        else
-          echo "Checksum verification failed for $USB_SETUP" >&2
-        fi
-      fi
-      fi
-      umount "$USB_MNT"
-    fi
-  fi  
+  echo "Could not fetch or load credentials" >&2
 fi
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 # curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
