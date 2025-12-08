@@ -5,6 +5,7 @@
 # curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
 
 export DEBIAN_FRONTEND=noninteractive
+source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh)
 red='\033[0;31m'
 green='\033[0;32m'
 clear='\033[0m'
@@ -291,8 +292,9 @@ echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $
 systemctl restart lldpd
 systemctl enable lldpd
 
-TOKEN_PART1="ghp_ruQYTd0Xs4dxyEf"
-TOKEN_PART2="sQ4NX9fsvfzf31536jcGD"
+#TOKEN_PART1="ghp_ruQYTd0Xs4dxyEf"
+#TOKEN_PART2="sQ4NX9fsvfzf31536jcGD"
+source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh)
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 # curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
 curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/setTime/setTime.sh | bash
