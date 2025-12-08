@@ -50,10 +50,13 @@ rm /var/log/*.old
 
 apt-get update --allow-releaseinfo-change -y
 
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 #Backup av nettverk
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
 mv dhcpcd.conf /etc/dhcpcd.base
 cp /etc/dhcpcd.conf dhcpcd.backup
+fi
+
 run_techbase_update() {
   local output
   output=$(eval "$1")
@@ -96,8 +99,8 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     else
         run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
         if [ $? -eq 1 ]; then
-        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh
-        mv runupdate.sh ~/.bashrc
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        mv runsetup.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
@@ -105,24 +108,28 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
         echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
         echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-        
+
         #systemctl daemon-reload
         #systemctl restart getty@tty1.service
-
-        echo "0" > update
+    
+        echo "0" > setup
+        sleep 5
         reboot
         exit 0
         fi
     fi
 else
     # Run the firmware update command with a timeout
-    run_techbase_update "timeout 240 softmgr update firmware"
-    run_techbase_update "timeout 240 softmgr update core"
-    run_techbase_update "timeout 240 softmgr update lib"
-    run_techbase_update "timeout 240 softmgr update all"
+    run_techbase_update "timeout 120 softmgr update firmware -f yes"
+    run_techbase_update "timeout 120 softmgr update core -f yes"
+    run_techbase_update "timeout 120 softmgr update lib -f yes"
+    run_techbase_update "timeout 30 softmgr update all"
 fi
 
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
 cp dhcpcd.backup /etc/dhcpcd.conf
+fi
+
 platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
 
 # Define the default I2C bus number (CM3)
@@ -266,6 +273,7 @@ fi
 host=ac5000$A$B$C$D$E$F
 echo $host
 
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 touch /etc/network/if-up.d/macchange
 echo "#!/bin/bash" > /etc/network/if-up.d/macchange
 echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
@@ -273,8 +281,9 @@ echo 'exit 0' >> /etc/network/if-up.d/macchange
 echo 'fi' >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/macchange
-echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
+##echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
+fi
 
 V=$(uname -r)
 ARCH=$(uname -m)

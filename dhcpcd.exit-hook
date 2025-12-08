@@ -1,47 +1,39 @@
-# Store the IP of eth0 to /root/pipes/ip
-ip addr list eth0 | grep inet | cut -d' ' -f6 | cut -d/ -f1 > /root/pipes/ip
-
-# Get the IP address and subnet for eth1 dynamically
-ETH1_IP=$(ip -4 addr show dev eth1 | grep inet | awk '{print $2}')
+#!/bin/sh
+IFACE="$1"
+ACTION="$2"
+[ "$IFACE" = "eth1" ] || exit 0
+case "$ACTION" in
+up|dhcp4-change|dhcp6-change|vpn-up|hostname)
+;;
+*)
+exit 0
+;;
+esac
+ip addr list eth0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1 > /root/pipes/ip
+ETH1_IP=$(ip -4 addr show dev eth1 | grep 'inet ' | awk '{print $2}')
 IP=$(echo "$ETH1_IP" | cut -d/ -f1)
 IP_SUBNET=$(echo "$ETH1_IP" | cut -d/ -f2)
-
-# Derive the default gateway by replacing the last octet of the IP address with '1'
 DEFAULT_GW=$(echo "$IP" | awk -F. '{print $1"."$2"."$3".1"}')
-
-# Check if eth1 has a valid IP address
 if [ -z "$IP" ]; then
-    echo "eth1 does not have a valid IP address. Exiting..."
-    exit 1
+echo "eth1 does not have a valid IP address. Exiting..."
+exit 1
 else
-    echo "eth1 IP: $IP/$IP_SUBNET"
-    echo "Calculated Default Gateway: $DEFAULT_GW"
+echo "eth1 IP: $IP/$IP_SUBNET"
+echo "Calculated Default Gateway: $DEFAULT_GW"
 fi
-
-# Clear existing rules for rt2
 ip rule flush table rt2
 ip route flush table rt2
 ip route flush cache
-
 NETWORK=$(ipcalc -n "$IP"/"$IP_SUBNET" | grep Network | awk '{print $2}')
-
-# Set routes with dynamically assigned src IP and calculated default gateway for eth1
-#ip route add "$IP_SUBNET"/24 dev eth1 src "$IP" table rt2
 ip route add "$NETWORK" dev eth1 src "$IP" table rt2
 ip route add default via "$DEFAULT_GW" dev eth1 table rt2
-
-# Add rules for traffic from/to the dynamically assigned IP
 ip rule add to "$IP"/32 table rt2
 ip rule add from "$IP"/32 table rt2
-
-# Failover logic
 if ! ping -c 1 81.167.40.222 >/dev/null 2>&1; then
-    echo "Switching to eth1 for 81.167.40.222 and 157.249.81.141"
-    ip rule add to 157.249.81.141/32 table rt2
-    ip rule add from 157.249.81.141/32 table rt2
-    ip rule add to 81.167.40.222/32 table rt2
-    ip rule add from 81.167.40.222/32 table rt2
-    ip rule add to 8.8.8.8/32 table rt2
-    ip rule add from 8.8.8.8/32 table rt2
+echo "Switching to eth1 for 81.167.40.222 and 157.249.81.141 and 8.8.8.8"
+for TARGET in 157.249.81.141 81.167.40.222 8.8.8.8; do
+ip rule add to "$TARGET"/32 table rt2
+ip rule add from "$TARGET"/32 table rt2
+done
 fi
-# Why does 192.168.0.153 not receive ACK?
+getenv > /root/pipes/env

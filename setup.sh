@@ -201,16 +201,7 @@ fi
 
 if [ ! -f restored ]; then
   if [ "$(uname -r)" = "6.6.72-v8+" ]; then
-  echo "Running on 6.6.72-v8+ kernel"
-  echo "Setting up dhcpcd"
-  export DEBIAN_FRONTEND=noninteractive
-  apt update -y
-  apt install -y dhcpcd
-  systemctl disable NetworkManager.service
-  systemctl disable NetworkManager-wait-online.service
-  systemctl disable NetworkManager-dispatcher.service 
-  systemctl enable dhcpcd.service
-  systemctl start dhcpcd.service
+  echo "Running on 6.6.72-v8+ kernel"  
   fi
   echo "Restoring settings"
   restore_settings -r
@@ -361,6 +352,8 @@ host=ac5000$A$B$C$D$E$F
 echo $host
 
 echo "Setting hostname to $host" > /root/setup.log
+
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 touch /etc/network/if-up.d/macchange
 echo "#!/bin/bash" > /etc/network/if-up.d/macchange
 echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/macchange
@@ -368,8 +361,9 @@ echo 'exit 0' >> /etc/network/if-up.d/macchange
 echo 'fi' >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth0" >> /etc/network/if-up.d/macchange
 echo "/usr/bin/macchanger -m $A:$B:$C:$D:$E:$F eth1" >> /etc/network/if-up.d/macchange
-echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
+# echo "getenv > /root/pipes/env" >> /etc/network/if-up.d/macchange
 chmod 755 /etc/network/if-up.d/macchange
+fi
 
 V=$(uname -r)
 ARCH=$(uname -m)
@@ -450,12 +444,26 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
 echo "Configuring network" > /root/setup.log
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 cp /etc/dhcpcd.conf /etc/dhcpcd.base
+fi
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
-mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
+if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+    mv dhcpcd.exit-hook /etc/NetworkManager/dispatcher.d/99-eth1-routes
+    nmcli connection modify "Wired connection 2" ipv4.method manual ipv4.addresses 192.168.0.10/24 ipv4.gateway 192.168.0.1 ipv4.dns 8.8.8.8
+    nmcli connection up "Wired connection 2"
+    /etc/NetworkManager/conf.d/99-disable-dnsmasq.conf <<EOF
+    [main]
+    dns=none
+    rc-manager=none
+    EOF
+    systemctl restart NetworkManager
+else
+    mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
+fi
 
 # touch /etc/network/if-up.d/ipchange
 echo "#!/bin/bash" > /etc/network/if-up.d/ipchange
@@ -465,13 +473,12 @@ echo 'fi' >> /etc/network/if-up.d/ipchange
 echo "ip addr list eth0 | grep 'inet ' | cut -d' ' -f6 | cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
 chmod 755 /etc/network/if-up.d/ipchange
 
-## get default dhcpcd.conf
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
- 
-mv dhcpcd.conf /etc/dhcpcd.conf
-
-systemctl daemon-reload
-timeout 20 service dhcpcd restart
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
+  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
+  mv dhcpcd.conf /etc/dhcpcd.conf
+  systemctl daemon-reload
+  timeout 20 service dhcpcd restart
+fi
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/network_recovery.sh
 chmod +x network_recovery.sh
