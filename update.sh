@@ -86,6 +86,7 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
 
+curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
