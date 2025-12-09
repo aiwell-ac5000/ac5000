@@ -165,7 +165,7 @@ else
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
-if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 cp dhcpcd.backup /etc/dhcpcd.conf
 fi
 
