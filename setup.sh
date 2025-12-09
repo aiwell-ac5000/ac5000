@@ -558,6 +558,8 @@ rm /root/setup
 echo "Configure update alias" > /root/setup.log
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 echo "alias backup_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
+echo "alias restore_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'" >> ~/.bashrc
+echo "alias fetch_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'" >> ~/.bashrc
 ## env var for TOKEN
 echo "export TOKEN_PART1=$TOKEN_PART1" >> ~/.bashrc
 echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
