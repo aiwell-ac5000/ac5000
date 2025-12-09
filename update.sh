@@ -474,13 +474,15 @@ fi
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     mv dhcpcd.exit-hook /etc/NetworkManager/dispatcher.d/99-eth1-routes
+    chmod 755 /etc/NetworkManager/dispatcher.d/99-eth1-routes
+    chmod +x /etc/NetworkManager/dispatcher.d/99-eth1-routes
+    chown root:root /etc/NetworkManager/dispatcher.d/99-eth1-routes
+    nmcli connection modify "Wired connection 1" ipv4.route-metric 50
+    nmcli connection modify "Wired connection 2" ipv4.route-metric 100
     nmcli connection modify "Wired connection 2" ipv4.method manual ipv4.addresses 192.168.0.10/24 ipv4.gateway 192.168.0.1 ipv4.dns 8.8.8.8
+    nmcli connection up "Wired connection 1"
     nmcli connection up "Wired connection 2"
-    tee /etc/NetworkManager/conf.d/99-disable-dnsmasq.conf > /dev/null <<EOF
-[main]
-dns=none
-rc-manager=none
-EOF
+   
     systemctl restart NetworkManager
 else
     mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
