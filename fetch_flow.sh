@@ -12,6 +12,9 @@ if ! command -v curl >/dev/null 2>&1; then
   exit 1
 fi
 
+# mdir to ensure the directory exists
+mkdir -p "$(dirname "$FLOW_FILE")"
+
 cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
 if [[ -z "$cn" ]]; then
   echo "CN not found in /etc/openvpn/client.conf" >&2
