@@ -227,6 +227,15 @@ if [ ! -f restored ]; then
 fi
 rm restored
 
+USB_DEV=${USB_DEV:-/dev/sda1}
+USB_MNT=/mnt/usb
+mkdir -p "$USB_MNT"
+mount "$USB_DEV" "$USB_MNT"
+if ! source "$USB_MNT/keys/setup.sh"; then
+  echo "Could not load credentials from USB device $USB_DEV" >&2
+  exit 1
+fi
+
 # Loop to check each address
 for address in "${addresses[@]}"; do
   if check_board_presence "$address"; then
@@ -275,15 +284,6 @@ else
     curl -fsSL https://get.docker.com -o get-docker.sh
     VERSION=26.1 sh get-docker.sh
 fi
-
-USB_DEV=${USB_DEV:-/dev/sda1}
-USB_MNT=/mnt/usb
-mkdir -p "$USB_MNT"
-mount "$USB_DEV" "$USB_MNT"
-if ! source "$USB_MNT/keys/setup.sh"; then
-  echo "Could not load credentials from USB device $USB_DEV" >&2
-  exit 1
-fi 
 
 #pip3 install docker-compose
 echo "Setting up users" > /root/setup.log
