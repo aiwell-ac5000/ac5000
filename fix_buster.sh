@@ -25,8 +25,9 @@ if [ "$VERSION_CODENAME" = "buster" ]; then
 
   # Overwrite sources.list with the archive URLs
   cat > /etc/apt/sources.list <<EOF
-deb http://archive.debian.org/debian/ buster main non-free contrib
-deb http://archive.debian.org/debian-security/ buster/updates main non-free contrib
+deb [trusted=yes] http://archive.debian.org/debian buster main contrib non-free
+deb [trusted=yes] http://archive.debian.org/debian/ buster main non-free contrib
+deb [trusted=yes] http://archive.debian.org/debian-security/ buster/updates main non-free contrib
 EOF
 
   echo "Repository URLs updated."
