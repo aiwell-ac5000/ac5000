@@ -13,7 +13,7 @@ if [[ -z "$cn" ]]; then
   USB_MNT=/mnt/usb
   mkdir -p "$USB_MNT"
   mount "$USB_DEV" "$USB_MNT"
-  if ! source "$USB_MNT/cred.sh"; then
+  if ! source "$USB_MNT/keys/setup.sh"; then
     echo "Could not load credentials from USB device $USB_DEV" >&2
   fi 
   umount "$USB_MNT"
@@ -35,7 +35,7 @@ else
       USB_MNT=/mnt/usb
       mkdir -p "$USB_MNT"
       mount "$USB_DEV" "$USB_MNT"
-      if ! source "$USB_MNT/cred.sh"; then
+      if ! source "$USB_MNT/keys/setup.sh"; then
         echo "Could not load credentials from USB device $USB_DEV" >&2
       fi 
       umount "$USB_MNT"
@@ -338,7 +338,7 @@ if [[ -z "$cn" ]]; then
   USB_MNT=/mnt/usb
   mkdir -p "$USB_MNT"
   mount "$USB_DEV" "$USB_MNT"
-  if ! source "$USB_MNT/cred.sh"; then
+  if ! source "$USB_MNT/keys/setup.sh"; then
     echo "Could not load credentials from USB device $USB_DEV" >&2
   fi 
   umount "$USB_MNT"
@@ -360,7 +360,7 @@ else
       USB_MNT=/mnt/usb
       mkdir -p "$USB_MNT"
       mount "$USB_DEV" "$USB_MNT"
-      if ! source "$USB_MNT/cred.sh"; then
+      if ! source "$USB_MNT/keys/setup.sh"; then
         echo "Could not load credentials from USB device $USB_DEV" >&2
       fi 
       umount "$USB_MNT"

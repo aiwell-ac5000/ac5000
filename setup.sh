@@ -377,7 +377,7 @@ USB_DEV=${USB_DEV:-/dev/sda1}
 USB_MNT=/mnt/usb
 mkdir -p "$USB_MNT"
 mount "$USB_DEV" "$USB_MNT"
-if ! source "$USB_MNT/cred.sh"; then
+if ! source "$USB_MNT/keys/setup.sh"; then
   echo "Could not load credentials from USB device $USB_DEV" >&2
 fi 
 umount "$USB_MNT"
