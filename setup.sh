@@ -166,7 +166,7 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
-        echo "Firmware updated successfully - Will reboot now"
+        echo "Softmgr updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
@@ -182,9 +182,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         
         echo "Updating lib"
         run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
+        if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
-        echo "Firmware updated successfully - Will reboot now"
+        echo "Lib updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
@@ -200,9 +201,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
       
         echo "Updating core"
         run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
+        if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
-        echo "Firmware updated successfully - Will reboot now"
+        echo "Core updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
@@ -216,9 +218,10 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         exit 0
         fi
         run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
+        if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
-        echo "Firmware updated successfully - Will reboot now"
+        echo "Updated successfully - Will reboot now"
         green='\033[0;32m'
         clear='\033[0m'
         printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
