@@ -157,22 +157,83 @@ run_techbase_update() {
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    run_techbase_update "timeout 240 softmgr check firmware -b x500_6.6.72-beta"
+    run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
     if [ $? -eq 0 ]; then
         echo "Firmware up to date"
 
         echo "Updating softmgr"
         run_techbase_update "timeout 240 softmgr update softmgr -b x500_6.6.72-beta"
+        if [ $? -eq 1 ]; then
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        mv runsetup.sh ~/.bashrc
+        echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    
+        echo "0" > setup
+        sleep 5
+        reboot
+        exit 0
+        fi
         
         echo "Updating lib"
         run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        mv runsetup.sh ~/.bashrc
+        echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    
+        echo "0" > setup
+        sleep 5
+        reboot
+        exit 0
+        fi
       
         echo "Updating core"
         run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        mv runsetup.sh ~/.bashrc
+        echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    
+        echo "0" > setup
+        sleep 5
+        reboot
+        exit 0
+        fi
         run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
-    else
-        run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
-        if [ $? -eq 1 ]; then
+        wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+        mv runsetup.sh ~/.bashrc
+        echo "Firmware updated successfully - Will reboot now"
+        green='\033[0;32m'
+        clear='\033[0m'
+        printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+        echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+        echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    
+        echo "0" > setup
+        sleep 5
+        reboot
+        exit 0
+        fi
+    elif [ $? -eq 1 ]; then
+        #run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
+        #if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"

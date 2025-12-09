@@ -122,8 +122,8 @@ run_techbase_update() {
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     echo "Running on 6.6.72-v8+ kernel"
-    run_techbase_update "timeout 240 softmgr check firmware -b x500_6.6.72-beta"
-    if [ $? -eq 0 ]; then
+    run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
+    elif [ $? -eq 1 ]; then
         echo "Firmware up to date"
 
         echo "Updating softmgr"
@@ -136,8 +136,8 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
         run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
     else
-        run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
-        if [ $? -eq 1 ]; then
+        # run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
+        #if [ $? -eq 1 ]; then
         wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
         mv runsetup.sh ~/.bashrc
         echo "Firmware updated successfully - Will reboot now"
