@@ -20,15 +20,26 @@ if [[ -z "$cn" ]]; then
 else
   echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
   if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-    echo "Could not fetch or load credentials from server" >&2
-    USB_DEV=${USB_DEV:-/dev/sda1}
-    USB_MNT=/mnt/usb
-    mkdir -p "$USB_MNT"
-    mount "$USB_DEV" "$USB_MNT"
-    if ! source "$USB_MNT/cred.sh"; then
-      echo "Could not load credentials from USB device $USB_DEV" >&2
-    fi 
-  umount "$USB_MNT"
+    echo "Initial credential fetch failed; retrying up to 30s..." >&2
+    fetched=0
+    for _ in {1..30}; do
+      if source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+        fetched=1
+        break
+      fi
+      sleep 1
+    done
+    if [[ $fetched -ne 1 ]]; then
+      echo "Could not fetch or load credentials from server after retries" >&2
+      USB_DEV=${USB_DEV:-/dev/sda1}
+      USB_MNT=/mnt/usb
+      mkdir -p "$USB_MNT"
+      mount "$USB_DEV" "$USB_MNT"
+      if ! source "$USB_MNT/cred.sh"; then
+        echo "Could not load credentials from USB device $USB_DEV" >&2
+      fi 
+      umount "$USB_MNT"
+    fi
   fi  
 fi
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
@@ -319,7 +330,6 @@ echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $
 systemctl restart lldpd
 systemctl enable lldpd
 
-# Hente credentials
 cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
 if [[ -z "$cn" ]]; then
   echo "CN not found in /etc/openvpn/client.conf" >&2
@@ -334,15 +344,26 @@ if [[ -z "$cn" ]]; then
 else
   echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
   if ! source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
-    echo "Could not fetch or load credentials from server" >&2
-    USB_DEV=${USB_DEV:-/dev/sda1}
-    USB_MNT=/mnt/usb
-    mkdir -p "$USB_MNT"
-    mount "$USB_DEV" "$USB_MNT"
-    if ! source "$USB_MNT/cred.sh"; then
-      echo "Could not load credentials from USB device $USB_DEV" >&2
-    fi 
-  umount "$USB_MNT"
+    echo "Initial credential fetch failed; retrying up to 30s..." >&2
+    fetched=0
+    for _ in {1..30}; do
+      if source <(curl -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+        fetched=1
+        break
+      fi
+      sleep 1
+    done
+    if [[ $fetched -ne 1 ]]; then
+      echo "Could not fetch or load credentials from server after retries" >&2
+      USB_DEV=${USB_DEV:-/dev/sda1}
+      USB_MNT=/mnt/usb
+      mkdir -p "$USB_MNT"
+      mount "$USB_DEV" "$USB_MNT"
+      if ! source "$USB_MNT/cred.sh"; then
+        echo "Could not load credentials from USB device $USB_DEV" >&2
+      fi 
+      umount "$USB_MNT"
+    fi
   fi  
 fi
 echo $TOKEN_PART1$TOKEN_PART2 | docker login ghcr.io -u aiwell-ac5000 --password-stdin
