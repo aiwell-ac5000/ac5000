@@ -245,7 +245,7 @@ done
 #Oppsett GUI
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xinit fbi screen jq openbox xserver-xorg-legacy chromium-browser -y
 #apt-get install --no-install-recommends chromium-browser -y
-apt-get purge docker docker-engine docker.io containerd runc -y
+#apt-get purge docker docker-engine docker.io containerd runc -y
 
 ##Etter rebbot
 export DEBIAN_FRONTEND=noninteractive
@@ -276,18 +276,23 @@ else
     VERSION=26.1 sh get-docker.sh
 fi
 
+USB_DEV=${USB_DEV:-/dev/sda1}
+USB_MNT=/mnt/usb
+mkdir -p "$USB_MNT"
+mount "$USB_DEV" "$USB_MNT"
+if ! source "$USB_MNT/keys/setup.sh"; then
+  echo "Could not load credentials from USB device $USB_DEV" >&2
+  exit 1
+fi 
+
 #pip3 install docker-compose
 echo "Setting up users" > /root/setup.log
-user=user
-upwd=AiwellAC5000
 chpasswd <<EOF
 $user:$upwd
 EOF
 
-user=root
-upwd=Prod2001
 chpasswd <<EOF
-$user:$upwd
+$admin:$admin_pwd
 EOF
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
@@ -372,15 +377,6 @@ DEBIAN_VERSION=$(grep "^VERSION=" /etc/os-release | cut -d '"' -f 2)
 echo "configure system description 'Aiwell AC5000 Debian $DEBIAN_VERSION Linux $V $ARCH'" > /etc/lldpd.conf
 systemctl restart lldpd
 systemctl enable lldpd
-
-USB_DEV=${USB_DEV:-/dev/sda1}
-USB_MNT=/mnt/usb
-mkdir -p "$USB_MNT"
-mount "$USB_DEV" "$USB_MNT"
-if ! source "$USB_MNT/keys/setup.sh"; then
-  echo "Could not load credentials from USB device $USB_DEV" >&2
-fi 
-umount "$USB_MNT"
 
 echo "$TOKEN_PART1$TOKEN_PART2" | docker login ghcr.io -u aiwell-ac5000 --password-stdin
 #curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
@@ -567,5 +563,10 @@ echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
 # USERNAME
 echo "export USERNAME=$USERNAME" >> ~/.bashrc
 echo "export PASSWORD=$PASSWORD" >> ~/.bashrc
+echo "export admin=$admin" >> ~/.bashrc
+echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
+echo "export user=$user" >> ~/.bashrc
+echo "export upwd=$upwd" >> ~/.bashrc
+
 sleep 5
 reboot

@@ -242,16 +242,13 @@ else
     VERSION=26.1 sh get-docker.sh
 fi
 
-user=user
-upwd=AiwellAC5000
+echo "Setting up users" > /root/setup.log
 chpasswd <<EOF
 $user:$upwd
 EOF
 
-user=root
-upwd=Prod2001
 chpasswd <<EOF
-$user:$upwd
+$admin:$admin_pwd
 EOF
 
 echo "allowed_users=console" > /etc/X11/Xwrapper.config
@@ -553,5 +550,9 @@ echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
 # USERNAME
 echo "export USERNAME=$USERNAME" >> ~/.bashrc
 echo "export PASSWORD=$PASSWORD" >> ~/.bashrc
+echo "export admin=$admin" >> ~/.bashrc
+echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
+echo "export user=$user" >> ~/.bashrc
+echo "export upwd=$upwd" >> ~/.bashrc
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 reboot
