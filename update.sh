@@ -42,7 +42,6 @@ else
     fi
   fi  
 fi
-curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
 
 red='\033[0;31m'
 green='\033[0;32m'
