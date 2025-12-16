@@ -4,7 +4,7 @@ set -euo pipefail
 
 FLOW_FILE="/root/storage/flows/application.json"
 TAB_NAME="Applikasjon"
-API_BASE="http://localhost:80"
+API_BASE="http://127.0.0.1:80"
 AUTH_HEADER=${AUTH_HEADER:-}
 CLIENT_ID=${CLIENT_ID:-node-red-admin}
 GRANT_TYPE=${GRANT_TYPE:-password}
