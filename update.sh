@@ -464,7 +464,7 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 
 # Backup original cmdline.txt
-if [ "$(uname -m)" != "aarch64" ]; then
+if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
 rm cmdline.txt
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
