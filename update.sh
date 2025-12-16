@@ -466,8 +466,9 @@ rm /var/log/*.[1-9]
 # Backup original cmdline.txt
 if [ "$(uname -m)" != "aarch64" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
+rm cmdline.txt
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
-cp cmdline.txt /boot/cmdline.txt
+mv cmdline.txt /boot/cmdline.txt
 fi
 
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook

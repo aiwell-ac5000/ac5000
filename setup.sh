@@ -337,8 +337,9 @@ systemctl enable docker
 # Backup original cmdline.txt
 if [ "$(uname -m)" != "aarch64" ]; then
 cp /boot/cmdline.txt /boot/cmdline.bck
+rm cmdline.txt
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/cmdline.txt
-cp cmdline.txt /boot/cmdline.txt
+mv cmdline.txt /boot/cmdline.txt
 elif [ "$(uname -r)" = "6.6.72-v8+" ]; then
 echo 'disable_splash=1' | sudo tee -a /boot/firmware/config.txt
 #echo 'force_mac_address='$A:$B:$C:$D:$E:$F'' | sudo tee -a /boot/firmware/config.txt
