@@ -48,7 +48,7 @@ green='\033[0;32m'
 clear='\033[0m'
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
-curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
+curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
 
 FOLDER="/root/storage"
 if [ -d "$FOLDER" ]; then
@@ -85,7 +85,7 @@ rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
 
-curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
+curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
@@ -567,9 +567,9 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #apt purge build-essential -y
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
-echo "alias backup_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
-echo "alias restore_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'" >> ~/.bashrc
-echo "alias fetch_flow='curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'" >> ~/.bashrc
+echo "alias backup_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
+echo "alias restore_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'" >> ~/.bashrc
+echo "alias fetch_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'" >> ~/.bashrc
 ## env var for TOKEN
 echo "export TOKEN_PART1=$TOKEN_PART1" >> ~/.bashrc
 echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
@@ -580,5 +580,5 @@ echo "export admin=$admin" >> ~/.bashrc
 echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
 echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
-curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
+curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 reboot
