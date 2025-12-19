@@ -180,9 +180,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
     fi
 else
     # Run the firmware update command with a timeout
-    run_techbase_update "timeout 120 softmgr update firmware -f yes"
-    run_techbase_update "timeout 120 softmgr update core -f yes"
-    run_techbase_update "timeout 120 softmgr update lib -f yes"
+    run_techbase_update "timeout 120 softmgr update firmware"
+    run_techbase_update "timeout 120 softmgr update core"
+    run_techbase_update "timeout 120 softmgr update lib"
     run_techbase_update "timeout 30 softmgr update all"
 fi
 
