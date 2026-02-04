@@ -120,8 +120,22 @@ run_techbase_update() {
 }
 
 update_reboot() {
+  echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
+  echo "alias backup_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
+  echo "alias restore_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'" >> ~/.bashrc
+  echo "alias fetch_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'" >> ~/.bashrc
+  ## env var for TOKEN
+  echo "export TOKEN_PART1=$TOKEN_PART1" >> ~/.bashrc
+  echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
+  # USERNAME
+  echo "export USERNAME=$USERNAME" >> ~/.bashrc
+  echo "export PASSWORD=$PASSWORD" >> ~/.bashrc
+  echo "export admin=$admin" >> ~/.bashrc
+  echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
+  echo "export user=$user" >> ~/.bashrc
+  echo "export upwd=$upwd" >> ~/.bashrc
   wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
-  mv runsetup.sh ~/.bashrc
+  cat runupdate.sh >> ~/.bashrc
   green='\033[0;32m'
   clear='\033[0m'
   printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
@@ -129,7 +143,7 @@ update_reboot() {
   echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
   echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
     
-  echo "0" > setup
+  echo "0" > update
   sleep 5
   reboot
   exit 0
