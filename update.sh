@@ -15,6 +15,10 @@ if [[ -z "$cn" ]]; then
   mount "$USB_DEV" "$USB_MNT"
   if ! source "$USB_MNT/keys/setup.sh"; then
     echo "Could not load credentials from USB device $USB_DEV" >&2
+    if [[ -z "${TOKEN_PART1:-}" ]]; then
+      echo "Security tokens is not set; exiting." >&2
+      exit 1
+    fi
   fi 
   umount "$USB_MNT"
 else
