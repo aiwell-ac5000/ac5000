@@ -2,6 +2,15 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
+USB_DEV=${USB_DEV:-/dev/sda1}
+USB_MNT=/mnt/usb
+mkdir -p "$USB_MNT"
+mount "$USB_DEV" "$USB_MNT"
+if ! source "$USB_MNT/keys/setup.sh"; then
+  echo "Could not load credentials from USB device $USB_DEV" >&2
+  exit 1
+fi
+
 echo "Starting setup script" > /root/setup.log
 
 FOLDER=/root/storage
@@ -248,15 +257,6 @@ if [ ! -f restored ]; then
   fi
 fi
 rm restored
-
-USB_DEV=${USB_DEV:-/dev/sda1}
-USB_MNT=/mnt/usb
-mkdir -p "$USB_MNT"
-mount "$USB_DEV" "$USB_MNT"
-if ! source "$USB_MNT/keys/setup.sh"; then
-  echo "Could not load credentials from USB device $USB_DEV" >&2
-  exit 1
-fi
 
 # Loop to check each address
 for address in "${addresses[@]}"; do
