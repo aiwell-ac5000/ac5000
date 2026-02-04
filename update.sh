@@ -19,11 +19,11 @@ if [[ -z "$cn" ]]; then
   umount "$USB_MNT"
 else
   echo "Using CN='$cn' from /etc/openvpn/client.conf for FTP upload"
-  if ! source <(curl --connect-timeout 10 --max-time 30 -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+  if ! source <(curl --connect-timeout 20 --max-time 120 -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
     echo "Initial credential fetch failed; retrying up to 30s..." >&2
     fetched=0
     for _ in {1..5}; do
-      if source <(curl --connect-timeout 10 --max-time 30 -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
+      if source <(curl --connect-timeout 20 --max-time 120 -fsSL ftp://10.2.0.1:2121/pub/cred.sh); then
         fetched=1
         break
       fi
