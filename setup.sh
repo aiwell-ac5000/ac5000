@@ -595,6 +595,6 @@ echo "export admin=$admin" >> ~/.bashrc
 echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
 echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
-
+rm setup
 sleep 5
 reboot

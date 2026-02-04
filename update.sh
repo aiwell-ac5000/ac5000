@@ -600,4 +600,5 @@ echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
 echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
+rm update
 reboot
