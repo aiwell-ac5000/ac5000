@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # curl -sSL ac5000setup.aiwell.no | bash
+apt update --allow-releaseinfo-change -y
+apt install screen -y
 
 USB_DEV=${USB_DEV:-/dev/sda1}
 USB_MNT=/mnt/usb
