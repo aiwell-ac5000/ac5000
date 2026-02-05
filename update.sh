@@ -257,7 +257,7 @@ done
 
 
 #Oppsett GUI
-apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn libffi-dev libssl-dev python3 python3-pip -y
+apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -pip -y
 # apt-get install --no-install-recommends chromium-browser -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 apt autoremove -y
