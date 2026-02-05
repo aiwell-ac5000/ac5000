@@ -611,5 +611,5 @@ rm update
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
-apt autoremove -y
+apt autoremove -y && apt clean -y
 reboot
