@@ -286,7 +286,7 @@ sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
 
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
-apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt autoremove -y
 
 echo "Installing required packages" > /root/setup.log
@@ -590,7 +590,7 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #Remove dev tools
 apt purge docker-ce-rootless-extras mkvtoolnix -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg libpython3.11-dev build-essential -y
-apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 apt autoremove -y && apt clean -y
 

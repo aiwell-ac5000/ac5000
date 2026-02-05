@@ -267,7 +267,7 @@ apt purge docker-ce-rootless-extras mkvtoolnix -y
 
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
-apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt autoremove -y
 
 apt-get update --allow-releaseinfo-change -y
@@ -624,7 +624,7 @@ rm update
 #Remove dev tools
 apt purge docker-ce-rootless-extras mkvtoolnix -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg libpython3.11-dev build-essential -y
-apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 #apt purge linux-image-6.6.51+rpt-rpi-v8 linux-image-6.6.51+rpt-rpi-2712 linux-headers-6.6.51+rpt-common-rpi -y
 apt autoremove -y && apt clean -y
