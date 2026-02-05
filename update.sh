@@ -255,6 +255,10 @@ for address in "${addresses[@]}"; do
   fi
 done
 
+#Remove junk
+apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
+apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt autoremove -y
 
 #Oppsett GUI
 apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -pip -y
@@ -601,4 +605,8 @@ echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 rm update
+#Remove junk
+apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
+apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt autoremove -y
 reboot

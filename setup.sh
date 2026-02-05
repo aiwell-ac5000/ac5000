@@ -280,6 +280,12 @@ done
 
 ##Etter rebbot
 export DEBIAN_FRONTEND=noninteractive
+
+#Remove junk
+apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
+apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt autoremove -y
+
 echo "Installing required packages" > /root/setup.log
 apt autoremove -y
 apt-get install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser mosquitto openvpn macchanger lldpd dnsmasq -y
@@ -572,6 +578,9 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 
 #rustup self uninstall -y
 #apt purge build-essential -y
+#Remove junk
+apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
+apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
 apt autoremove -y
 
 green='\033[0;32m'
