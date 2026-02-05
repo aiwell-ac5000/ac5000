@@ -1,6 +1,5 @@
 if [ -z "${STY:-}" ]; then
-  screen -dmS ac5000-setup bash -lc "source ~/.bashrc"
-  return 0
+  exec screen -S ac5000-setup bash -lc "source ~/.bashrc"
 fi
 
 runsetup_main() {
