@@ -270,6 +270,7 @@ apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt autoremove -y
 
+apt-get update --allow-releaseinfo-change -y
 #Oppsett GUI
 apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -y
 # apt-get install --no-install-recommends chromium-browser -y

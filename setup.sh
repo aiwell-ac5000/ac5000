@@ -290,7 +290,9 @@ apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt autoremove -y
 
 echo "Installing required packages" > /root/setup.log
-apt autoremove -y
+apt autoremove -y && apt clean -y
+
+apt-get update --allow-releaseinfo-change -y
 apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen ipcalc xserver-xorg-legacy chromium-browser mosquitto openvpn macchanger lldpd dnsmasq -y
 #apt install build-essential -y
 #curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
