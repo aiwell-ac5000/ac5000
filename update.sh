@@ -255,7 +255,10 @@ for address in "${addresses[@]}"; do
   fi
 done
 
-#Remove junk
+#Removove unused wifi drivers
+sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
+
+#Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
 apt autoremove -y
@@ -605,7 +608,7 @@ echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 rm update
-#Remove junk
+#Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
 apt autoremove -y
