@@ -52,7 +52,12 @@ green='\033[0;32m'
 clear='\033[0m'
 
 cp /var/lib/docker/volumes/root_node-red-data/_data/flows.json backup_flows.json
-curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
+running_containers="$(docker ps -q 2>/dev/null)"
+if [ -n "$running_containers" ]; then
+  curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash
+else
+  echo "No running Docker containers; skipping backup."
+fi
 
 FOLDER="/root/storage"
 if [ -d "$FOLDER" ]; then
