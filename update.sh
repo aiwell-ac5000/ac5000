@@ -332,7 +332,7 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
 mv environment /etc/environment
 
 https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dphys-swapfile
-mv environment /etc/dphys-swapfile
+mv dphys-swapfile /etc/dphys-swapfile
 dphys-swapfile setup && dphys-swapfile swapon
 
 #Set node-red port varaibel
