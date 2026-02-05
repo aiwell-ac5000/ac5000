@@ -586,6 +586,7 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #rustup self uninstall -y
 #apt purge build-essential -y
 #Remove dev tools
+apt purge docker-ce-rootless-extras mkvtoolnix fonts-urw-base35 -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y

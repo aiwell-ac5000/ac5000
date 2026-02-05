@@ -263,6 +263,8 @@ done
 #Removove unused wifi drivers
 sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
 
+apt purge docker-ce-rootless-extras mkvtoolnix fonts-urw-base35 -y
+
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
@@ -619,6 +621,7 @@ echo "export upwd=$upwd" >> ~/.bashrc
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 rm update
 #Remove dev tools
+apt purge docker-ce-rootless-extras mkvtoolnix fonts-urw-base35 -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
