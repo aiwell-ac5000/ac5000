@@ -1,3 +1,9 @@
+if [ -z "${STY:-}" ]; then
+  screen -dmS ac5000-update bash -lc "source ~/.bashrc"
+  return 0
+fi
+
+runupdate_main() {
 wait_limit=240          # seconds
 elapsed=0
 server_ready=1
@@ -33,3 +39,6 @@ if [ "$server_ready" -eq 0 ]; then
 else
   echo "Setup server did not respond within ${wait_limit}s"
 fi
+}
+
+runupdate_main
