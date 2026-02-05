@@ -95,6 +95,7 @@ yes | docker system prune
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
 rm /var/log/*.old
+journalctl --vacuum-size=50M
 
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
@@ -630,4 +631,5 @@ apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 #apt purge linux-image-6.6.51+rpt-rpi-v8 linux-image-6.6.51+rpt-rpi-2712 linux-headers-6.6.51+rpt-common-rpi -y
 apt autoremove -y && apt clean -y
+journalctl --vacuum-size=50M
 reboot

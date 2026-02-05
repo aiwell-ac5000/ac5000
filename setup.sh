@@ -619,5 +619,6 @@ echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
 echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
 rm setup
+journalctl --vacuum-size=50M
 sleep 5
 reboot
