@@ -364,6 +364,10 @@ comctrl 1 RS-485 2 RS-485
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
 mv environment /etc/environment
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dphys-swapfile
+mv environment /etc/dphys-swapfile
+dphys-swapfile setup && dphys-swapfile swapon
+
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
 mv autostart /etc/xdg/openbox/autostart
 
