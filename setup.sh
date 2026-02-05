@@ -584,6 +584,7 @@ echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/syst
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt purge docker-buildx-plugin
 apt autoremove -y && apt clean -y
 
 green='\033[0;32m'
