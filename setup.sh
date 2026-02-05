@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # curl -sSL ac5000setup.aiwell.no | bash
+
+export DEBIAN_FRONTEND=noninteractive
 apt update --allow-releaseinfo-change -y
 apt install screen -y
 
@@ -99,7 +101,6 @@ else
   fi  
 fi
 
-export DEBIAN_FRONTEND=noninteractive
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
 

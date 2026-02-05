@@ -5,6 +5,8 @@
 # curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
 
 export DEBIAN_FRONTEND=noninteractive
+apt update --allow-releaseinfo-change -y
+apt install screen -y
 # Hente credentials
 cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
 if [[ -z "$cn" ]]; then
