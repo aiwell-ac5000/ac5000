@@ -265,7 +265,7 @@ sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
 
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
-apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt autoremove -y
 
 #Oppsett GUI
@@ -620,7 +620,7 @@ curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_ap
 rm update
 #Remove dev tools
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
-apt purge libboost1.74-dev libpython3.11-dev libssl-dev libprotobuf-dev -y
+apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 apt purge linux-image-6.6.51+rpt-rpi-v8 linux-image-6.6.51+rpt-rpi-2712 linux-headers-6.6.51+rpt-common-rpi -y
 apt autoremove -y && apt clean -y
