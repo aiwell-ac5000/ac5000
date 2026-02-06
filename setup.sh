@@ -373,6 +373,10 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dphys-swapfile
 mv dphys-swapfile /etc/dphys-swapfile
 dphys-swapfile setup && dphys-swapfile swapon
 
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/journald.conf
+mv journald.conf /etc/systemd/journald.conf
+systemctl restart systemd-journald.service
+
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
 mv autostart /etc/xdg/openbox/autostart
 
