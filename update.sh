@@ -337,9 +337,15 @@ comctrl 1 RS-485 2 RS-485
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
 mv environment /etc/environment
 
+#Change default swapfile size
 https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dphys-swapfile
 mv dphys-swapfile /etc/dphys-swapfile
 dphys-swapfile setup && dphys-swapfile swapon
+
+#Change default journal size
+wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/journald.conf
+mv journald.conf /etc/systemd/journald.conf
+systemctl restart systemd-journald.service
 
 #Set node-red port varaibel
 
