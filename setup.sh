@@ -281,8 +281,9 @@ done
 #apt-get install --no-install-recommends chromium-browser -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
 
-##Etter rebbot
-export DEBIAN_FRONTEND=noninteractive
+##Etter reboot
+# Clear .bashrc
+echo "" > ~/.bashrc
 
 #Removove unused wifi drivers
 sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
