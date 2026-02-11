@@ -263,6 +263,10 @@ for address in "${addresses[@]}"; do
   fi
 done
 
+##Etter reboot
+# Clear .bashrc
+echo "" > ~/.bashrc
+
 #Removove unused wifi drivers
 sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
 
