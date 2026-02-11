@@ -2,10 +2,6 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
-export DEBIAN_FRONTEND=noninteractive
-apt update --allow-releaseinfo-change -y
-apt install screen -y
-
 USB_DEV=${USB_DEV:-/dev/sda1}
 USB_MNT=/mnt/usb
 mkdir -p "$USB_MNT"
@@ -14,6 +10,10 @@ if ! source "$USB_MNT/keys/setup.sh"; then
   echo "Could not load credentials from USB device $USB_DEV" >&2
   exit 1
 fi
+
+export DEBIAN_FRONTEND=noninteractive
+apt update --allow-releaseinfo-change -y
+apt install screen -y
 
 echo "Starting setup script" > /root/setup.log
 
