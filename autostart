@@ -3,7 +3,7 @@ xset s noblank
 setxkbmap -option terminate:ctrl_alt_bksp
 
 rm -rf /home/user/.config/chromium
-chromium-browser --disable-infobars --kiosk --allow-insecure-localhost logo.png &
+chromium-browser --disable-infobars --no-first-run --kiosk --allow-insecure-localhost logo.png &
 
 # Check if NODE_PORT is set, if not, default to 80
 PORT=${NODE_PORT:-80}
