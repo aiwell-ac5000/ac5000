@@ -146,7 +146,7 @@ update_reboot() {
   echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
   echo "export user=$user" >> ~/.bashrc
   echo "export upwd=$upwd" >> ~/.bashrc
-  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
+  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh
   cat runupdate.sh >> ~/.bashrc
   green='\033[0;32m'
   clear='\033[0m'
