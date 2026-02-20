@@ -638,6 +638,11 @@ echo "export admin=$admin" >> ~/.bashrc
 echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
 echo "export user=$user" >> ~/.bashrc
 echo "export upwd=$upwd" >> ~/.bashrc
+# Persist SKIP_GPIO across reboots so that setup_gpio.sh remains skipped
+# on future updates if it was skipped during this run.
+if [ -n "${SKIP_GPIO:-}" ]; then
+  echo "export SKIP_GPIO=$SKIP_GPIO" >> ~/.bashrc
+fi
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
 rm update
 #Remove dev tools
