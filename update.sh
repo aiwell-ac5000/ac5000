@@ -453,10 +453,16 @@ rm /root/pipes/ENV.sh
 #Opsett av sikkerhet
 mkdir /root/keys
 
-rm setup_gpio.sh
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
-chmod +x setup_gpio.sh
-./setup_gpio.sh
+# Download and run GPIO setup unless SKIP_GPIO is set (e.g. for systems
+# that do not use the onboard digital I/O or need a custom GPIO configuration).
+if [ -z "${SKIP_GPIO:-}" ]; then
+  rm setup_gpio.sh
+  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/setup_gpio.sh
+  chmod +x setup_gpio.sh
+  ./setup_gpio.sh
+else
+  echo "SKIP_GPIO is set, skipping GPIO setup."
+fi
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/before_docker
 mv before_docker /etc/systemd/system/custom-before-docker.service
 systemctl enable custom-before-docker.service
