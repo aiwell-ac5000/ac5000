@@ -5,11 +5,11 @@ LOG_FILE="/var/log/syslog"
 MARKER_FILE="/var/log/network_recovery_marker"
 LOCK_FILE="/var/run/network_recovery.lock"
 NETWORK_LOG="/var/log/network_recovery.log"
+REBOOT_CONTROL_FILE="/usr/local/bin/reboot_on_network_recovery"
 ERROR_MSGS=("smsc95xx.*Error reading MII_ACCESS" \
             "smsc95xx.*Failed to read MII_BMSR" \
             "smsc95xx.*Failed to read reg index.*" \
             "dwc2.*dwc2_update_urb_state_abn.*trimming xfer length")
-PING_HOSTS=("8.8.8.8" "81.167.40.222")
 LOG_ACTIONS="/var/log/network_recovery.log"
 
 # Log a message
@@ -76,12 +76,31 @@ check_log_errors() {
     return 1
 }
 
-# Reboot the device
+# Reboot the device unless control file has value 'false' (/usr/local/bin/reboot_on_network_recovery)
 reboot_device() {
+    local reboot_allowed="true"
+
+    if [[ -f "$REBOOT_CONTROL_FILE" ]]; then
+        reboot_allowed="$(tr -d '[:space:]' < "$REBOOT_CONTROL_FILE" | tr '[:upper:]' '[:lower:]')"
+        log_action "Reboot control file found: value='$reboot_allowed'"
+    else
+        log_action "Reboot control file not found. Defaulting to reboot allowed."
+    fi
+
+    if [[ "$reboot_allowed" == "false" ]]; then
+        log_action "Reboot suppressed by $REBOOT_CONTROL_FILE."
+        return 0
+    fi
+
     log_action "Rebooting the device due to smsc95xx driver error..."
     sudo shutdown -r now
-    log_action "Reboot command issued, but this line might not be executed if the system shuts down."
 }
+
+#reboot_device() {
+#    log_action "Rebooting the device due to smsc95xx driver error..."
+#    sudo shutdown -r now
+#    log_action "Reboot command issued, but this line might not be executed if the system shuts down."
+#}
 
 # Main Logic
 main() {
