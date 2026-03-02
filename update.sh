@@ -191,6 +191,22 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
             echo "Core updated successfully - Will reboot now"
             update_reboot
         fi
+
+        echo "Updating imod"
+        run_techbase_update "timeout 240 softmgr update imod -b x500_6.6.72-beta"
+        softmgr_result=$?
+        if [ $softmgr_result -eq 1 ]; then
+            echo "imod package updated successfully"
+        fi
+
+        echo "Updating java"
+        run_techbase_update "timeout 240 softmgr update java -b x500_6.6.72-beta"
+        softmgr_result=$?
+        if [ $softmgr_result -eq 1 ]; then
+            echo "java package updated successfully"
+        fi
+
+        echo "Updating all"
         run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
         softmgr_result=$?
         if [ $softmgr_result -eq 1 ]; then
