@@ -2,6 +2,54 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
+echo "Running setup script, checking if all hosts are reachable via interfaces."
+
+PING_HOSTS=("google.com" "github.com" "archive.debian.org")
+
+check_hosts_default() {
+  for h in "${PING_HOSTS[@]}"; do
+    if ! ping -c 1 -W 3 "$h" >/dev/null 2>&1; then
+      return 1
+    fi
+  done
+  return 0
+}
+
+check_hosts_iface() {
+  local iface="$1"
+  for h in "${PING_HOSTS[@]}"; do
+    if ! ping -I "$iface" -c 1 -W 2 "$h" >/dev/null 2>&1; then
+      return 1
+    fi
+  done
+  return 0
+}
+
+# 1) If all pings succeed normally, skip failover and go to step 4
+if check_hosts_default; then
+  echo "All hosts reachable via default routing, skipping failover logic."
+else
+  echo "Some hosts unreachable via default route, trying eth1 ..."
+
+  # 2) Try via eth1; if this fails, keep eth0 up and exit update script
+  if ! check_hosts_iface "eth1"; then
+    echo "Hosts also unreachable via eth1, leaving eth0 up."
+    echo "BOTH INTERFACES FAILED - stopping script."
+    exit 1 # Exit with failure when ping via both interfaces fail
+  else
+    echo "Hosts reachable via eth1, checking via eth0 explicitly ..."
+
+    # 3) If eth1 works, test via eth0; if that fails, bring eth0 down
+    if ! check_hosts_iface "eth0"; then
+      echo "Eth0 cannot reach hosts while eth1 can, bringing eth0 down."
+      /sbin/ifconfig eth0 down
+    fi
+  fi
+fi
+
+# 4) Remaining portion of the script
+echo "Running remaining script..."
+
 USB_DEV=${USB_DEV:-/dev/sda1}
 USB_MNT=/mnt/usb
 mkdir -p "$USB_MNT"
