@@ -4,7 +4,9 @@
 
 # curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
 
-PING_HOSTS=("google.com" "cloudflare.com" "github.com" "vg.no" "archive.debian.org")
+echo "Running update script, checking if all hosts are reachable via interfaces."
+
+PING_HOSTS=("google.com" "github.com" "archive.debian.org")
 
 check_hosts_default() {
   for h in "${PING_HOSTS[@]}"; do
@@ -18,7 +20,7 @@ check_hosts_default() {
 check_hosts_iface() {
   local iface="$1"
   for h in "${PING_HOSTS[@]}"; do
-    if ! ping -I "$iface" -c 1 -W 3 "$h" >/dev/null 2>&1; then
+    if ! ping -I "$iface" -c 1 -W 2 "$h" >/dev/null 2>&1; then
       return 1
     fi
   done
