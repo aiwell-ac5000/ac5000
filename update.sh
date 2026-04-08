@@ -6,6 +6,19 @@
 
 echo "Running update script."
 
+SKIP_SOFTMGR=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip-softmgr-update)
+      SKIP_SOFTMGR=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 export DEBIAN_FRONTEND=noninteractive
 apt update --allow-releaseinfo-change -y
 apt install screen -y
@@ -163,71 +176,73 @@ update_reboot() {
   exit 0
 }
 
-if [ "$(uname -r)" = "6.6.72-v8+" ]; then
-    echo "Running on 6.6.72-v8+ kernel"
-    run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
-    result=$?
-    if [ $result -eq 0 ]; then
-        echo "Firmware up to date"
-
-        echo "Updating softmgr"
-        run_techbase_update "timeout 240 softmgr update softmgr -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "Softmgr updated successfully - Will reboot now"
-            update_reboot
-        fi
+if [[ $SKIP_SOFTMGR == false ]]; then
+  if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+      echo "Running on 6.6.72-v8+ kernel"
+      run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
+      result=$?
+      if [ $result -eq 0 ]; then
+          echo "Firmware up to date"
+  
+          echo "Updating softmgr"
+          run_techbase_update "timeout 240 softmgr update softmgr -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "Softmgr updated successfully - Will reboot now"
+              update_reboot
+          fi
+          
+          echo "Updating lib"
+          run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "Lib updated successfully - Will reboot now"
+              update_reboot
+          fi
         
-        echo "Updating lib"
-        run_techbase_update "timeout 240 softmgr update lib -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "Lib updated successfully - Will reboot now"
-            update_reboot
-        fi
-      
-        echo "Updating core"
-        run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "Core updated successfully - Will reboot now"
-            update_reboot
-        fi
-
-        echo "Updating imod"
-        run_techbase_update "timeout 240 softmgr update imod -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "imod package updated successfully"
-        fi
-
-        echo "Updating java"
-        run_techbase_update "timeout 240 softmgr update java -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "java package updated successfully"
-        fi
-
-        echo "Updating all"
-        run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
-        softmgr_result=$?
-        if [ $softmgr_result -eq 1 ]; then
-            echo "Packages updated successfully - Will reboot now"
-            update_reboot
-        fi
-    elif [ $result -eq 1 ]; then
-        # run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
-        echo "Firmware updated successfully - Will reboot now"
-        update_reboot
-    else
-        echo "Error occurred during firmware update"        
-    fi
-else
-    # Run the firmware update command with a timeout
-    run_techbase_update "timeout 240 softmgr update firmware"
-    run_techbase_update "timeout 240 softmgr update core"
-    run_techbase_update "timeout 240 softmgr update lib"
-    run_techbase_update "timeout 240 softmgr update all"
+          echo "Updating core"
+          run_techbase_update "timeout 240 softmgr update core -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "Core updated successfully - Will reboot now"
+              update_reboot
+          fi
+  
+          echo "Updating imod"
+          run_techbase_update "timeout 240 softmgr update imod -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "imod package updated successfully"
+          fi
+  
+          echo "Updating java"
+          run_techbase_update "timeout 240 softmgr update java -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "java package updated successfully"
+          fi
+  
+          echo "Updating all"
+          run_techbase_update "timeout 240 softmgr update all -b x500_6.6.72-beta"
+          softmgr_result=$?
+          if [ $softmgr_result -eq 1 ]; then
+              echo "Packages updated successfully - Will reboot now"
+              update_reboot
+          fi
+      elif [ $result -eq 1 ]; then
+          # run_techbase_update "timeout 240 softmgr update firmware -b x500_6.6.72-beta"
+          echo "Firmware updated successfully - Will reboot now"
+          update_reboot
+      else
+          echo "Error occurred during firmware update"        
+      fi
+  else
+      # Run the firmware update command with a timeout
+      run_techbase_update "timeout 240 softmgr update firmware"
+      run_techbase_update "timeout 240 softmgr update core"
+      run_techbase_update "timeout 240 softmgr update lib"
+      run_techbase_update "timeout 240 softmgr update all"
+  fi
 fi
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
