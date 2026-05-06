@@ -178,6 +178,23 @@ else
   echo "CM3 DIO enabled (active low), MODE pins set to input, DIO1..DIO4 forced to input via /gpioDIO symlinks"
 fi
 
+# -------- BTN (Push-button input) --------
+# CM4 only. A single push-button is wired to BCM GPIO 13. The exported sysfs
+# pin number depends on the kernel version: 525 for kernel >=6.6.32 (chip
+# base 512), 13 for older kernels (chip base 0). Exposed to userspace at
+# /gpioBTN/BTN1, mirroring the /gpioDIO convention.
+if [ "$CM_GEN" -eq 4 ]; then
+  if [ "$K_IS_GE_6_6_32" -eq 1 ]; then
+    BTN1=525
+  else
+    BTN1=13
+  fi
+  ensure_export "$BTN1"
+  ensure_dir    "$BTN1" in
+  ensure_symlink "/gpioBTN/BTN1" "/sys/class/gpio/gpio$BTN1"
+  echo "CM4 BTN1 mapped to gpio$BTN1; symlink /gpioBTN/BTN1 created"
+fi
+
 # -------- IIO (Industrial I/O) ADC symlink --------
 # The AC5000 has an ADC connected over I2C. Depending on the board revision
 # and configuration, the ADC may appear at one of several I2C addresses.

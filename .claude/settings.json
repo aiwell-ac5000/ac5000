@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash -n /home/roar/setupfiles/ac5000/setup_gpio.sh)"
+    ]
+  }
+}
