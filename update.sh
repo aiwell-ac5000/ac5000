@@ -626,6 +626,19 @@ mv before_docker /etc/systemd/system/custom-before-docker.service
 systemctl enable custom-before-docker.service
 systemctl start custom-before-docker.service
 
+# Factory-reset button watcher (CM4 only). Re-fetched on every update so the
+# unit and watcher script stay in sync with the repo.
+if [ "$platform" = "BCM2711" ]; then
+  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/btn_factory_reset.sh
+  chmod +x btn_factory_reset.sh
+  mv btn_factory_reset.sh /root/btn_factory_reset.sh
+  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/btn_factory_reset
+  mv btn_factory_reset /etc/systemd/system/custom-btn-factory-reset.service
+  systemctl daemon-reload
+  systemctl enable custom-btn-factory-reset.service
+  systemctl restart custom-btn-factory-reset.service
+fi
+
 
 #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/AO.py
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml

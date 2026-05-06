@@ -1,0 +1,20 @@
+[Unit]
+Description=AC5000 factory-reset button watcher (CM4)
+After=custom-before-docker.service docker.service
+Wants=custom-before-docker.service docker.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /root/btn_factory_reset.sh
+Restart=on-failure
+RestartSec=5
+User=root
+Group=root
+# Optional overrides:
+#Environment=BTN_PRESSED=0
+#Environment=BTN_HOLD_SECONDS=10
+#Environment=BTN_COMPOSE_DIR=/root
+#Environment=BTN_CONTEXT_DIR=/root/storage/context
+
+[Install]
+WantedBy=multi-user.target
