@@ -13,6 +13,27 @@ if ! source "$USB_MNT/keys/setup.sh"; then
   exit 1
 fi
 
+# --- Fetch shared helpers ---
+# common.sh / hardware.sh / network.sh / systemd_units.sh hold the code
+# that used to be duplicated between setup.sh and update.sh. We download
+# each file at runtime and source it before any of the helper functions
+# (run_techbase_update, cm_detect, install_*) are invoked below.
+fetch_shared() {
+  local name="$1"
+  local url="https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/$name"
+  local dest="/tmp/$name"
+  if ! wget -q -O "$dest" "$url"; then
+    printf 'FATAL: failed to fetch %s\n' "$url" >&2
+    exit 1
+  fi
+  # shellcheck source=/dev/null
+  source "$dest"
+}
+fetch_shared common.sh
+fetch_shared hardware.sh
+fetch_shared network.sh
+fetch_shared systemd_units.sh
+
 export DEBIAN_FRONTEND=noninteractive
 apt update --allow-releaseinfo-change -y
 apt install screen -y
@@ -91,8 +112,7 @@ else
     else
     printf "p\nd\n3\nn\np\n3\n2785280\n\nN\nw\n" | fdisk /dev/mmcblk0
     fi
-    green='\033[0;32m'
-    clear='\033[0m'
+    # green/clear come from common.sh, sourced near the top of this script.
     printf "\n${green}Forsøker å utvide lagringsplassen. Systemet vil starte på nytt av seg selv${clear}!"
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"   
     echo "0" > setup
@@ -107,193 +127,17 @@ curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster
 apt-get update --allow-releaseinfo-change -y
 
 echo "Installing i2c tools" > /root/setup.log
-# Detect the Compute Module generation from /proc/cpuinfo Model line.
-# Field 7 is "3" or "4" on both kernel 5 and kernel 6; the older
-# "Hardware: BCM2711/BCM2837" line is no longer emitted on kernel 6.
-cm=$(grep "Model" /proc/cpuinfo | awk '{print $7}')
-
-# Default to CM3 I2C bus; override on CM4.
-i2c_bus=0
-setenv I2C_ADDRESS_EXCARD 0
-if [ "$cm" = "4" ]; then
-  i2c_bus=1
-  setenv I2C_ADDRESS_EXCARD 1
-fi
+# Detect Compute Module generation, set $cm and $i2c_bus. Helper from hardware.sh.
+cm_detect
 
 echo "Setting up relays" > /root/setup.log
-# Define the I2C addresses to check (expressed without "0x" prefix)
-addresses=("20" "21" "22")
-#The previous line causes the error sh: 61: Syntax error: "(" unexpected
-
-# Function to check the presence of a board at an address
-check_board_presence() {
-  local address="$1"
-  i2cget -y "$i2c_bus" "0x$address" >/dev/null 2>&1
-  local exit_code=$?
-  if [ $exit_code -eq 0 ] || [ $exit_code -eq 1 ]; then
-    return 0  # Return 0 if i2cget returns 0 or 1
-  else
-    return $exit_code  # Return the actual exit code from i2cget
-  fi
-}
 
 echo "Techbase update" > /root/setup.log
-
-# ---------------------------------------------------------------------------
-# _kill_tree
-#
-# Send a signal to a process and every descendant of it.
-#
-# WHY: when bash is waiting on a child (e.g. softmgr blocked in `sleep`),
-# its default SIGTERM handler does not run until the wait completes.
-# Killing only the top-level pid therefore does not stop the workload.
-# Walking the tree depth-first and signalling leaves first lets the
-# workload actually terminate so wait() can return in the parent.
-# ---------------------------------------------------------------------------
-_kill_tree() {
-  local pid="$1" sig="$2" child
-  for child in $(pgrep -P "$pid" 2>/dev/null); do
-    _kill_tree "$child" "$sig"
-  done
-  kill -"$sig" "$pid" 2>/dev/null
-}
-
-# ---------------------------------------------------------------------------
-# run_techbase_update
-#
-# Run a softmgr command (or any long-running shell command) under an
-# inactivity (idle) watchdog instead of a fixed wall-clock timeout.
-#
-# WHY: softmgr update operations vary from a few seconds (nothing to do)
-# to many minutes (large firmware bundles on a slow link). A fixed
-# `timeout 240` cannot tell a slow but healthy download from a frozen
-# process: both look identical from the outside. The fix is to watch
-# the *output stream* instead of the clock. A healthy softmgr emits
-# progress lines (percentages, dots, status messages); a hung one is
-# silent. We reset the watchdog on every line and only kill the
-# process when it has been silent for $idle seconds.
-#
-# A second, generous wall-clock cap ($hard) is kept as a safety net so
-# a process that prints garbage forever cannot run unboundedly.
-#
-# Arguments:
-#   $1  command string to run (NO `timeout` prefix; this helper owns timing)
-#   $2  idle timeout in seconds   (default: $IDLE_TIMEOUT or 30)
-#   $3  hard timeout in seconds   (default: $HARD_TIMEOUT or 900)
-#
-# Defaults rationale:
-#   - 30 s of total silence from a tool that is supposed to be printing
-#     progress is a strong signal that it is hung, not just slow.
-#   - 15 min total wall time is more than any healthy softmgr update
-#     should ever need; beyond that, something is wrong regardless of
-#     what is being printed.
-#
-# Return codes:
-#     0  command succeeded and reported nothing to do
-#     1  command succeeded and installed updates (caller may reboot),
-#        OR command failed in some other way (mirrors the original helper)
-#   124  hard timeout: total runtime exceeded $hard seconds
-#   137  idle timeout: no output for $idle seconds (treated as hung)
-# ---------------------------------------------------------------------------
-run_techbase_update() {
-  local cmd="$1"
-  local idle="${2:-${IDLE_TIMEOUT:-30}}"
-  local hard="${3:-${HARD_TIMEOUT:-900}}"
-  local output="" line rc start now elapsed cmd_pid
-
-  # Launch the command as a coprocess so we can read its stdout one line
-  # at a time from the parent shell. `stdbuf -oL -eL` forces line-buffered
-  # output, otherwise libc may hold up to ~4 KB before flushing and the
-  # watchdog would misfire on a healthy but quiet command. `2>&1` folds
-  # stderr into the stream we are watching, so error diagnostics also
-  # count as a heartbeat.
-  coproc CMD { stdbuf -oL -eL bash -c "$cmd" 2>&1; }
-  cmd_pid=$CMD_PID
-
-  # Duplicate the coprocess read end into a file descriptor that we own
-  # (`read_fd`). Bash automatically unsets CMD[0] and closes its
-  # underlying fd as soon as the child exits. Without our own duplicate,
-  # the next `read` would fail with "Bad file descriptor" the moment
-  # softmgr finishes, even if there is still buffered output to drain.
-  # We close `read_fd` ourselves before every return path below.
-  local read_fd
-  exec {read_fd}<&"${CMD[0]}"
-
-  start=$(date +%s)
-
-  # Read a line at a time. `read -t $idle` blocks for at most $idle
-  # seconds. If a line arrives within that window the command is alive
-  # and we re-enter the loop (the watchdog is implicitly reset). If the
-  # window expires `read` exits non-zero and we drop out of the loop.
-  while IFS= read -t "$idle" -ru "$read_fd" line; do
-    # Stream the line live to the operator's terminal AND keep a copy
-    # so we can grep the captured output for "No updates available" /
-    # "ACTION=none" once the command has finished. The trailing $clear
-    # bounds any unbalanced ANSI colour escape from softmgr to a single
-    # line, so a stray "green-on" cannot latch the terminal into green
-    # for everything we print afterwards.
-    printf '%s%b\n' "$line" "$clear"
-    output+="$line"$'\n'
-
-    # Enforce the absolute upper bound. Even a perfectly chatty command
-    # should not run for more than $hard seconds without us intervening.
-    now=$(date +%s)
-    elapsed=$(( now - start ))
-    if (( elapsed >= hard )); then
-      printf '\n%bHard timeout (%ss) reached.%b\n' "$red" "$hard" "$clear" >&2
-      _kill_tree "$cmd_pid" TERM   # ask politely first (whole tree)
-      sleep 5
-      _kill_tree "$cmd_pid" KILL   # then enforce
-      wait "$cmd_pid" 2>/dev/null
-      exec {read_fd}<&-
-      return 124
-    fi
-  done
-
-  # The loop ends for one of two reasons: read hit EOF (the command
-  # exited and closed its end of the pipe) or read hit the idle timeout
-  # (no output for $idle seconds). Note: `$?` after a `while CMD; do
-  # BODY; done` reflects the body's last exit, not the failing CMD, so
-  # we cannot use it here. We disambiguate by asking the kernel whether
-  # the child is still alive: if it is, the only thing that could have
-  # broken us out of the loop is the idle timeout, i.e. a hang.
-  if kill -0 "$cmd_pid" 2>/dev/null; then
-    printf '\n%bNo output for %ss; treating as hung.%b\n' "$red" "$idle" "$clear" >&2
-    _kill_tree "$cmd_pid" TERM
-    sleep 5
-    _kill_tree "$cmd_pid" KILL
-    wait "$cmd_pid" 2>/dev/null
-    exec {read_fd}<&-
-    return 137
-  fi
-
-  # The command finished on its own; collect its real exit status and
-  # release our duplicate of the read end before inspecting the captured
-  # output.
-  wait "$cmd_pid"
-  rc=$?
-  exec {read_fd}<&-
-
-  # Same outcome contract as the original helper: inspect the captured
-  # output for the vendor's "no work to do" markers, otherwise treat a
-  # successful exit as "updates were installed, caller may reboot".
-  if [ $rc -eq 0 ]; then
-    if [[ "$output" == *"No updates available"* || "$output" == *"ACTION=none"* ]]; then
-      echo "Alt er oppdatert"
-      return 0
-    fi
-    echo "Nye oppdateringer er installert. Fikser innstillinger."
-    return 1
-  fi
-  printf '\n%bKlarte ikke å utføre kommandoen: %s%b\n' "$red" "$cmd" "$clear" >&2
-  return 1
-}
 
 update_reboot() {
   wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
   mv runsetup.sh ~/.bashrc
-  green='\033[0;32m'
-  clear='\033[0m'
+  # green/clear come from common.sh, sourced near the top of this script.
   printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
   echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
   echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -384,8 +228,7 @@ if [ ! -f restored ]; then
     wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
     mv runsetup.sh ~/.bashrc
     echo "Settings restored successfully - Will reboot now"
-    green='\033[0;32m'
-    clear='\033[0m'
+    # green/clear come from common.sh, sourced near the top of this script.
     printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
     echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
     echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -401,18 +244,8 @@ if [ ! -f restored ]; then
 fi
 rm restored
 
-# Loop to check each address
-for address in "${addresses[@]}"; do
-  if check_board_presence "$address"; then
-    echo "Board found at address $address"
-    case "$address" in
-      "20") setenv EX_CARD_1 4R ;;
-      "21") setenv EX_CARD_2 4R ;;
-      "22") setenv EX_CARD_3 4R ;;
-      *) echo "Unknown board at address 0x$address";;
-    esac
-  fi
-done
+# Probe the three relay-board I2C addresses (helper from hardware.sh).
+detect_relay_boards
 #bash ex_card_configure.sh &
 # curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/config.sh | sh
 
@@ -603,28 +436,8 @@ wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.
 # This command works, and the file is downloaded
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/daemon.json
 
-#Sette up symlink for å hindre problemer med kernel 5.10/6.6
-rm -f /iio_device0
-# Possible I2C device addresses for iio:device0 symlink setup (hexadecimal, without leading 0x)
-addresses=("6c" "6b" "6d" "e" "6f")
-found=0
-for address in "${addresses[@]}"; do
-  FOLDER="/sys/bus/i2c/devices/0-00$address/iio:device0"
-  if [ -d "$FOLDER" ]; then
-    echo "Mappe '$FOLDER' eksisterer."
-    ln -s "$FOLDER" /iio_device0
-    found=1
-    break
-  else
-    echo "Mappe '$FOLDER' eksisterer ikke."
-  fi
-done
-if [ $found -eq 0 ]; then
-  echo "Ingen gyldige i2c enheter funnet for å opprette symlink."
-  # Create /root/busfolder
-  mkdir -p /root/busfolder
-  ln -s "/root/busfolder" /iio_device0
-fi
+# Sette up symlink for å hindre problemer med kernel 5.10/6.6 (helper from hardware.sh)
+install_iio_symlink
 
 #File is not moved, no error message is displayed
 mv daemon.json /etc/docker/daemon.json
@@ -653,30 +466,9 @@ fi
 
 echo "1 rt2" >>  /etc/iproute2/rt_tables
 
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.exit-hook
-if [ "$(uname -r)" = "6.6.72-v8+" ]; then
-    mv dhcpcd.exit-hook /etc/NetworkManager/dispatcher.d/99-eth1-routes
-    chmod 755 /etc/NetworkManager/dispatcher.d/99-eth1-routes
-    chmod +x /etc/NetworkManager/dispatcher.d/99-eth1-routes
-    chown root:root /etc/NetworkManager/dispatcher.d/99-eth1-routes
-    nmcli connection modify "Wired connection 1" ipv4.route-metric 50
-    nmcli connection modify "Wired connection 2" ipv4.route-metric 100
-    nmcli connection modify "Wired connection 2" ipv4.method manual ipv4.addresses 192.168.0.10/24 ipv4.gateway 192.168.0.1 ipv4.dns 8.8.8.8
-    nmcli connection up "Wired connection 1"
-    nmcli connection up "Wired connection 2"
-   
-    systemctl restart NetworkManager
-else
-    mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
-fi
-
-# touch /etc/network/if-up.d/ipchange
-echo "#!/bin/bash" > /etc/network/if-up.d/ipchange
-echo 'if [ "$IFACE" = lo ]; then' >> /etc/network/if-up.d/ipchange
-echo 'exit 0' >> /etc/network/if-up.d/ipchange
-echo 'fi' >> /etc/network/if-up.d/ipchange
-echo "ip addr list eth0 | grep 'inet ' | cut -d' ' -f6 | cut -d/ -f1 > /root/pipes/ip" >> /etc/network/if-up.d/ipchange
-chmod 755 /etc/network/if-up.d/ipchange
+# dhcpcd / ipchange / recovery-cron installers come from network.sh.
+install_dhcpcd_exit_hook
+install_ipchange_script
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
   wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/dhcpcd.conf
@@ -685,23 +477,7 @@ if [ "$(uname -r)" != "6.6.72-v8+" ]; then
   timeout 20 service dhcpcd restart
 fi
 
-wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/network_recovery.sh
-chmod +x network_recovery.sh
-mv network_recovery.sh /usr/local/bin/network_recovery.sh
-(crontab -l | grep -Fq "/usr/local/bin/network_recovery.sh") || (crontab -l; echo "*/30 * * * * /usr/local/bin/network_recovery.sh") | crontab -
-
-tee /etc/logrotate.d/network_recovery > /dev/null <<EOF
-/var/log/network_recovery.log
-{
-        rotate 0
-        maxsize 2M
-        hourly
-        missingok
-        notifempty
-        delaycompress
-        compress
-}
-EOF
+install_network_recovery_cron
 
 #cd /etc
 #touch udev/rules.d/99-eth-mac.rules
@@ -712,35 +488,9 @@ raspi-config nonint do_hostname $host
 #raspi-config nonint do_boot_behaviour B2
 
 
-# Define the override directory and file
-OVERRIDE_DIR="/etc/systemd/system/docker.service.d"
-OVERRIDE_FILE="${OVERRIDE_DIR}/override.conf"
-
-# Ensure the override directory exists
-echo "Creating override directory if it doesn't exist..."
-sudo mkdir -p "$OVERRIDE_DIR"
-
-# Write the configuration to the override file
-echo "Writing configuration to ${OVERRIDE_FILE}..."
-sudo bash -c "cat > ${OVERRIDE_FILE}" <<EOL
-[Unit]
-After=mosquitto.service
-Requires=mosquitto.service
-EOL
-
-touch /etc/systemd/system/splashscreen.service
-
-echo "[Unit]" > /etc/systemd/system/splashscreen.service
-echo "Description=Splash screen" >> /etc/systemd/system/splashscreen.service
-echo "DefaultDependencies=no" >> /etc/systemd/system/splashscreen.service
-echo "After=local-fs.target" >> /etc/systemd/system/splashscreen.service
-echo "[Service]" >> /etc/systemd/system/splashscreen.service
-echo "ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose -a /root/logo.png" >> /etc/systemd/system/splashscreen.service
-echo "StandardInput=tty" >> /etc/systemd/system/splashscreen.service
-echo "StandardOutput=tty" >> /etc/systemd/system/splashscreen.service
-echo "[Install]" >> /etc/systemd/system/splashscreen.service
-echo "WantedBy=sysinit.target" >> /etc/systemd/system/splashscreen.service
-systemctl enable splashscreen
+# systemd unit installers come from systemd_units.sh.
+install_docker_override
+install_splashscreen_service
 
 echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -755,8 +505,7 @@ apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 apt autoremove -y && apt clean -y
 
-green='\033[0;32m'
-clear='\033[0m'
+# green/clear come from common.sh, sourced near the top of this script.
 printf "\n${green}Setup executed successfully. AC5000 IS SUPPOSED TO REBOOT. THIS IS NORMAL.${clear}!"
 printf "\n${green}Progammering ble korrekt utført. DET ER MENINGEN AT AC0500 SKAL STARTE PÅ NYTT AV SEG SELV ETTER PROGRAMMERING. DETTE ER HELT NORMALT${clear}!"
 rm /root/setup
