@@ -228,8 +228,11 @@ run_techbase_update() {
   while IFS= read -t "$idle" -ru "$read_fd" line; do
     # Stream the line live to the operator's terminal AND keep a copy
     # so we can grep the captured output for "No updates available" /
-    # "ACTION=none" once the command has finished.
-    printf '%s\n' "$line"
+    # "ACTION=none" once the command has finished. The trailing $clear
+    # bounds any unbalanced ANSI colour escape from softmgr to a single
+    # line, so a stray "green-on" cannot latch the terminal into green
+    # for everything we print afterwards.
+    printf '%s%b\n' "$line" "$clear"
     output+="$line"$'\n'
 
     # Enforce the absolute upper bound. Even a perfectly chatty command
