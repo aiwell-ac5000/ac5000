@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bash -n /home/roar/setupfiles/ac5000/setup_gpio.sh)"
+      "Bash(bash -n /home/roar/setupfiles/ac5000/setup_gpio.sh)",
+      "Bash(grep -nE '\\\\$platform|BCM2711|\"Hardware\"' /home/roar/setupfiles/ac5000/setup.sh /home/roar/setupfiles/ac5000/update.sh)",
+      "Bash(grep -nE '\\\\$cm|cm=\\\\$' /home/roar/setupfiles/ac5000/setup.sh /home/roar/setupfiles/ac5000/update.sh)"
     ]
   }
 }

@@ -107,20 +107,14 @@ curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster
 apt-get update --allow-releaseinfo-change -y
 
 echo "Installing i2c tools" > /root/setup.log
-# Detect the platform (CM3 or CM4)
-platform=$(cat /proc/cpuinfo | grep "Hardware" | awk '{print $3}')
+# Detect the Compute Module generation from /proc/cpuinfo Model line.
+# Field 7 is "3" or "4" on both kernel 5 and kernel 6; the older
+# "Hardware: BCM2711/BCM2837" line is no longer emitted on kernel 6.
+cm=$(grep "Model" /proc/cpuinfo | awk '{print $7}')
 
-# Define the default I2C bus number (CM3)
+# Default to CM3 I2C bus; override on CM4.
 i2c_bus=0
 setenv I2C_ADDRESS_EXCARD 0
-
-# If the platform is CM4, change the I2C bus number BCM2711
-if [ "$platform" = "BCM2711" ]; then
-  i2c_bus=1
-  setenv I2C_ADDRESS_EXCARD 1
-fi
-
-cm=$(cat /proc/cpuinfo | grep "Model" | awk '{print $7}')
 if [ "$cm" = "4" ]; then
   i2c_bus=1
   setenv I2C_ADDRESS_EXCARD 1
@@ -590,7 +584,7 @@ systemctl start custom-before-docker.service
 
 # Factory-reset button watcher (CM4 only). The button is on BCM GPIO 13,
 # wired only on CM4 hardware; on CM3 the same line is already used as DIO2.
-if [ "$platform" = "BCM2711" ]; then
+if [ "$cm" = "4" ]; then
   wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/btn_factory_reset.sh
   chmod +x btn_factory_reset.sh
   mv btn_factory_reset.sh /root/btn_factory_reset.sh
