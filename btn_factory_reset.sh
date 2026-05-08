@@ -51,7 +51,7 @@ fi
 log "watching $VALUE_FILE (pressed level=$PRESSED, hold=${HOLD_SECONDS}s, poll=${POLL_SECONDS}s)"
 
 factory_reset() {
-  npe +LED2
+  npe +LED2  
   log "${HOLD_SECONDS}-second hold confirmed; starting factory reset"
 
   if [ -f "$COMPOSE_DIR/docker-compose.yml" ]; then
@@ -70,6 +70,9 @@ factory_reset() {
   else
     log "WARN: $COMPOSE_DIR/docker-compose.yml missing; skipping compose up"
   fi
+
+  rm /var/log/*.gz
+  rm /var/log/*.[1-9]
 
   log "rebooting"
   /sbin/reboot
