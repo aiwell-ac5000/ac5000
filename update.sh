@@ -265,6 +265,7 @@ apt autoremove -y
 
 apt-get update --allow-releaseinfo-change -y
 #Oppsett GUI
+apt -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --fix-broken install
 apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -y
 # apt-get install --no-install-recommends chromium-browser -y
 #apt-get purge docker docker-engine docker.io containerd runc -y
