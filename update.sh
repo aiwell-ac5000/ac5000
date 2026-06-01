@@ -457,6 +457,7 @@ systemctl start custom-before-docker.service
 # Factory-reset button watcher (CM4 only). Re-fetched on every update so the
 # unit and watcher script stay in sync with the repo.
 if [ "$cm" = "4" ]; then
+  rm btn_factory_reset*
   wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/btn_factory_reset.sh
   chmod +x btn_factory_reset.sh
   mv btn_factory_reset.sh /root/btn_factory_reset.sh
