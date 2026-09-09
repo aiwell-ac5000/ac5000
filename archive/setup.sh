@@ -2,39 +2,6 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
-# ver_ge: version comparison helper. Returns true (0) if $1 >= $2 using
-# semantic version sorting. Used to detect whether the running kernel is
-# at or above version 6.6.32, where GPIO base numbering changed.
-ver_ge() { [ "$(printf '%s\n' "$2" "$1" | sort -V | head -n1)" = "$2" ]; }  # $1 >= $2 ?
-
-# Capture the running kernel release string (e.g. "6.6.45") for version checks.
-KREL="$(uname -r)"
-K_IS_GE_6_6_32=0; ver_ge "$KREL" "6.6.32" && K_IS_GE_6_6_32=1
-
-# Read the hardware model string from the device tree to determine whether
-# this is a CM3 or CM4. The file may contain null bytes, so tr strips them.
-# Falls back to CM4 if the model string is unrecognised.
-MODEL="$(tr -d '\0' </sys/firmware/devicetree/base/model 2>/dev/null || true)"
-case "$MODEL" in
-  *"Compute Module 4"*) CM_GEN=4 ;;
-  *"Compute Module 3 Plus"*) CM_GEN=3 ;;
-  *"Compute Module 3"*) CM_GEN=3 ;;
-  *) CM_GEN=4 ;;
-esac
-echo "Detected model: $MODEL (CM_GEN=$CM_GEN), kernel=$KREL (>=6.6.32: $K_IS_GE_6_6_32)"
-
-# Exit if CM3
-if [ "$CM_GEN" -eq 3 ]; then
-  echo "CM3 detected. Exiting setup script."
-  exit 0
-fi
-
-# IF NOT AARCH64 (32 BIT deperecated) then exit
-if [ "$(uname -m)" != "aarch64" ]; then
-  echo "32-bit architecture detected. Exiting setup script."
-  exit 0
-fi
-
 echo "Running setup script."
 
 USB_DEV=${USB_DEV:-/dev/sda1}
