@@ -31,6 +31,9 @@ if [ "$CM_GEN" -eq 3 ]; then
   exit 0
 fi
 
+# DOwnload and run registry-login.sh to authenticate with the container registry.
+curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
+
 # eXIT IF NOT AARCH64 (32 BIT deperecated)
 if [ "$(uname -m)" != "aarch64" ]; then
   echo "Non-aarch64 architecture detected. Exiting setup script."
