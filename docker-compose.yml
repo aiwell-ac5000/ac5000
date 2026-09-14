@@ -16,7 +16,7 @@ services:
         max-file: "1"
         compress: "false" 
   node-red:
-    image: npm.aiwell.no/node-red-ac5000:latest
+    image: containers.aiwell.no/node-red-ac5000:latest
     container_name: root-node-red-1
     restart: unless-stopped
     user: root
