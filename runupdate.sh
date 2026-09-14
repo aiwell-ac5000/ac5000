@@ -1,6 +1,31 @@
+# This file is appended to root's ~/.bashrc by update_reboot so the update
+# resumes automatically after a reboot. Debian sources ~/.bashrc for
+# non-interactive ssh commands too, so the guard below decides who actually
+# drives the update.
 if [ -z "${STY:-}" ]; then
+  # Only the tty1 autologin console resumes the update. Every other login
+  # gets a normal shell: without this, `ssh host cmd` died with "Must be
+  # connected to a terminal" (exec screen with no tty) and `ssh -t` was
+  # trapped in the wait loop below, which is what made a stuck update
+  # impossible to fix remotely.
+  if [ "$(tty 2>/dev/null)" != "/dev/tty1" ]; then
+    return 0 2>/dev/null || exit 0
+  fi
   exec screen -S ac5000-update bash -lc "source ~/.bashrc"
 fi
+
+# Put the login back to normal: drop the hook from ~/.bashrc (the marker is
+# written by update_reboot just before this file is appended), hand tty1
+# back to `user`, and clear the update flag. Used whenever we decide the
+# update is not going to resume, so no login is left waiting forever.
+restore_normal_login() {
+  [ -f /root/.bashrc ] && sed -i '/^# --- ac5000 runupdate ---$/,$d' /root/.bashrc
+  echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  systemctl daemon-reload 2>/dev/null
+  rm -f /root/update /root/update_reboots
+}
 
 PING_HOSTS=("google.com" "github.com" "archive.debian.org")
 
@@ -71,19 +96,42 @@ while [ "$elapsed" -lt "$wait_limit" ]; do
 done
 
 if [ "$server_ready" -eq 0 ]; then
-    if [ "$(cat update)" = "1" ]; then
-        while [ "$(cat update)" = "1" ]; do
-            echo "Waiting for setup to complete..."
+    if [ "$(cat /root/update 2>/dev/null)" = "1" ]; then
+        # Another shell is running the update. Wait for it, but bounded:
+        # an unbounded wait here is what left every login printing
+        # "Waiting for setup to complete..." forever after a run died.
+        waited=0
+        wait_cap=${UPDATE_WAIT_CAP:-1800}
+        while [ "$(cat /root/update 2>/dev/null)" = "1" ]; do
+            echo "Waiting for setup to complete... (${waited}s)"
             sleep 2
+            waited=$((waited + 2))
+            if [ "$waited" -ge "$wait_cap" ]; then
+                echo "Update did not complete within ${wait_cap}s; restoring normal login."
+                restore_normal_login
+                exit 0
+            fi
         done
         echo "Update completed, starting normal operation."
         reboot
         exit 0
     else
-        echo "1" > update
+        echo "1" > /root/update
         echo "Setup server is ready, running update script..."
         curl -sSL ac5000update.aiwell.no | bash
-    fi     
+        # A successful update.sh reboots and never returns here. If it did
+        # return, decide from the flag: "0" means update_reboot already
+        # asked for a reboot, so just wait for it. Anything else means the
+        # run died before rebooting, so restore a normal login instead of
+        # leaving the hook armed and every future login stuck waiting.
+        if [ "$(cat /root/update 2>/dev/null)" = "0" ]; then
+            echo "Reboot pending..."
+            sleep 60
+        else
+            echo "update.sh exited without rebooting; restoring normal login."
+            restore_normal_login
+        fi
+    fi
 else
   echo "Setup server did not respond within ${wait_limit}s"
 fi

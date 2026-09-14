@@ -170,19 +170,47 @@ echo "Setting up relays" > /root/setup.log
 
 echo "Techbase update" > /root/setup.log
 
+# Ledger of reboots taken within one setup run (one line per reboot), so a
+# stage that never converges cannot reboot the device indefinitely. See the
+# matching guard in update.sh.
+SETUP_REBOOT_LEDGER=/root/setup_reboots
+MAX_SETUP_REBOOTS=7
+
+# Bounded, resumable reboot between softmgr stages. $1 is the stage name
+# (firmware/softmgr/lib/core/all) recorded in the ledger.
 update_reboot() {
-  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh
-  mv runsetup.sh ~/.bashrc
+  local stage="${1:-unknown}"
+  local count
+  count=$(wc -l < "$SETUP_REBOOT_LEDGER" 2>/dev/null || echo 0)
+  if [ "$count" -ge "$MAX_SETUP_REBOOTS" ]; then
+    printf '\n%bReboot-grense nadd (%s reboots, stage=%s). Fortsetter uten reboot.%b\n' \
+      "$red" "$count" "$stage" "$clear" >&2
+    rm -f "$SETUP_REBOOT_LEDGER"
+    return 1
+  fi
+  echo "$(date '+%F %T') $stage" >> "$SETUP_REBOOT_LEDGER"
+
+  # -O so a failed fetch cannot leave runsetup.sh.1, .2, ... behind; and do
+  # not reboot at all if we could not get the resume hook, because nothing
+  # would pick the setup back up afterwards.
+  if ! wget -q -O /tmp/runsetup.sh https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runsetup.sh || [ ! -s /tmp/runsetup.sh ]; then
+    printf '\n%bKunne ikke hente runsetup.sh; avbryter uten reboot.%b\n' "$red" "$clear" >&2
+    rm -f "$SETUP_REBOOT_LEDGER"
+    return 1
+  fi
+  mv /tmp/runsetup.sh ~/.bashrc
   # green/clear come from common.sh, sourced near the top of this script.
   printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
   echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
   echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
   echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    
+
   echo "0" > setup
   sleep 5
   reboot
-  exit 0
+  # No `exit 0` after `reboot`: it returns immediately, and exiting lets
+  # getty respawn and re-arm the hook before shutdown lands.
+  sleep 60
 }
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
@@ -199,7 +227,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         softmgr_result=$?
         if [ $softmgr_result -eq 1 ]; then
             echo "Softmgr updated successfully - Will reboot now"
-            update_reboot
+            update_reboot softmgr
+        elif [ $softmgr_result -ne 0 ]; then
+            echo "Softmgr update failed (rc=$softmgr_result) - not rebooting"
         fi
         
         echo "Updating lib"
@@ -207,7 +237,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         softmgr_result=$?
         if [ $softmgr_result -eq 1 ]; then
             echo "Lib updated successfully - Will reboot now"
-            update_reboot
+            update_reboot lib
+        elif [ $softmgr_result -ne 0 ]; then
+            echo "Lib update failed (rc=$softmgr_result) - not rebooting"
         fi
       
         echo "Updating core"
@@ -215,7 +247,9 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         softmgr_result=$?
         if [ $softmgr_result -eq 1 ]; then
             echo "Core updated successfully - Will reboot now"
-            update_reboot
+            update_reboot core
+        elif [ $softmgr_result -ne 0 ]; then
+            echo "Core update failed (rc=$softmgr_result) - not rebooting"
         fi
 
         echo "Updating imod"
@@ -237,13 +271,15 @@ if [ "$(uname -r)" = "6.6.72-v8+" ]; then
         softmgr_result=$?
         if [ $softmgr_result -eq 1 ]; then
             echo "Packages updated successfully - Will reboot now"
-            update_reboot
+            update_reboot all
+        elif [ $softmgr_result -ne 0 ]; then
+            echo "Package update failed (rc=$softmgr_result) - not rebooting"
         fi
     elif [ $result -eq 1 ]; then
         echo "Firmware updated successfully - Will reboot now"
-        update_reboot
+        update_reboot firmware
     else
-        echo "Error occurred during firmware update"        
+        echo "Error occurred during firmware update (rc=$result) - not rebooting"        
     fi
 else
     # Older kernel branch: the helper still owns timing, so the bare

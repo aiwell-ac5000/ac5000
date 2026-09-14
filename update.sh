@@ -102,6 +102,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Reset the between-stage reboot ledger at the start of a fresh run. On a
+# resume, runupdate.sh has set /root/update=1 before re-invoking us, so the
+# ledger is kept and the reboot cap counts across the whole sequence.
+[ -f /root/update ] || rm -f /root/update_reboots
+
 export DEBIAN_FRONTEND=noninteractive
 apt update --allow-releaseinfo-change -y
 apt install screen -y
@@ -205,7 +210,16 @@ docker image rm roarge/node-red-ac5000 -f
 docker image rm ghcr.io/aiwell-ac5000/node-red-ac5000:beta -f
 docker image rm ghcr.io/aiwell-ac5000/fw-ac5000:beta -f
 
-yes | docker system prune
+# Remove every :beta image on any registry. The hardcoded list above
+# missed the containers.aiwell.no/*:beta tags that filled the disk and
+# starved the softmgr stages. All containers are down here, so nothing in
+# use is removed.
+docker images --format '{{.Repository}}:{{.Tag}}' | grep ':beta$' | xargs -r -n1 docker image rm -f
+
+# `-a` so unused tagged images go too (plain prune keeps them). Everything
+# needed is re-pulled from the compose file below. Frees the space the
+# softmgr stages check for before installing.
+yes | docker system prune -a
 
 rm /var/log/*.gz
 rm /var/log/*.[1-9]
@@ -222,34 +236,88 @@ mv dhcpcd.conf /etc/dhcpcd.base
 cp /etc/dhcpcd.conf dhcpcd.backup
 fi
 
-update_reboot() {
-  echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
-  echo "alias backup_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
-  echo "alias restore_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'" >> ~/.bashrc
-  echo "alias fetch_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'" >> ~/.bashrc
-  ## env var for TOKEN
-  echo "export TOKEN_PART1=$TOKEN_PART1" >> ~/.bashrc
-  echo "export TOKEN_PART2=$TOKEN_PART2" >> ~/.bashrc
-  # USERNAME
-  echo "export USERNAME=$USERNAME" >> ~/.bashrc
-  echo "export PASSWORD=$PASSWORD" >> ~/.bashrc
-  echo "export admin=$admin" >> ~/.bashrc
-  echo "export admin_pwd=$admin_pwd" >> ~/.bashrc
-  echo "export user=$user" >> ~/.bashrc
-  echo "export upwd=$upwd" >> ~/.bashrc
-  wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh
-  cat runupdate.sh >> ~/.bashrc
-  green='\033[0;32m'
-  clear='\033[0m'
-  printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+# Ledger of reboots taken within one update run (one line per reboot).
+# A legitimate sequence (firmware -> softmgr -> lib -> core -> all) reboots
+# at most five times; the cap bounds any runaway. It is reset at the start
+# of a fresh run (see near the top of the script) and removed on success.
+UPDATE_REBOOT_LEDGER=/root/update_reboots
+MAX_UPDATE_REBOOTS=7
+
+# The plain-login ~/.bashrc: aliases + credential exports, no runupdate
+# hook. Same content the end-of-run block writes; factored out so the
+# reboot-cap and fetch-failure paths can restore a normal login too.
+write_login_aliases() {
+  {
+    echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'"
+    echo "alias backup_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'"
+    echo "alias restore_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash'"
+    echo "alias fetch_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fetch_flow.sh | bash'"
+    echo "export TOKEN_PART1=$TOKEN_PART1"
+    echo "export TOKEN_PART2=$TOKEN_PART2"
+    echo "export USERNAME=$USERNAME"
+    echo "export PASSWORD=$PASSWORD"
+    echo "export admin=$admin"
+    echo "export admin_pwd=$admin_pwd"
+    echo "export user=$user"
+    echo "export upwd=$upwd"
+  } > ~/.bashrc
+}
+
+# $1 = user | root : rewrite the tty1 autologin drop-in.
+set_autologin() {
   echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
   echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-  echo "ExecStart=-/sbin/agetty --autologin root --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
-    
-  echo "0" > update
+  echo "ExecStart=-/sbin/agetty --autologin $1 --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
+}
+
+# Restore a normal login and clear the update flag/ledger, then return
+# non-zero so the caller does NOT reboot. Used when the reboot cap trips
+# or the resume hook cannot be fetched.
+abort_reboot() {
+  write_login_aliases
+  set_autologin user
+  systemctl daemon-reload
+  rm -f /root/update "$UPDATE_REBOOT_LEDGER"
+}
+
+# Bounded, resumable reboot between softmgr stages. $1 is the stage name
+# (firmware/softmgr/lib/core/all) recorded in the ledger.
+update_reboot() {
+  local stage="${1:-unknown}"
+  local count
+  count=$(wc -l < "$UPDATE_REBOOT_LEDGER" 2>/dev/null || echo 0)
+  if [ "$count" -ge "$MAX_UPDATE_REBOOTS" ]; then
+    printf '\n%bReboot-grense nadd (%s reboots, stage=%s). Avbryter uten reboot; enheten kommer opp normalt. Se %s.%b\n' \
+      "$red" "$count" "$stage" "$UPDATE_REBOOT_LEDGER" "$clear" >&2
+    abort_reboot
+    return 1
+  fi
+  echo "$(date '+%F %T') $stage" >> "$UPDATE_REBOOT_LEDGER"
+
+  # Base login block first (aliases + exports), then the runupdate hook.
+  write_login_aliases
+  # Fetch the resume hook with -O so it overwrites rather than leaving
+  # runupdate.sh.1, .2, ... copies. If the fetch fails, do NOT reboot: a
+  # reboot with no working hook strands the device with no way to resume.
+  if ! wget -q -O /root/runupdate.sh https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/runupdate.sh || [ ! -s /root/runupdate.sh ]; then
+    printf '\n%bKunne ikke hente runupdate.sh; avbryter uten reboot.%b\n' "$red" "$clear" >&2
+    abort_reboot
+    return 1
+  fi
+  echo "# --- ac5000 runupdate ---" >> ~/.bashrc
+  cat /root/runupdate.sh >> ~/.bashrc
+  printf "\n${green}AC5000 vil automatisk kjøre oppdatering på nytt etter omstart${clear}!"
+  set_autologin root
+
+  echo "0" > /root/update
   sleep 5
   reboot
-  exit 0
+  # No `exit 0` after `reboot`: `reboot` returns immediately (systemd
+  # --no-block), and exiting lets the tty1 login shell die, getty respawn
+  # and re-source the hook, writing update=1 and starting a second
+  # update.sh before shutdown lands -- the race that left a device stuck
+  # at update=1. Block here until the kernel actually takes us down.
+  sleep 60
 }
 
 if [[ $SKIP_SOFTMGR == false ]]; then
@@ -267,23 +335,29 @@ if [[ $SKIP_SOFTMGR == false ]]; then
           softmgr_result=$?
           if [ $softmgr_result -eq 1 ]; then
               echo "Softmgr updated successfully - Will reboot now"
-              update_reboot
+              update_reboot softmgr
+          elif [ $softmgr_result -ne 0 ]; then
+              echo "Softmgr update failed (rc=$softmgr_result) - not rebooting"
           fi
-          
+
           echo "Updating lib"
           run_techbase_update "softmgr update lib -b x500_6.6.72-beta"
           softmgr_result=$?
           if [ $softmgr_result -eq 1 ]; then
               echo "Lib updated successfully - Will reboot now"
-              update_reboot
+              update_reboot lib
+          elif [ $softmgr_result -ne 0 ]; then
+              echo "Lib update failed (rc=$softmgr_result) - not rebooting"
           fi
-        
+
           echo "Updating core"
           run_techbase_update "softmgr update core -b x500_6.6.72-beta"
           softmgr_result=$?
           if [ $softmgr_result -eq 1 ]; then
               echo "Core updated successfully - Will reboot now"
-              update_reboot
+              update_reboot core
+          elif [ $softmgr_result -ne 0 ]; then
+              echo "Core update failed (rc=$softmgr_result) - not rebooting"
           fi
   
           echo "Updating imod"
@@ -305,13 +379,15 @@ if [[ $SKIP_SOFTMGR == false ]]; then
           softmgr_result=$?
           if [ $softmgr_result -eq 1 ]; then
               echo "Packages updated successfully - Will reboot now"
-              update_reboot
+              update_reboot all
+          elif [ $softmgr_result -ne 0 ]; then
+              echo "Package update failed (rc=$softmgr_result) - not rebooting"
           fi
       elif [ $result -eq 1 ]; then
           echo "Firmware updated successfully - Will reboot now"
-          update_reboot
+          update_reboot firmware
       else
-          echo "Error occurred during firmware update"        
+          echo "Error occurred during firmware update (rc=$result) - not rebooting"
       fi
   else
       # Older kernel branch: the helper still owns timing, so the bare
@@ -645,7 +721,8 @@ if [ -n "${SKIP_GPIO:-}" ]; then
   echo "export SKIP_GPIO=$SKIP_GPIO" >> ~/.bashrc
 fi
 curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/restore_application.sh | bash
-rm update
+# Run completed successfully: clear the flag and the reboot ledger.
+rm -f /root/update /root/update_reboots
 #Remove dev tools
 apt purge docker-ce-rootless-extras mkvtoolnix -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg libpython3.11-dev build-essential -y

@@ -68,8 +68,11 @@ _kill_tree() {
 #
 # Return codes:
 #     0  command succeeded and reported nothing to do
-#     1  command succeeded and installed updates (caller may reboot),
-#        OR command failed in some other way (mirrors the original helper)
+#     1  command succeeded and installed updates (caller may reboot)
+#     2  command failed (non-zero exit, or a known refusal such as low
+#        disk space): caller must NOT reboot. A reboot cannot clear a
+#        persistent failure, so mapping it to a reboot is what produced
+#        the update.sh boot loop this return code exists to prevent.
 #   124  hard timeout: total runtime exceeded $hard seconds
 #   137  idle timeout: no output for $idle seconds (treated as hung)
 # ---------------------------------------------------------------------------
@@ -160,9 +163,18 @@ run_techbase_update() {
       echo "Alt er oppdatert"
       return 0
     fi
+    # Belt and braces: softmgr has been seen to log its low-disk refusal
+    # ("Very low available space on selected dir") as an error. If a
+    # future build prints that but still exits 0, the "installed" path
+    # below would tell the caller to reboot into the same failure. Treat
+    # the refusal as a failure regardless of exit code.
+    if [[ "$output" == *"Very low available space"* ]]; then
+      printf '\n%bKommandoen ble avvist (for lite ledig diskplass): %s%b\n' "$red" "$cmd" "$clear" >&2
+      return 2
+    fi
     echo "Nye oppdateringer er installert. Fikser innstillinger."
     return 1
   fi
-  printf '\n%bKlarte ikke å utføre kommandoen: %s%b\n' "$red" "$cmd" "$clear" >&2
-  return 1
+  printf '\n%bKlarte ikke å utføre kommandoen (rc=%s): %s%b\n' "$red" "$rc" "$cmd" "$clear" >&2
+  return 2
 }
