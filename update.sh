@@ -51,6 +51,7 @@ if [ "$(uname -m)" != "aarch64" ]; then
     # delete old images
     docker rmi ghcr.io/aiwell-ac5000/fw-ac5000:latest
     docker rmi ghcr.io/aiwell-ac5000/node-red-ac5000:latest
+    docker rmi containers.aiwell.ac5000/node-red-ac5000:latest
     yes | docker system prune
     # delete old logs    rm /var/log/*.gz
     rm /var/log/*.[1-9]
