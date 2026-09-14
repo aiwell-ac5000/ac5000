@@ -46,6 +46,9 @@ if ! source "$USB_MNT/keys/setup.sh"; then
   exit 1
 fi
 
+# DOwnload and run registry-login.sh to authenticate with the container registry.
+curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
+
 # --- Fetch shared helpers ---
 # common.sh / hardware.sh / network.sh / systemd_units.sh hold the code
 # that used to be duplicated between setup.sh and update.sh. We download

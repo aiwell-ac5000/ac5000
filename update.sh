@@ -34,11 +34,8 @@ fi
 # DOwnload and run registry-login.sh to authenticate with the container registry.
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
 
-# eXIT IF NOT AARCH64 (32 BIT deperecated)
-if [ "$(uname -m)" != "aarch64" ]; then
-  echo "Non-aarch64 architecture detected. Exiting setup script."
-  exit 0
-fi
+# temporary workaround for 32-bit architecture support (delete when deprecated)
+rm END_OF_LIFE
 
 # IF NOT AARCH64 (32 BIT deperecated)
 if [ "$(uname -m)" != "aarch64" ]; then
@@ -59,8 +56,10 @@ if [ "$(uname -m)" != "aarch64" ]; then
     rm /var/log/*.[1-9]
     rm /var/log/*.gz
     # download and move 32-bit compose file, then run it and prune old images. Finally, create END_OF_LIFE file to prevent this from running again.
-    wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose-32bit.yml
-    mv docker-compose-32bit.yml docker-compose.yml
+    #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose-32bit.yml
+    #mv docker-compose-32bit.yml docker-compose.yml
+
+    wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
 
     export DEBIAN_FRONTEND=noninteractive
     apt-get update --allow-releaseinfo-change -y
@@ -213,7 +212,7 @@ rm /var/log/*.[1-9]
 rm /var/log/*.old
 journalctl --vacuum-size=50M
 
-curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
+#curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
