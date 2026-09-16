@@ -34,83 +34,33 @@ fi
 # DOwnload and run registry-login.sh to authenticate with the container registry.
 curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
 
-# temporary workaround for 32-bit architecture support (delete when deprecated)
-rm END_OF_LIFE
-
-# IF NOT AARCH64 (32 BIT deperecated)
-if [ "$(uname -m)" != "aarch64" ]; then
-  echo "Non-aarch64 architecture detected."
-  # Exit if  file END_OF_LIFE exists, if not create it and exit with message about using 32-bit image.
-  if [ -f END_OF_LIFE ]; then
-    echo "32-bit image detected. This image is no longer supported. Exiting setup script."
-    exit 0
-  else
-    echo "32-bit image detected. Will install final 32-bit image and then reboot. Please re-flash with 64-bit image for future updates."
-    docker compose down --volumes
-    rm docker-compose.yml
-    # delete old images
-    docker rmi ghcr.io/aiwell-ac5000/fw-ac5000:latest
-    docker rmi ghcr.io/aiwell-ac5000/node-red-ac5000:latest
-    docker rmi containers.aiwell.ac5000/node-red-ac5000:latest
-    yes | docker system prune
-    # delete old logs    rm /var/log/*.gz
-    rm /var/log/*.[1-9]
-    rm /var/log/*.gz
-    # download and move 32-bit compose file, then run it and prune old images. Finally, create END_OF_LIFE file to prevent this from running again.
-    #wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose-32bit.yml
-    #mv docker-compose-32bit.yml docker-compose.yml
-
-    wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/docker-compose.yml
-
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update --allow-releaseinfo-change -y
-
-    #Removove unused wifi drivers
-    sudo apt purge firmware-atheros firmware-libertas firmware-misc-nonfree -y
-
-    apt purge docker-ce-rootless-extras mkvtoolnix -y
-
-    #Remove dev tools
-    apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
-    apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
-    apt autoremove -y
-
-    #Update chromium
-    apt-get update --allow-releaseinfo-change -y    
-    apt -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --fix-broken install -y
-    apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" chromium-browser -y
-    apt autoremove -y
-
-    docker compose pull && docker compose up -d && yes | docker system prune
-    # Create END_OF_LIFE file to prevent this block from running again on next update.
-    touch END_OF_LIFE
-    reboot
-  fi
-fi
-
 echo "Running update script."
 
-SKIP_SOFTMGR=false
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --skip-softmgr-update)
-      SKIP_SOFTMGR=true
-      shift
-      ;;
-    *)
-      break
-      ;;
-  esac
-done
+if [ "$(uname -m)" = "aarch64" ]; then
+  SKIP_SOFTMGR=false
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --skip-softmgr-update)
+        SKIP_SOFTMGR=true
+        shift
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+fi
 
 # Reset the between-stage reboot ledger at the start of a fresh run. On a
 # resume, runupdate.sh has set /root/update=1 before re-invoking us, so the
 # ledger is kept and the reboot cap counts across the whole sequence.
 [ -f /root/update ] || rm -f /root/update_reboots
 
-export DEBIAN_FRONTEND=noninteractive
-apt update --allow-releaseinfo-change -y
-apt install screen -y
+if [ "$(uname -m)" = "aarch64" ]; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt update --allow-releaseinfo-change -y
+  apt install screen -y
+fi
 # Hente credentials
 cn=$(sed -n 's/^[[:space:]]*Subject:[[:space:]]*CN=\([^[:space:]]*\).*/\1/p' /etc/openvpn/client.conf | tr -d '\r' | head -n1)
 if [[ -z "$cn" ]]; then
@@ -206,16 +156,13 @@ fi
 
 docker compose down --volumes
 rm docker-compose.yml
-docker image rm roarge/fw-ac5000 -f
-docker image rm roarge/node-red-ac5000 -f
-docker image rm ghcr.io/aiwell-ac5000/node-red-ac5000:beta -f
-docker image rm ghcr.io/aiwell-ac5000/fw-ac5000:beta -f
 
-# Remove every :beta image on any registry. The hardcoded list above
+# Remove every :beta and :latest image on any registry. The hardcoded list above
 # missed the containers.aiwell.no/*:beta tags that filled the disk and
 # starved the softmgr stages. All containers are down here, so nothing in
 # use is removed.
 docker images --format '{{.Repository}}:{{.Tag}}' | grep ':beta$' | xargs -r -n1 docker image rm -f
+docker images --format '{{.Repository}}:{{.Tag}}' | grep ':latest$' | xargs -r -n1 docker image rm -f
 
 # `-a` so unused tagged images go too (plain prune keeps them). Everything
 # needed is re-pulled from the compose file below. Frees the space the
@@ -227,8 +174,7 @@ rm /var/log/*.[1-9]
 rm /var/log/*.old
 journalctl --vacuum-size=50M
 
-#curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
-apt-get update --allow-releaseinfo-change -y
+#apt-get update --allow-releaseinfo-change -y
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 #Backup av nettverk
@@ -321,82 +267,84 @@ update_reboot() {
   sleep 60
 }
 
-if [[ $SKIP_SOFTMGR == false ]]; then
-  if [ "$(uname -r)" = "6.6.72-v8+" ]; then
-      echo "Running on 6.6.72-v8+ kernel"
-      # Timing is handled by run_techbase_update's idle/hard watchdog;
-      # no `timeout N` prefix is needed on these commands.
-      run_techbase_update "softmgr update firmware -b x500_6.6.72-beta"
-      result=$?
-      if [ $result -eq 0 ]; then
-          echo "Firmware up to date"
-  
-          echo "Updating softmgr"
-          run_techbase_update "softmgr update softmgr -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "Softmgr updated successfully - Will reboot now"
-              update_reboot softmgr
-          elif [ $softmgr_result -ne 0 ]; then
-              echo "Softmgr update failed (rc=$softmgr_result) - not rebooting"
-          fi
+if [ "$(uname -m)" = "aarch64" ]; then
+  if [[ $SKIP_SOFTMGR == false ]]; then
+    if [ "$(uname -r)" = "6.6.72-v8+" ]; then
+        echo "Running on 6.6.72-v8+ kernel"
+        # Timing is handled by run_techbase_update's idle/hard watchdog;
+        # no `timeout N` prefix is needed on these commands.
+        run_techbase_update "softmgr update firmware -b x500_6.6.72-beta"
+        result=$?
+        if [ $result -eq 0 ]; then
+            echo "Firmware up to date"
+    
+            echo "Updating softmgr"
+            run_techbase_update "softmgr update softmgr -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "Softmgr updated successfully - Will reboot now"
+                update_reboot softmgr
+            elif [ $softmgr_result -ne 0 ]; then
+                echo "Softmgr update failed (rc=$softmgr_result) - not rebooting"
+            fi
 
-          echo "Updating lib"
-          run_techbase_update "softmgr update lib -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "Lib updated successfully - Will reboot now"
-              update_reboot lib
-          elif [ $softmgr_result -ne 0 ]; then
-              echo "Lib update failed (rc=$softmgr_result) - not rebooting"
-          fi
+            echo "Updating lib"
+            run_techbase_update "softmgr update lib -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "Lib updated successfully - Will reboot now"
+                update_reboot lib
+            elif [ $softmgr_result -ne 0 ]; then
+                echo "Lib update failed (rc=$softmgr_result) - not rebooting"
+            fi
 
-          echo "Updating core"
-          run_techbase_update "softmgr update core -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "Core updated successfully - Will reboot now"
-              update_reboot core
-          elif [ $softmgr_result -ne 0 ]; then
-              echo "Core update failed (rc=$softmgr_result) - not rebooting"
-          fi
-  
-          echo "Updating imod"
-          run_techbase_update "softmgr update imod -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "imod package updated successfully"
-          fi
-  
-          echo "Updating java"
-          run_techbase_update "softmgr update java -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "java package updated successfully"
-          fi
-  
-          echo "Updating all"
-          run_techbase_update "softmgr update all -b x500_6.6.72-beta"
-          softmgr_result=$?
-          if [ $softmgr_result -eq 1 ]; then
-              echo "Packages updated successfully - Will reboot now"
-              update_reboot all
-          elif [ $softmgr_result -ne 0 ]; then
-              echo "Package update failed (rc=$softmgr_result) - not rebooting"
-          fi
-      elif [ $result -eq 1 ]; then
-          echo "Firmware updated successfully - Will reboot now"
-          update_reboot firmware
-      else
-          echo "Error occurred during firmware update (rc=$result) - not rebooting"
-      fi
-  else
-      # Older kernel branch: the helper still owns timing, so the bare
-      # softmgr commands here are correct.
-      run_techbase_update "softmgr update firmware"
-      run_techbase_update "softmgr update core"
-      run_techbase_update "softmgr update lib"
-      run_techbase_update "softmgr update all"
+            echo "Updating core"
+            run_techbase_update "softmgr update core -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "Core updated successfully - Will reboot now"
+                update_reboot core
+            elif [ $softmgr_result -ne 0 ]; then
+                echo "Core update failed (rc=$softmgr_result) - not rebooting"
+            fi
+    
+            echo "Updating imod"
+            run_techbase_update "softmgr update imod -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "imod package updated successfully"
+            fi
+    
+            echo "Updating java"
+            run_techbase_update "softmgr update java -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "java package updated successfully"
+            fi
+    
+            echo "Updating all"
+            run_techbase_update "softmgr update all -b x500_6.6.72-beta"
+            softmgr_result=$?
+            if [ $softmgr_result -eq 1 ]; then
+                echo "Packages updated successfully - Will reboot now"
+                update_reboot all
+            elif [ $softmgr_result -ne 0 ]; then
+                echo "Package update failed (rc=$softmgr_result) - not rebooting"
+            fi
+        elif [ $result -eq 1 ]; then
+            echo "Firmware updated successfully - Will reboot now"
+            update_reboot firmware
+        else
+            echo "Error occurred during firmware update (rc=$result) - not rebooting"
+        fi
+    else
+        # Older kernel branch: the helper still owns timing, so the bare
+        # softmgr commands here are correct.
+        run_techbase_update "softmgr update firmware"
+        run_techbase_update "softmgr update core"
+        run_techbase_update "softmgr update lib"
+        run_techbase_update "softmgr update all"
+    fi
   fi
 fi
 
@@ -423,31 +371,39 @@ apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt autoremove -y
 
-apt-get update --allow-releaseinfo-change -y
-#Oppsett GUI
-apt -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --fix-broken install -y
-apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -y
-# apt-get install --no-install-recommends chromium-browser -y
-#apt-get purge docker docker-engine docker.io containerd runc -y
-apt autoremove -y
-#apt install build-essential -y
-#curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y 
-
-#apt install -yq macchanger
-
-#apt-get install libffi-dev libssl-dev -y
-#apt install python3-dev -y
-#apt-get install -y python3 python3-pip
-#pip3 install smbus
-
 if [ "$(uname -m)" = "aarch64" ]; then
-    echo "Running on aarch64"
-    curl -sSL https://get.docker.com | sh
-else
-    echo "Running on armhf"
-    export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    VERSION=26.1 sh get-docker.sh
+  apt-get update --allow-releaseinfo-change -y
+  #Oppsett GUI
+  apt -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --fix-broken install -y
+  apt install --no-install-recommends -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" xserver-xorg x11-xserver-utils xinit fbi openbox jq screen xserver-xorg-legacy chromium-browser ipcalc lldpd macchanger mosquitto dnsmasq openvpn -y
+  apt autoremove -y
+
+  curl -sSL https://get.docker.com | sh
+
+  echo "allowed_users=console" > /etc/X11/Xwrapper.config
+  echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
+
+  # apt install dnsmasq -y
+  #apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
+
+  echo "interface=eth1" > /etc/dnsmasq.conf
+  echo "bind-dynamic" >> /etc/dnsmasq.conf
+  echo "domain-needed" >> /etc/dnsmasq.conf
+  echo "bogus-priv" >> /etc/dnsmasq.conf
+  echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
+
+  #echo "interface=eth1" >> /etc/dnsmasq.conf
+  #echo "bind-dynamic" >> /etc/dnsmasq.conf
+  #echo "domain-needed" >> /etc/dnsmasq.conf
+  #echo "bogus-priv" >> /etc/dnsmasq.conf
+  #echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
+  echo "server=8.8.8.8" >> /etc/dnsmasq.conf
+
+  #Sette oppstarts-skript
+
+  #Konfigurere RS485
+  service_port_ctrl off
+  comctrl 1 RS-485 2 RS-485
 fi
 
 echo "Setting up users" > /root/setup.log
@@ -458,31 +414,6 @@ EOF
 chpasswd <<EOF
 $admin:$admin_pwd
 EOF
-
-echo "allowed_users=console" > /etc/X11/Xwrapper.config
-echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
-
-# apt install dnsmasq -y
-#apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install -y dnsmasq
-
-echo "interface=eth1" > /etc/dnsmasq.conf
-echo "bind-dynamic" >> /etc/dnsmasq.conf
-echo "domain-needed" >> /etc/dnsmasq.conf
-echo "bogus-priv" >> /etc/dnsmasq.conf
-echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-
-#echo "interface=eth1" >> /etc/dnsmasq.conf
-#echo "bind-dynamic" >> /etc/dnsmasq.conf
-#echo "domain-needed" >> /etc/dnsmasq.conf
-#echo "bogus-priv" >> /etc/dnsmasq.conf
-#echo "dhcp-range=192.168.0.100,192.168.0.200,255.255.255.0,12h" >> /etc/dnsmasq.conf
-echo "server=8.8.8.8" >> /etc/dnsmasq.conf
-
-#Sette oppstarts-skript
-
-#Konfigurere RS485
-service_port_ctrl off
-comctrl 1 RS-485 2 RS-485
 
 #Get clean environment
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/environment
@@ -500,33 +431,34 @@ systemctl restart systemd-journald.service
 
 #Set node-red port varaibel
 
-
-
 #Sette oppstarts-skript
 wget https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/autostart
 mv autostart /etc/xdg/openbox/autostart
 
 echo "[[ -z \$DISPLAY && \$XDG_VTNR -eq 1 ]] && startx -- -nocursor" > /home/user/.bash_profile
 
-#sette hostname
-A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
 
-if [ "$A" -eq 0 ]; then
-  A=18
-  B=83
-  C=C4
-  D=AC
-  E=50
-  F=00
-else
-  B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
-  C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
-  D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
-  E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
-  F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)  
+if [ "$(uname -m)" = "aarch64" ]; then
+  #sette hostname
+  A=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f1)
+
+  if [ "$A" -eq 0 ]; then
+    A=18
+    B=83
+    C=C4
+    D=AC
+    E=50
+    F=00
+  else
+    B=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f2)
+    C=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f3)
+    D=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f4)
+    E=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f5)
+    F=$(getenv HOST_MAC | cut -d'=' -f2 | cut -d':' -f6)  
+  fi
+  host=ac5000$A$B$C$D$E$F
+  echo $host
 fi
-host=ac5000$A$B$C$D$E$F
-echo $host
 
 if [ "$(uname -r)" != "6.6.72-v8+" ]; then
 touch /etc/network/if-up.d/macchange
@@ -680,11 +612,6 @@ fi
 
 install_network_recovery_cron
 
-#cd /etc
-#touch udev/rules.d/99-eth-mac.rules
-#echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.1", KERNEL=="eth*", NAME="eth0"' > udev/rules.d/99-eth-mac.rules
-#echo 'SUBSYSTEM=="net", ACTION=="add", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="9514", KERNELS=="1-1.2", KERNEL=="eth*", NAME="eth1" RUN+="/sbin/ip link set dev eth1 address AC:50:00:AC:50:00"' >> udev/rules.d/99-eth-mac.rules
-
 raspi-config nonint do_hostname $host 
 #raspi-config nonint do_boot_behaviour B2
 
@@ -697,10 +624,6 @@ echo "[Service]" > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 echo "ExecStart=" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 echo "ExecStart=-/sbin/agetty --autologin user --noclear %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/autologin.conf
 
-#systemctl daemon-reload
-#systemctl restart getty@tty1.service
-#rustup self uninstall -y
-#apt purge build-essential -y
 apt autoremove -y
 echo "alias update_all='curl -sSL ac5000update.aiwell.no | bash'" > ~/.bashrc
 echo "alias backup_flow='curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/backup_application.sh | bash'" >> ~/.bashrc
@@ -729,7 +652,6 @@ apt purge docker-ce-rootless-extras mkvtoolnix -y
 apt purge gcc-12 g++-12 cpp-12 gdb libc6-dbg libpython3.11-dev build-essential -y
 apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
-#apt purge linux-image-6.6.51+rpt-rpi-v8 linux-image-6.6.51+rpt-rpi-2712 linux-headers-6.6.51+rpt-common-rpi -y
 apt autoremove -y && apt clean -y
 journalctl --vacuum-size=50M
 reboot
