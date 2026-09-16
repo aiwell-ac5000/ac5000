@@ -159,7 +159,7 @@ else
   fi  
 fi
 
-curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
+#curl -sSL https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/fix_buster.sh | bash
 apt-get update --allow-releaseinfo-change -y
 
 echo "Installing i2c tools" > /root/setup.log
