@@ -18,12 +18,16 @@ fi
 # the log update.sh writes. A pass that fails here, before update.sh runs,
 # then still leaves a trace next to the passes that did run. Only this hook's
 # own messages are written here, because update.sh logs its output itself.
-# The repeated "Waiting ..." lines stay on screen only.
+# The repeated "Waiting ..." lines stay on screen only. Nothing rotates the
+# file until update.sh runs, and a hook that fails can run again on every
+# tty1 login (getty respawns it), so writing stops at the same 8 MiB cap
+# the update.sh logger uses.
 hook_log() {
   echo "$*"
   {
     [ -d /root/logs ] || mkdir -m 700 /root/logs
-    printf '[%(%F %T %z)T] runupdate.sh: %s\n' -1 "$*" >> /root/logs/update.log
+    [ "$(stat -c %s /root/logs/update.log 2>/dev/null || echo 0)" -lt 8388608 ] &&
+      printf '[%(%F %T %z)T] runupdate.sh: %s\n' -1 "$*" >> /root/logs/update.log
   } 2>/dev/null
 }
 
@@ -134,15 +138,14 @@ if [ "$server_ready" -eq 0 ]; then
         curl -sSL ac5000update.aiwell.no | bash
         local -a run_rc=("${PIPESTATUS[@]}")
         hook_log "update.sh returned (curl rc=${run_rc[0]}, bash rc=${run_rc[1]})"
-        # A successful update.sh reboots and never returns here. If it did
-        # return, decide from the flag: "0" means update_reboot already
-        # asked for a reboot, so just wait for it. Anything else means the
-        # run died before rebooting, so restore a normal login instead of
-        # leaving the hook armed and every future login stuck waiting.
-        # update.sh deletes the flag near its end, before its final
-        # reboot, so a missing flag means the run finished. The normal
-        # login is restored then too, as before, but the log says the run
-        # finished.
+        # update.sh ends in a reboot, but `reboot` returns at once, so the
+        # hook can still get here. Decide from the flag. "0" means
+        # update_reboot asked for a reboot, so just wait for it. A missing
+        # flag means update.sh reached its end, which deletes the flag
+        # before the final reboot. Any other value means the run died
+        # before rebooting. In those last two cases restore a normal login,
+        # so the hook is not left armed with every future login stuck
+        # waiting.
         if [ "$(cat /root/update 2>/dev/null)" = "0" ]; then
             hook_log "Reboot pending..."
             sleep 60

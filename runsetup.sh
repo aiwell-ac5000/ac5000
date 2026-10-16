@@ -6,12 +6,16 @@ fi
 # the log setup.sh writes. A pass that fails here, before setup.sh runs,
 # then still leaves a trace next to the passes that did run. Only this hook's
 # own messages are written here, because setup.sh logs its output itself.
-# The repeated "Waiting ..." lines stay on screen only.
+# The repeated "Waiting ..." lines stay on screen only. Nothing rotates the
+# file until setup.sh runs, and a hook that fails can run again on every
+# tty1 login (getty respawns it), so writing stops at the same 8 MiB cap
+# the setup.sh logger uses.
 hook_log() {
   echo "$*"
   {
     [ -d /root/logs ] || mkdir -m 700 /root/logs
-    printf '[%(%F %T %z)T] runsetup.sh: %s\n' -1 "$*" >> /root/logs/setup.log
+    [ "$(stat -c %s /root/logs/setup.log 2>/dev/null || echo 0)" -lt 8388608 ] &&
+      printf '[%(%F %T %z)T] runsetup.sh: %s\n' -1 "$*" >> /root/logs/setup.log
   } 2>/dev/null
 }
 

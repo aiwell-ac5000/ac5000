@@ -14,15 +14,17 @@
 # after restore_settings, and runsetup.sh starts it again from the top, so
 # every pass appends to the same file and a whole run reads in order.
 # runsetup.sh adds its own "runsetup.sh:" lines to the file too. A pass
-# rotates the file at start-up once it has reached 2 MiB, keeping
-# setup.log.1 (newest) to setup.log.5. The logger may not grow a file past
-# 8 MiB (ulimit -f in the logger only), which guards against a runaway
-# command. Read the log with `less -R`, because softmgr lines carry colour
-# codes. `grep -nE 'start:|end:|rebooting|runsetup.sh:'` lists the passes.
+# rotates the file at start-up once it has reached 2 MiB and keeps
+# setup.log.1 (newest) to setup.log.5. As a guard against a runaway command
+# the logger stops writing the file at 8 MiB (ulimit -f in the logger only,
+# not applied when the console output itself goes to a file). Read the log
+# with `less -R`, because softmgr lines carry colour codes.
+# `grep -nE 'start:|end:|rebooting|runsetup.sh:'` lists the passes.
 #
 # Logging must never stop the setup:
 #   - if /root/logs or the file cannot be written, the script runs without
-#     a log, exactly as before
+#     a log file. Only the banner, end line and reboot markers are new on
+#     the console then.
 #   - the logger ignores Ctrl-C and hangups, and tee -p keeps writing the
 #     file when the terminal goes away
 #   - if tee stops for any reason, the two cat commands keep reading the
@@ -83,8 +85,9 @@ log_reboot() {
   done
 }
 
-# One banner per pass. Boot id and uptime keep the passes in order even when
-# the clock is still wrong just after a reboot. The setup and restored flags
+# One banner per pass. Boot id and uptime show which boot a pass ran in and
+# how long after boot it started, which helps when the clock is still wrong
+# just after a reboot. The setup and restored flags
 # are read relative to the working directory, as the rest of setup.sh does.
 log_mark "===== setup.sh start: host=$HOSTNAME pid=$$" \
   "boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id 2>/dev/null)" \
@@ -94,10 +97,11 @@ log_mark "===== setup.sh start: host=$HOSTNAME pid=$$" \
   "ledger_at_start=$(cat /root/setup_reboots 2>/dev/null | wc -l)" \
   "root_free=$(df -Pm / 2>/dev/null | awk 'NR==2 {print $4}')MB" \
   "screen=${STY:-none} ====="
-# Last line of every pass. A signal that ends the pass, such as the SIGTERM
-# at shutdown, runs this trap too. The status is then that of the last
-# command that finished, not the signal, and after a reboot request the
-# line says so.
+# Last line of a pass that ends on its own, by exit, Ctrl-C or the final
+# reboot. A signal runs this trap too, and the status is then that of the
+# last command that finished, not the signal. A pass that a reboot between
+# stages takes down ends with its "rebooting" marker instead, because the
+# shutdown stops tee at the same moment as this script.
 trap 'log_mark "===== setup.sh end: last status $?${AC5000_REBOOTING:+ (after reboot request)} ====="' EXIT
 # --- end of logging setup ---
 
