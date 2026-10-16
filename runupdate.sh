@@ -14,6 +14,19 @@ if [ -z "${STY:-}" ]; then
   exec screen -S ac5000-update bash -lc "source ~/.bashrc"
 fi
 
+# Show a message and also append it, timestamped, to /root/logs/update.log,
+# the log update.sh writes. A pass that fails here, before update.sh runs,
+# then still leaves a trace next to the passes that did run. Only this hook's
+# own messages are written here, because update.sh logs its output itself.
+# The repeated "Waiting ..." lines stay on screen only.
+hook_log() {
+  echo "$*"
+  {
+    [ -d /root/logs ] || mkdir -m 700 /root/logs
+    printf '[%(%F %T %z)T] runupdate.sh: %s\n' -1 "$*" >> /root/logs/update.log
+  } 2>/dev/null
+}
+
 # Put the login back to normal: drop the hook from ~/.bashrc (the marker is
 # written by update_reboot just before this file is appended), hand tty1
 # back to `user`, and clear the update flag. Used whenever we decide the
@@ -49,31 +62,31 @@ check_hosts_iface() {
 }
 
 check_connectivity() {
-  echo "Running update script, checking if all hosts are reachable via interfaces."
+  hook_log "Running update script, checking if all hosts are reachable via interfaces."
   # 1) If all pings succeed normally, skip failover and go to step 4
   if check_hosts_default; then
-    echo "All hosts reachable via default routing, skipping failover logic."
+    hook_log "All hosts reachable via default routing, skipping failover logic."
   else
-    echo "Some hosts unreachable via default route, trying eth1 ..."
+    hook_log "Some hosts unreachable via default route, trying eth1 ..."
   
     # 2) Try via eth1; if this fails, keep eth0 up and exit update script
     if ! check_hosts_iface "eth1"; then
-      echo "Hosts also unreachable via eth1, leaving eth0 up."
-      echo "BOTH INTERFACES FAILED - stopping script."
+      hook_log "Hosts also unreachable via eth1, leaving eth0 up."
+      hook_log "BOTH INTERFACES FAILED - stopping script."
       exit 1 # Exit with failure when ping via both interfaces fail
     else
-      echo "Hosts reachable via eth1, checking via eth0 explicitly ..."
+      hook_log "Hosts reachable via eth1, checking via eth0 explicitly ..."
   
       # 3) If eth1 works, test via eth0; if that fails, bring eth0 down
       if ! check_hosts_iface "eth0"; then
-        echo "Eth0 cannot reach hosts while eth1 can, bringing eth0 down."
+        hook_log "Eth0 cannot reach hosts while eth1 can, bringing eth0 down."
         /sbin/ifconfig eth0 down
       fi
     fi
   fi
   
   # 4) Remaining portion of the script
-  echo "Running remaining script..."
+  hook_log "Running remaining script..."
 }
 
 runupdate_main() {
@@ -107,33 +120,42 @@ if [ "$server_ready" -eq 0 ]; then
             sleep 2
             waited=$((waited + 2))
             if [ "$waited" -ge "$wait_cap" ]; then
-                echo "Update did not complete within ${wait_cap}s; restoring normal login."
+                hook_log "Update did not complete within ${wait_cap}s; restoring normal login."
                 restore_normal_login
                 exit 0
             fi
         done
-        echo "Update completed, starting normal operation."
+        hook_log "Update completed, starting normal operation."
         reboot
         exit 0
     else
         echo "1" > /root/update
-        echo "Setup server is ready, running update script..."
+        hook_log "Setup server is ready, running update script..."
         curl -sSL ac5000update.aiwell.no | bash
+        local -a run_rc=("${PIPESTATUS[@]}")
+        hook_log "update.sh returned (curl rc=${run_rc[0]}, bash rc=${run_rc[1]})"
         # A successful update.sh reboots and never returns here. If it did
         # return, decide from the flag: "0" means update_reboot already
         # asked for a reboot, so just wait for it. Anything else means the
         # run died before rebooting, so restore a normal login instead of
         # leaving the hook armed and every future login stuck waiting.
+        # update.sh deletes the flag near its end, before its final
+        # reboot, so a missing flag means the run finished. The normal
+        # login is restored then too, as before, but the log says the run
+        # finished.
         if [ "$(cat /root/update 2>/dev/null)" = "0" ]; then
-            echo "Reboot pending..."
+            hook_log "Reboot pending..."
             sleep 60
+        elif [ -f /root/update ]; then
+            hook_log "update.sh exited without rebooting; restoring normal login."
+            restore_normal_login
         else
-            echo "update.sh exited without rebooting; restoring normal login."
+            hook_log "update.sh finished and asked for its final reboot."
             restore_normal_login
         fi
     fi
 else
-  echo "Setup server did not respond within ${wait_limit}s"
+  hook_log "Setup server did not respond within ${wait_limit}s"
 fi
 }
 

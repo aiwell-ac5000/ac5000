@@ -4,6 +4,99 @@
 
 # curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/update.sh | bash
 
+# --- Logging to /root/logs ---
+# Everything this script prints, and everything printed by the commands and
+# scripts it runs (apt, softmgr, docker, registry-login.sh, get.docker.com,
+# the subflow scripts, setup_gpio.sh and so on), is copied to
+# /root/logs/update.log while still showing on the console.
+#
+# update.sh reboots between softmgr stages and runupdate.sh starts it again
+# from the top, so every pass appends to the same file and a whole run reads
+# in order. runupdate.sh adds its own "runupdate.sh:" lines to the file too.
+# A pass rotates the file at start-up once it has reached 2 MiB, keeping
+# update.log.1 (newest) to update.log.5. The logger may not grow a file past
+# 8 MiB (ulimit -f in the logger only), which guards against a runaway
+# command. Read the log with `less -R`, because softmgr lines carry colour
+# codes. `grep -nE 'start:|end:|rebooting|runupdate.sh:'` lists the passes.
+#
+# Logging must never stop the update:
+#   - if /root/logs or the file cannot be written, the script runs without
+#     a log, exactly as before
+#   - the logger ignores Ctrl-C and hangups, and tee -p keeps writing the
+#     file when the terminal goes away
+#   - if tee stops for any reason, the two cat commands keep reading the
+#     pipe, so this script never gets SIGPIPE from a missing reader
+#   - nothing in this block reads stdin, which is the script itself when it
+#     arrives through curl | bash
+# Do not add a bare `wait` to this script or to the helpers it sources. It
+# would also wait for the logger, which only exits after this script does.
+# Never run the script with bash -x. Treat the log as confidential. It is
+# root-only because a child may print a device password.
+AC5000_LOG=/root/logs/update.log
+if mkdir -p /root/logs 2>/dev/null; then
+  chmod 700 /root/logs 2>/dev/null
+  if [ -f "$AC5000_LOG" ] && [ "$(stat -c %s "$AC5000_LOG" 2>/dev/null || echo 0)" -ge 2097152 ]; then
+    mv -f "$AC5000_LOG.4" "$AC5000_LOG.5" 2>/dev/null
+    mv -f "$AC5000_LOG.3" "$AC5000_LOG.4" 2>/dev/null
+    mv -f "$AC5000_LOG.2" "$AC5000_LOG.3" 2>/dev/null
+    mv -f "$AC5000_LOG.1" "$AC5000_LOG.2" 2>/dev/null
+    mv -f "$AC5000_LOG" "$AC5000_LOG.1" 2>/dev/null
+  fi
+  if { : >> "$AC5000_LOG"; } 2>/dev/null; then
+    chmod 600 "$AC5000_LOG" 2>/dev/null
+    # XFSZ has to be ignored before ulimit -f, otherwise the kernel kills
+    # tee at the cap. The cap is skipped when the console output already
+    # goes to a regular file, so that file is not cut short.
+    exec > >(
+      trap '' HUP INT XFSZ
+      [ -f /proc/self/fd/1 ] || ulimit -f 8192 2>/dev/null
+      tee -a -p "$AC5000_LOG"
+      cat 2>/dev/null
+      exec cat >/dev/null
+    ) 2>&1
+  fi
+fi
+
+# Timestamped marker line for the log. It starts with a newline because
+# several messages in this script end without one.
+log_mark() {
+  printf '\n[%(%F %T %z)T] %s\n' -1 "$*"
+}
+
+# Call directly before every `reboot`. It marks the log, gives tee a moment
+# to write the marker, then flushes the log and the resume state
+# (/root/update, the reboot ledger, ~/.bashrc, autologin.conf) to disk in
+# case the shutdown hangs and the unit is power-cycled. A hung sync must not
+# stop the reboot from being requested, so the wait for it ends after 20 s.
+log_reboot() {
+  local sync_pid n
+  AC5000_REBOOTING=1
+  log_mark "update.sh: rebooting ($*), root free $(df -Pm / 2>/dev/null | awk 'NR==2 {print $4}') MB"
+  sleep 1
+  sync &
+  sync_pid=$!
+  for ((n = 0; n < 20; n++)); do
+    kill -0 "$sync_pid" 2>/dev/null || break
+    sleep 1
+  done
+}
+
+# One banner per pass. Boot id and uptime keep the passes in order even when
+# the clock is still wrong just after a reboot.
+log_mark "===== update.sh start: host=$HOSTNAME pid=$$" \
+  "boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id 2>/dev/null)" \
+  "uptime=$(cut -d' ' -f1 /proc/uptime 2>/dev/null)s" \
+  "update_flag=$(cat /root/update 2>/dev/null || echo none)" \
+  "ledger_at_start=$(cat /root/update_reboots 2>/dev/null | wc -l)" \
+  "root_free=$(df -Pm / 2>/dev/null | awk 'NR==2 {print $4}')MB" \
+  "screen=${STY:-none} args=$* ====="
+# Last line of every pass. A signal that ends the pass, such as the SIGTERM
+# at shutdown, runs this trap too. The status is then that of the last
+# command that finished, not the signal, and after a reboot request the
+# line says so.
+trap 'log_mark "===== update.sh end: last status $?${AC5000_REBOOTING:+ (after reboot request)} ====="' EXIT
+# --- end of logging setup ---
+
 # ver_ge: version comparison helper. Returns true (0) if $1 >= $2 using
 # semantic version sorting. Used to detect whether the running kernel is
 # at or above version 6.6.32, where GPIO base numbering changed.
@@ -258,6 +351,7 @@ update_reboot() {
 
   echo "0" > /root/update
   sleep 5
+  log_reboot "stage=$stage, reboot $((count + 1)) of max $MAX_UPDATE_REBOOTS"
   reboot
   # No `exit 0` after `reboot`: `reboot` returns immediately (systemd
   # --no-block), and exiting lets the tty1 login shell die, getty respawn
@@ -265,6 +359,7 @@ update_reboot() {
   # update.sh before shutdown lands -- the race that left a device stuck
   # at update=1. Block here until the kernel actually takes us down.
   sleep 60
+  log_mark "update.sh: still running 60 s after the reboot request, continuing"
 }
 
 if [ "$(uname -m)" = "aarch64" ]; then
@@ -654,4 +749,5 @@ apt purge libboost1.74-dev:armhf libssl-dev libprotobuf-dev:armhf -y
 apt purge docker-buildx-plugin git firmware-realtek man-db -y
 apt autoremove -y && apt clean -y
 journalctl --vacuum-size=50M
+log_reboot "update complete"
 reboot
