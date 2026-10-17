@@ -11,6 +11,9 @@
 #
 # This file is sourced, not executed directly. It must NOT use `set -e`
 # or other strict modes that would change the parent script's behaviour.
+# It must not use a bare `wait` (without a pid) either. setup.sh and
+# update.sh send their output through a logging process substitution, and
+# a bare `wait` would block on it forever.
 
 # ANSI colour codes used by status output and run_techbase_update.
 red='\033[0;31m'

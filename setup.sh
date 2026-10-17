@@ -2,6 +2,109 @@
 
 # curl -sSL ac5000setup.aiwell.no | bash
 
+# --- Logging to /root/logs ---
+# Everything this script prints, and everything printed by the commands and
+# scripts it runs (apt, fdisk, resize2fs, softmgr, docker, registry-login.sh,
+# get.docker.com, the subflow scripts, setup_gpio.sh and so on), is copied
+# to /root/logs/setup.log while still showing on the console. This is not
+# /root/setup.log, the one-line status file that runsetup.sh shows while it
+# waits. That file is unchanged.
+#
+# setup.sh reboots to grow the root partition, between softmgr stages and
+# after restore_settings, and runsetup.sh starts it again from the top, so
+# every pass appends to the same file and a whole run reads in order.
+# runsetup.sh adds its own "runsetup.sh:" lines to the file too. A pass
+# rotates the file at start-up once it has reached 2 MiB and keeps
+# setup.log.1 (newest) to setup.log.5. As a guard against a runaway command
+# the logger stops writing the file at 8 MiB (ulimit -f in the logger only,
+# not applied when the console output itself goes to a file). Read the log
+# with `less -R`, because softmgr lines carry colour codes.
+# `grep -nE 'start:|end:|rebooting|runsetup.sh:'` lists the passes.
+#
+# Logging must never stop the setup:
+#   - if /root/logs or the file cannot be written, the script runs without
+#     a log file. Only the banner, end line and reboot markers are new on
+#     the console then.
+#   - the logger ignores Ctrl-C and hangups, and tee -p keeps writing the
+#     file when the terminal goes away
+#   - if tee stops for any reason, the two cat commands keep reading the
+#     pipe, so this script never gets SIGPIPE from a missing reader
+#   - nothing in this block reads stdin, which is the script itself when it
+#     arrives through curl | bash
+# Do not add a bare `wait` to this script or to the helpers it sources. It
+# would also wait for the logger, which only exits after this script does.
+# Never run the script with bash -x. Treat the log as confidential. It is
+# root-only because a child may print a device password.
+AC5000_LOG=/root/logs/setup.log
+if mkdir -p /root/logs 2>/dev/null; then
+  chmod 700 /root/logs 2>/dev/null
+  if [ -f "$AC5000_LOG" ] && [ "$(stat -c %s "$AC5000_LOG" 2>/dev/null || echo 0)" -ge 2097152 ]; then
+    mv -f "$AC5000_LOG.4" "$AC5000_LOG.5" 2>/dev/null
+    mv -f "$AC5000_LOG.3" "$AC5000_LOG.4" 2>/dev/null
+    mv -f "$AC5000_LOG.2" "$AC5000_LOG.3" 2>/dev/null
+    mv -f "$AC5000_LOG.1" "$AC5000_LOG.2" 2>/dev/null
+    mv -f "$AC5000_LOG" "$AC5000_LOG.1" 2>/dev/null
+  fi
+  if { : >> "$AC5000_LOG"; } 2>/dev/null; then
+    chmod 600 "$AC5000_LOG" 2>/dev/null
+    # XFSZ has to be ignored before ulimit -f, otherwise the kernel kills
+    # tee at the cap. The cap is skipped when the console output already
+    # goes to a regular file, so that file is not cut short.
+    exec > >(
+      trap '' HUP INT XFSZ
+      [ -f /proc/self/fd/1 ] || ulimit -f 8192 2>/dev/null
+      tee -a -p "$AC5000_LOG"
+      cat 2>/dev/null
+      exec cat >/dev/null
+    ) 2>&1
+  fi
+fi
+
+# Timestamped marker line for the log. It starts with a newline because
+# several messages in this script end without one.
+log_mark() {
+  printf '\n[%(%F %T %z)T] %s\n' -1 "$*"
+}
+
+# Call directly before every `reboot`. It marks the log, gives tee a moment
+# to write the marker, then flushes the log and the resume state (./setup,
+# ./restored, the reboot ledger, ~/.bashrc, autologin.conf, the partition
+# table and /boot) to disk in case the shutdown hangs and the unit is
+# power-cycled. A hung sync must not stop the reboot from being requested,
+# so the wait for it ends after 20 s.
+log_reboot() {
+  local sync_pid n
+  AC5000_REBOOTING=1
+  log_mark "setup.sh: rebooting ($*), root free $(df -Pm / 2>/dev/null | awk 'NR==2 {print $4}') MB"
+  sleep 1
+  sync &
+  sync_pid=$!
+  for ((n = 0; n < 20; n++)); do
+    kill -0 "$sync_pid" 2>/dev/null || break
+    sleep 1
+  done
+}
+
+# One banner per pass. Boot id and uptime show which boot a pass ran in and
+# how long after boot it started, which helps when the clock is still wrong
+# just after a reboot. The setup and restored flags
+# are read relative to the working directory, as the rest of setup.sh does.
+log_mark "===== setup.sh start: host=$HOSTNAME pid=$$" \
+  "boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id 2>/dev/null)" \
+  "uptime=$(cut -d' ' -f1 /proc/uptime 2>/dev/null)s" \
+  "setup_flag=$(cat setup 2>/dev/null || echo none)" \
+  "restored=$([ -f restored ] && echo yes || echo no)" \
+  "ledger_at_start=$(cat /root/setup_reboots 2>/dev/null | wc -l)" \
+  "root_free=$(df -Pm / 2>/dev/null | awk 'NR==2 {print $4}')MB" \
+  "screen=${STY:-none} ====="
+# Last line of a pass that ends on its own, by exit, Ctrl-C or the final
+# reboot. A signal runs this trap too, and the status is then that of the
+# last command that finished, not the signal. A pass that a reboot between
+# stages takes down ends with its "rebooting" marker instead, because the
+# shutdown stops tee at the same moment as this script.
+trap 'log_mark "===== setup.sh end: last status $?${AC5000_REBOOTING:+ (after reboot request)} ====="' EXIT
+# --- end of logging setup ---
+
 # ver_ge: version comparison helper. Returns true (0) if $1 >= $2 using
 # semantic version sorting. Used to detect whether the running kernel is
 # at or above version 6.6.32, where GPIO base numbering changed.
@@ -153,6 +256,7 @@ else
     printf "\n${green}Kjører setup på nytt etter omstart${clear}!"   
     echo "0" > setup
     sleep 5
+    log_reboot "root partition resized"
     reboot
     exit 0
     #
@@ -207,10 +311,12 @@ update_reboot() {
 
   echo "0" > setup
   sleep 5
+  log_reboot "stage=$stage, reboot $((count + 1)) of max $MAX_SETUP_REBOOTS"
   reboot
   # No `exit 0` after `reboot`: it returns immediately, and exiting lets
   # getty respawn and re-arm the hook before shutdown lands.
   sleep 60
+  log_mark "setup.sh: still running 60 s after the reboot request, continuing"
 }
 
 if [ "$(uname -r)" = "6.6.72-v8+" ]; then
@@ -310,6 +416,7 @@ if [ ! -f restored ]; then
     echo "0" > setup
     echo "1" > restored
     sleep 5
+    log_reboot "settings restored"
     reboot
     exit 0
   fi
@@ -601,4 +708,5 @@ echo "export upwd=$upwd" >> ~/.bashrc
 rm setup
 journalctl --vacuum-size=50M
 sleep 5
+log_reboot "setup complete"
 reboot
