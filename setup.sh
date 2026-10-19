@@ -99,8 +99,9 @@ log_mark "===== setup.sh start: host=$HOSTNAME pid=$$" \
   "screen=${STY:-none} ====="
 # Last line of a pass that ends on its own, by exit, Ctrl-C or the final
 # reboot. A signal runs this trap too, and the status is then that of the
-# last command that finished, not the signal. A pass that a reboot between
-# stages takes down ends with its "rebooting" marker instead, because the
+# last command that finished, not the signal. A pass that a mid-run reboot
+# takes down (partition resize, between softmgr stages or after
+# restore_settings) ends with its "rebooting" marker instead, because the
 # shutdown stops tee at the same moment as this script.
 trap 'log_mark "===== setup.sh end: last status $?${AC5000_REBOOTING:+ (after reboot request)} ====="' EXIT
 # --- end of logging setup ---
@@ -258,6 +259,12 @@ else
     sleep 5
     log_reboot "root partition resized"
     reboot
+    # Do not exit straight after `reboot`. It returns at once, and exiting
+    # lets runsetup.sh run again before the shutdown lands, see setup=0 and
+    # start a second setup pass. Wait for the shutdown, as update_reboot
+    # does, and only exit if it has not come within 60 s.
+    sleep 60
+    log_mark "setup.sh: still running 60 s after the reboot request, exiting"
     exit 0
     #
   fi  
@@ -418,6 +425,10 @@ if [ ! -f restored ]; then
     sleep 5
     log_reboot "settings restored"
     reboot
+    # Same as after the partition resize: wait for the shutdown instead of
+    # exiting, so runsetup.sh cannot start a second pass before it lands.
+    sleep 60
+    log_mark "setup.sh: still running 60 s after the reboot request, exiting"
     exit 0
   fi
 fi

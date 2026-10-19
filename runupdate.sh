@@ -65,30 +65,59 @@ check_hosts_iface() {
   return 0
 }
 
+# One HTTPS probe of the update server. The timeouts stop a route that
+# drops packets from holding a single probe for minutes.
+check_update_server() {
+  curl -k --output /dev/null --silent --head --fail --connect-timeout 10 --max-time 20 https://ac5000update.aiwell.no
+}
+
 check_connectivity() {
+  # When neither the default route nor eth1 answers ping, the checks are
+  # repeated every 10 s for up to CONNECTIVITY_WAIT seconds (300 by
+  # default), because eth1's uplink can come up after this login and the
+  # eth0 failover below should still happen. A site that blocks ICMP goes
+  # on as soon as the update server answers over HTTPS. When the time is
+  # up the hook carries on and runupdate_main's server check decides.
+  # Exiting here used to end the tty1 login, getty logged root in again at
+  # once and the hook looped every few seconds without ever resuming the
+  # update on a site that blocks ICMP.
+  local start=$SECONDS first=1 wait_cap=${CONNECTIVITY_WAIT:-300}
   hook_log "Running update script, checking if all hosts are reachable via interfaces."
-  # 1) If all pings succeed normally, skip failover and go to step 4
-  if check_hosts_default; then
-    hook_log "All hosts reachable via default routing, skipping failover logic."
-  else
-    hook_log "Some hosts unreachable via default route, trying eth1 ..."
-  
-    # 2) Try via eth1; if this fails, keep eth0 up and exit update script
-    if ! check_hosts_iface "eth1"; then
-      hook_log "Hosts also unreachable via eth1, leaving eth0 up."
-      hook_log "BOTH INTERFACES FAILED - stopping script."
-      exit 1 # Exit with failure when ping via both interfaces fail
-    else
+  while :; do
+    # 1) If all pings succeed normally, skip failover and go to step 4
+    if check_hosts_default; then
+      hook_log "All hosts reachable via default routing, skipping failover logic."
+      break
+    fi
+    [ "$first" = 1 ] && hook_log "Some hosts unreachable via default route, trying eth1 ..."
+
+    # 2) Try via eth1. If it answers, test eth0 as well.
+    if check_hosts_iface "eth1"; then
       hook_log "Hosts reachable via eth1, checking via eth0 explicitly ..."
-  
-      # 3) If eth1 works, test via eth0; if that fails, bring eth0 down
+
+      # 3) If eth1 works, test via eth0. If that fails, bring eth0 down.
       if ! check_hosts_iface "eth0"; then
         hook_log "Eth0 cannot reach hosts while eth1 can, bringing eth0 down."
         /sbin/ifconfig eth0 down
       fi
+      break
     fi
-  fi
-  
+
+    # Neither interface answers ping. Keep eth0 up and ask the update
+    # server, in case only ICMP is blocked.
+    if check_update_server; then
+      hook_log "No ping replies, but the update server answers over HTTPS. Continuing."
+      break
+    fi
+    if [ $((SECONDS - start)) -ge "$wait_cap" ]; then
+      hook_log "BOTH INTERFACES FAILED the ping check for $((SECONDS - start))s, continuing. The update server check decides whether the update runs."
+      break
+    fi
+    [ "$first" = 1 ] && hook_log "Hosts also unreachable via eth1, leaving eth0 up. Checking again every 10s for up to ${wait_cap}s."
+    first=0
+    sleep 10
+  done
+
   # 4) Remaining portion of the script
   hook_log "Running remaining script..."
 }
@@ -99,7 +128,7 @@ elapsed=0
 server_ready=1
 
 check_server() {
-  curl -k --output /dev/null --silent --head --fail https://ac5000update.aiwell.no
+  check_update_server
 }
 
 while [ "$elapsed" -lt "$wait_limit" ]; do
