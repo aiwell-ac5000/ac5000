@@ -129,7 +129,8 @@ if [ "$CM_GEN" -eq 3 ]; then
 fi
 
 # DOwnload and run registry-login.sh to authenticate with the container registry.
-curl -sSL raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
+curl -4fsSL --retry 5 --retry-all-errors \
+  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
 
 echo "Running update script."
 
