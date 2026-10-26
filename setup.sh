@@ -150,9 +150,16 @@ if ! source "$USB_MNT/keys/setup.sh"; then
   exit 1
 fi
 
-# DOwnload and run registry-login.sh to authenticate with the container registry.
-curl -4fsSL --retry 5 --retry-all-errors \
-  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh | bash
+# Download and run registry-login.sh to authenticate with the container registry.
+# --retry-all-errors requires curl ≥ 7.71.0 (not available on Buster); use a shell retry loop instead.
+_n=0; until curl -4fsSL --retry 3 \
+  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh \
+  -o /tmp/registry-login.sh; do
+    _n=$((_n + 1)); [ $_n -ge 5 ] && { echo "registry-login.sh: download failed after 5 attempts" >&2; exit 1; }
+    sleep $((_n * 2))
+done
+bash /tmp/registry-login.sh
+rm -f /tmp/registry-login.sh
   
 # --- Fetch shared helpers ---
 # common.sh / hardware.sh / network.sh / systemd_units.sh hold the code
