@@ -1,32 +1,28 @@
 /var/log/syslog
 {
-	rotate 0
-	maxsize 40M
-	hourly
-	missingok
-	notifempty
-	delaycompress
-	compress
-	postrotate
-		systemctl restart rsyslog.service
-	endscript
+        rotate 0
+        maxsize 40M
+        hourly
+        missingok
+        notifempty
+        sharedscripts
+        postrotate
+                /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
 }
-
 /var/log/auth.log
 /var/log/smsd.log
 {
-	rotate 0
-	maxsize 1M
-	hourly
-	missingok
-	notifempty
-	delaycompress
-	compress
-	postrotate
-		systemctl restart rsyslog.service
-	endscript
+        rotate 0
+        maxsize 1M
+        hourly
+        missingok
+        notifempty
+        sharedscripts
+        postrotate
+                /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
 }
-
 /var/log/mail.info
 /var/log/mail.warn
 /var/log/mail.err
@@ -39,14 +35,13 @@
 /var/log/debug
 /var/log/messages
 {
-	rotate 0
-	maxsize 20M
-	hourly
-	missingok
-	notifempty
-	compress
-	delaycompress
-	postrotate
-		systemctl restart rsyslog.service
-	endscript
+        rotate 0
+        maxsize 20M
+        hourly
+        missingok
+        notifempty
+        sharedscripts
+        postrotate
+                /usr/bin/systemctl kill -s HUP rsyslog.service >/dev/null 2>&1 || true
+        endscript
 }
