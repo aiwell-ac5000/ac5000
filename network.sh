@@ -37,6 +37,9 @@ install_dhcpcd_exit_hook() {
     nmcli connection modify "Wired connection 1" ipv4.route-metric 50
     nmcli connection modify "Wired connection 2" ipv4.route-metric 100
     nmcli connection modify "Wired connection 2" ipv4.method manual ipv4.addresses 192.168.0.10/24 ipv4.gateway 192.168.0.1 ipv4.dns 8.8.8.8
+    
+    install_networkmanager_permissions
+    
     nmcli connection up "Wired connection 1"
     nmcli connection up "Wired connection 2"
 
@@ -44,6 +47,53 @@ install_dhcpcd_exit_hook() {
   else
     mv dhcpcd.exit-hook /etc/dhcpcd.exit-hook
   fi
+}
+
+# ---------------------------------------------------------------------------
+# install_networkmanager_permissions
+#
+# Allow the designated user to manage NetworkManager connections
+# without sudo or root credentials.
+# ---------------------------------------------------------------------------
+install_networkmanager_permissions() {
+  local username="user"
+  local groupname="network-admin"
+  local rule_file="/etc/polkit-1/rules.d/50-aiwell-network-admin.rules"
+
+  if ! id "$username" >/dev/null 2>&1; then
+    echo "ERROR: User '$username' does not exist."
+    return 1
+  fi
+
+  if ! command -v nmcli >/dev/null 2>&1 ||
+     ! command -v pkaction >/dev/null 2>&1; then
+    echo "ERROR: NetworkManager or Polkit is not installed."
+    return 1
+  fi
+
+  getent group "$groupname" >/dev/null || groupadd "$groupname"
+  usermod -aG "$groupname" "$username"
+
+  install -d -m 0755 /etc/polkit-1/rules.d
+
+  cat > "$rule_file" <<'EOF'
+polkit.addRule(function(action, subject) {
+    if (subject.isInGroup("network-admin")) {
+        var allowedActions = [
+            "org.freedesktop.NetworkManager.settings.modify.system",
+            "org.freedesktop.NetworkManager.network-control",
+            "org.freedesktop.NetworkManager.enable-disable-network"
+        ];
+
+        if (allowedActions.indexOf(action.id) >= 0) {
+            return polkit.Result.YES;
+        }
+    }
+});
+EOF
+
+  chmod 0644 "$rule_file"
+  chown root:root "$rule_file"
 }
 
 # ---------------------------------------------------------------------------
