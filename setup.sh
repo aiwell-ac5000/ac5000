@@ -158,7 +158,8 @@ _n=0; until curl -4fsSL --retry 3 \
     _n=$((_n + 1)); [ $_n -ge 5 ] && { echo "registry-login.sh: download failed after 5 attempts" >&2; exit 1; }
     sleep $((_n * 2))
 done
-bash /tmp/registry-login.sh
+#bash /tmp/registry-login.sh
+TOKEN_PART1="$TOKEN_PART1" REGISTRY_USER="${REGISTRY_USER:-root}" bash /tmp/registry-login.sh
 rm -f /tmp/registry-login.sh
   
 # --- Fetch shared helpers ---
