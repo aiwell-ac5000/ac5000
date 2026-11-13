@@ -152,14 +152,14 @@ fi
 
 # Download and run registry-login.sh to authenticate with the container registry.
 # --retry-all-errors requires curl ≥ 7.71.0 (not available on Buster); use a shell retry loop instead.
-_n=0; until curl -4fsSL --retry 3 \
-  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh \
-  -o /tmp/registry-login.sh; do
-    _n=$((_n + 1)); [ $_n -ge 5 ] && { echo "registry-login.sh: download failed after 5 attempts" >&2; exit 1; }
-    sleep $((_n * 2))
-done
+#_n=0; until curl -4fsSL --retry 3 \
+#  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh \
+#  -o /tmp/registry-login.sh; do
+#    _n=$((_n + 1)); [ $_n -ge 5 ] && { echo "registry-login.sh: download failed after 5 attempts" >&2; exit 1; }
+#    sleep $((_n * 2))
+#done
 #bash /tmp/registry-login.sh
-rm -f /tmp/registry-login.sh
+#rm -f /tmp/registry-login.sh
   
 # --- Fetch shared helpers ---
 # common.sh / hardware.sh / network.sh / systemd_units.sh hold the code
@@ -597,6 +597,13 @@ systemctl restart lldpd
 systemctl enable lldpd
 
 echo "$TOKEN_PART1$TOKEN_PART2" | docker login ghcr.io -u aiwell-ac5000 --password-stdin
+# Download and run registry-login.sh to authenticate with the container registry.
+_n=0; until curl -4fsSL --retry 3 \
+  https://raw.githubusercontent.com/aiwell-ac5000/ac5000/main/registry-login.sh \
+  -o /tmp/registry-login.sh; do
+    _n=$((_n + 1)); [ $_n -ge 5 ] && { echo "registry-login.sh: download failed after 5 attempts" >&2; exit 1; }
+    sleep $((_n * 2))
+done
 TOKEN_PART1="$TOKEN_PART1" REGISTRY_USER="${REGISTRY_USER:-root}" bash /tmp/registry-login.sh
 rm -f /tmp/registry-login.sh
 #curl -sSL --header "Authorization: token $TOKEN_PART1$TOKEN_PART2" -H "Accept: application/vnd.github.v3.raw" https://raw.githubusercontent.com/aiwell-ac5000/ac5000-nodes/main/subflows/digital-input/di_service.sh | bash
